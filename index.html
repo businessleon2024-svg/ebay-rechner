@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eBay Gebühren- &amp; Gewinnrechner | Deutschland</title>
+  <meta name="description" content="Professioneller eBay Gebühren- und Gewinnrechner für Deutschland – live, präzise, kostenlos.">
+
+  <!-- Inter Schriftart -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+/* =========================================================
+   eBay Gebühren- & Gewinnrechner – Stylesheet
+   Design-Tokens: Dark-Mode SaaS-Dashboard
+   ========================================================= */
+
+:root {
+  /* Flächen */
+  --bg: #0a0e13;
+  --bg-gradient: radial-gradient(1200px 600px at 15% -10%, #10261f 0%, transparent 60%),
+                 radial-gradient(1000px 500px at 100% 0%, #12181f 0%, transparent 55%),
+                 #0a0e13;
+  --surface: #121820;
+  --surface-2: #1a222b;
+  --border: #232c37;
+  --border-soft: #1c242e;
+
+  /* Text */
+  --text: #eaf0f6;
+  --text-muted: #8a97a6;
+  --text-faint: #5c6774;
+
+  /* Akzent (Signature-Farbe: Smaragd-Teal) */
+  --accent: #2fd9ac;
+  --accent-strong: #22c396;
+  --accent-soft: rgba(47, 217, 172, 0.14);
+
+  /* Statusfarben */
+  --success: #22c55e;
+  --success-strong: #16a34a;
+  --success-soft: rgba(34, 197, 94, 0.12);
+  --danger: #f2495c;
+  --danger-strong: #dc3654;
+  --danger-soft: rgba(242, 73, 92, 0.12);
+
+  /* Sonstiges */
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-gradient);
+  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100vh;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem clamp(1rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.topbar__logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(150deg, var(--accent-soft), transparent);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.topbar__logo svg {
+  width: 22px;
+  height: 22px;
+}
+
+.topbar__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.topbar__subtitle {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.topbar__badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(47, 217, 172, 0.25);
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.topbar__badge .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(47, 217, 172, 0.6);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(47, 217, 172, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(47, 217, 172, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(47, 217, 172, 0); }
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  padding: 1.75rem clamp(1rem, 4vw, 3rem) 2.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.form-panel {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.panel__heading {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+/* =========================================================
+   FORM FIELDS
+   ========================================================= */
+
+.field {
+  margin-bottom: 1.15rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.45rem;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.input-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
+  padding: 0.85rem 1rem 0.85rem 2.6rem;
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #1c2530;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.input-suffix {
+  position: absolute;
+  right: 14px;
+  color: var(--text-faint);
+  font-weight: 600;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+select.input {
+  cursor: pointer;
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a97a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+}
+
+select.input option {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.form-actions {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.8rem 1.1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition), box-shadow var(--transition), border-color var(--transition);
+  flex: 1;
+  white-space: nowrap;
+}
+
+.btn svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #05201a;
+  box-shadow: 0 8px 20px rgba(47, 217, 172, 0.25);
+}
+
+.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(47, 217, 172, 0.35);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+}
+
+.btn--ghost {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+.btn--ghost:hover {
+  color: var(--text);
+  border-color: #3a4655;
+  transform: translateY(-1px);
+}
+
+.copy-feedback {
+  min-height: 1.2rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.copy-feedback.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================================
+   RESULT PANEL
+   ========================================================= */
+
+.result-panel {
+  min-height: 100%;
+}
+
+/* Große Gewinn-Karte */
+.profit-card {
+  border-radius: var(--radius-lg);
+  padding: 1.9rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.4rem;
+  transition: background var(--transition), box-shadow var(--transition);
+  background: linear-gradient(135deg, var(--success-soft), transparent 70%), var(--surface-2);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  box-shadow: var(--shadow-lift);
+}
+
+.profit-card.is-negative {
+  background: linear-gradient(135deg, var(--danger-soft), transparent 70%), var(--surface-2);
+  border: 1px solid rgba(242, 73, 92, 0.3);
+}
+
+.profit-card__label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.profit-card__value {
+  font-size: clamp(2.4rem, 6vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--success);
+  transition: color var(--transition);
+}
+
+.profit-card.is-negative .profit-card__value {
+  color: var(--danger);
+}
+
+.profit-card__margin {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Aufschlüsselungs-Balken */
+.breakdown-bar {
+  display: flex;
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  margin-bottom: 0.75rem;
+}
+
+.breakdown-bar__segment {
+  height: 100%;
+  transition: width 220ms ease;
+}
+
+.breakdown-bar__segment--buy { background: #6b7d94; }
+.breakdown-bar__segment--ship { background: #b98af0; }
+.breakdown-bar__segment--fee { background: #f2495c; }
+.breakdown-bar__segment--profit { background: var(--accent); }
+
+.breakdown-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1.3rem;
+  margin-bottom: 1.6rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.breakdown-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot--buy { background: #6b7d94; }
+.dot--ship { background: #b98af0; }
+.dot--fee { background: #f2495c; }
+.dot--profit { background: var(--accent); }
+
+/* Detail-Grid */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.85rem;
+}
+
+.detail-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.detail-item:hover {
+  border-color: #35404d;
+}
+
+.detail-item--highlight {
+  border-color: rgba(47, 217, 172, 0.35);
+  background: linear-gradient(135deg, var(--accent-soft), transparent 70%), var(--surface-2);
+}
+
+.detail-item__label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.detail-item__value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer {
+  text-align: center;
+  padding: 1.2rem 1rem 2.2rem;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    padding: 1.1rem 1rem;
+  }
+
+  .topbar__badge {
+    display: none;
+  }
+
+  .panel {
+    padding: 1.25rem;
+  }
+
+  .profit-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
+
+/* Reduzierte Bewegung respektieren */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9"/>
+          <path d="M3 12h6"/>
+          <path d="M13.5 8.5c1.8 0 2.8 1.1 2.8 2.6 0 1.9-1.6 2.3-2.8 2.9-1 .5-1.7 1-1.7 2"/>
+          <circle cx="12" cy="17.5" r="0.6" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <div>
+        <h1 class="topbar__title">Gebühren&shy;rechner</h1>
+        <p class="topbar__subtitle">eBay Provision &amp; Gewinn · Deutschland</p>
+      </div>
+    </div>
+    <div class="topbar__badge" id="liveBadge">
+      <span class="dot"></span>
+      Live-Berechnung aktiv
+    </div>
+  </header>
+
+  <!-- ===================== MAIN LAYOUT ===================== -->
+  <main class="layout">
+
+    <!-- ---------- INPUT PANEL ---------- -->
+    <section class="panel form-panel" aria-labelledby="formHeading">
+      <h2 id="formHeading" class="panel__heading">Angaben zum Verkauf</h2>
+
+      <div class="field">
+        <label for="categorySelect">Kategorie</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.6 12.3 12.3 20.6a1.5 1.5 0 0 1-2.1 0l-7.1-7.1a1.5 1.5 0 0 1-.4-1.3L3.9 4.5A1.5 1.5 0 0 1 5.3 3.2l7.7-1a1.5 1.5 0 0 1 1.3.4l6.3 6.3a1.5 1.5 0 0 1 0 2.1Z"/>
+              <circle cx="8.3" cy="8.3" r="1.2"/>
+            </svg>
+          </span>
+          <select id="categorySelect" class="input select"></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="sellPrice">Verkaufspreis (Brutto)</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M17 5.5c0-1.9-2.2-3.5-5-3.5S7 3.6 7 5.5 9.2 9 12 9s5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5"/>
+            </svg>
+          </span>
+          <input id="sellPrice" class="input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" autocomplete="off">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="buyPrice">Einkaufspreis (Brutto)</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="20" r="1.3"/>
+              <circle cx="17" cy="20" r="1.3"/>
+              <path d="M2.5 3h2.4l2.1 11.4a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L20.5 7H6"/>
+            </svg>
+          </span>
+          <input id="buyPrice" class="input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" autocomplete="off">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="shippingCost">Eigene Versandkosten</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1.5" y="7" width="13" height="9.5" rx="1.2"/>
+              <path d="M14.5 10.2h4.2l3.3 3.3v3H14.5z"/>
+              <circle cx="6.5" cy="19" r="1.6"/>
+              <circle cx="17.5" cy="19" r="1.6"/>
+            </svg>
+          </span>
+          <input id="shippingCost" class="input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" autocomplete="off">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="resetBtn" class="btn btn--ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 3-6.7"/>
+            <path d="M3 4v5h5"/>
+          </svg>
+          Zurücksetzen
+        </button>
+        <button type="button" id="copyBtn" class="btn btn--primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8.5" y="8.5" width="12" height="12" rx="2"/>
+            <path d="M15.5 8.5V5.5A2 2 0 0 0 13.5 3.5h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>
+          </svg>
+          Ergebnis kopieren
+        </button>
+      </div>
+      <p class="copy-feedback" id="copyFeedback" role="status" aria-live="polite"></p>
+    </section>
+
+    <!-- ---------- RESULT PANEL ---------- -->
+    <section class="panel result-panel" aria-labelledby="resultHeading">
+      <h2 id="resultHeading" class="panel__heading">Ergebnis</h2>
+
+      <!-- Große Gewinn-Karte -->
+      <div class="profit-card" id="profitCard">
+        <span class="profit-card__label">Endgewinn</span>
+        <span class="profit-card__value" id="profitValue">0,00 €</span>
+        <span class="profit-card__margin" id="profitMargin">Marge: 0,0 %</span>
+      </div>
+
+      <!-- Aufschlüsselungs-Balken -->
+      <div class="breakdown-bar" id="breakdownBar" aria-hidden="true">
+        <div class="breakdown-bar__segment breakdown-bar__segment--buy" id="segBuy"></div>
+        <div class="breakdown-bar__segment breakdown-bar__segment--ship" id="segShip"></div>
+        <div class="breakdown-bar__segment breakdown-bar__segment--fee" id="segFee"></div>
+        <div class="breakdown-bar__segment breakdown-bar__segment--profit" id="segProfit"></div>
+      </div>
+      <div class="breakdown-legend">
+        <span><i class="dot dot--buy"></i>Einkauf</span>
+        <span><i class="dot dot--ship"></i>Versand</span>
+        <span><i class="dot dot--fee"></i>eBay-Gebühr</span>
+        <span><i class="dot dot--profit"></i>Gewinn</span>
+      </div>
+
+      <!-- Detail-Grid -->
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-item__label">Verkaufspreis</span>
+          <span class="detail-item__value" id="outSellPrice">0,00 €</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">Einkaufspreis</span>
+          <span class="detail-item__value" id="outBuyPrice">0,00 €</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">Versandkosten</span>
+          <span class="detail-item__value" id="outShipping">0,00 €</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">Kategorie</span>
+          <span class="detail-item__value" id="outCategory">–</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">Verkaufsprovision</span>
+          <span class="detail-item__value" id="outFeeRate">0,0 %</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">Netto-Provision</span>
+          <span class="detail-item__value" id="outNetCommission">0,00 €</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">Festgebühr</span>
+          <span class="detail-item__value" id="outFixedFee">0,50 €</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-item__label">USt. auf eBay-Gebühren</span>
+          <span class="detail-item__value" id="outVat">0,00 €</span>
+        </div>
+        <div class="detail-item detail-item--highlight">
+          <span class="detail-item__label">Gesamte eBay-Gebühr</span>
+          <span class="detail-item__value" id="outTotalFee">0,00 €</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Alle Angaben ohne Gewähr · Berechnung: Provision + 0,50 € Festgebühr, zzgl. 19 % USt. auf eBay-Gebühren.</p>
+  </footer>
+
+  <script>
+// categories.js
+// Enthält alle eBay-Kategorien mit dem jeweiligen Verkaufsprovisionssatz (in Prozent).
+// Neue Kategorien können hier einfach als weiteres Objekt { name, fee } ergänzt werden.
+
+const categories = [
+  { name: "Auto & Motorrad: Teile", fee: 12 },
+  { name: "Baby", fee: 12 },
+  { name: "Business & Industrie", fee: 14 },
+  { name: "Computer, Tablets & Netzwerk", fee: 7 },
+  { name: "Bücher", fee: 12 },
+  { name: "Filme & Serien", fee: 12 },
+  { name: "Foto & Camcorder", fee: 7 },
+  { name: "Games", fee: 12 },
+  { name: "Handys & Kommunikation", fee: 7 },
+  { name: "Haushaltsgeräte", fee: 7 },
+  { name: "Kleidung & Accessoires", fee: 12 },
+  { name: "Möbel & Wohnen", fee: 13 },
+  { name: "Musikinstrumente", fee: 12 },
+  { name: "Musik", fee: 12 },
+  { name: "TV, Video & Audio", fee: 7 },
+  { name: "Sammeln & Seltenes", fee: 12 },
+  { name: "Sport", fee: 12 },
+  { name: "Spielzeug", fee: 12 },
+  { name: "Uhren & Schmuck", fee: 12 },
+  { name: "Beauty & Gesundheit", fee: 12 },
+  { name: "Garten & Terrasse", fee: 13 },
+  { name: "Büro & Schreibwaren", fee: 14 },
+  { name: "Tickets & Reisen", fee: 12 },
+  { name: "Sonstige Kategorien", fee: 12 }
+];
+
+  </script>
+  <script>
+/* =========================================================
+   app.js
+   eBay Gebühren- & Gewinnrechner – Anwendungslogik
+   Reine Vanilla-JS-Implementierung, ES6.
+   ========================================================= */
+
+(() => {
+  "use strict";
+
+  /* ---------------------------------------------------------
+     Konstanten
+     --------------------------------------------------------- */
+  const FIXED_FEE = 0.5;        // Feste eBay-Gebühr pro Verkauf
+  const VAT_RATE = 1.19;        // Faktor für 19 % Umsatzsteuer
+  const STORAGE_KEY = "ebayCalcState";
+
+  /* ---------------------------------------------------------
+     DOM-Referenzen
+     --------------------------------------------------------- */
+  const el = {
+    category: document.getElementById("categorySelect"),
+    sellPrice: document.getElementById("sellPrice"),
+    buyPrice: document.getElementById("buyPrice"),
+    shippingCost: document.getElementById("shippingCost"),
+
+    resetBtn: document.getElementById("resetBtn"),
+    copyBtn: document.getElementById("copyBtn"),
+    copyFeedback: document.getElementById("copyFeedback"),
+
+    profitCard: document.getElementById("profitCard"),
+    profitValue: document.getElementById("profitValue"),
+    profitMargin: document.getElementById("profitMargin"),
+
+    segBuy: document.getElementById("segBuy"),
+    segShip: document.getElementById("segShip"),
+    segFee: document.getElementById("segFee"),
+    segProfit: document.getElementById("segProfit"),
+
+    outSellPrice: document.getElementById("outSellPrice"),
+    outBuyPrice: document.getElementById("outBuyPrice"),
+    outShipping: document.getElementById("outShipping"),
+    outCategory: document.getElementById("outCategory"),
+    outFeeRate: document.getElementById("outFeeRate"),
+    outNetCommission: document.getElementById("outNetCommission"),
+    outFixedFee: document.getElementById("outFixedFee"),
+    outVat: document.getElementById("outVat"),
+    outTotalFee: document.getElementById("outTotalFee"),
+  };
+
+  /* ---------------------------------------------------------
+     Formatierungs-Helfer (deutsches Zahlenformat)
+     --------------------------------------------------------- */
+  const currencyFormatter = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  const formatCurrency = (value) => currencyFormatter.format(Number.isFinite(value) ? value : 0);
+
+  const formatPercent = (value, decimals = 1) =>
+    `${Number(value).toLocaleString("de-DE", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    })} %`;
+
+  /* ---------------------------------------------------------
+     Kategorien-Dropdown befüllen
+     --------------------------------------------------------- */
+  function populateCategories() {
+    el.category.innerHTML = "";
+    categories.forEach((cat, index) => {
+      const option = document.createElement("option");
+      option.value = index;
+      option.textContent = `${cat.name} · ${cat.fee}%`;
+      el.category.appendChild(option);
+    });
+  }
+
+  /* ---------------------------------------------------------
+     Eingaben lesen (mit Fallback auf 0 bei ungültigen Werten)
+     --------------------------------------------------------- */
+  function readInputs() {
+    const sellPrice = parseFloat(el.sellPrice.value.replace(",", ".")) || 0;
+    const buyPrice = parseFloat(el.buyPrice.value.replace(",", ".")) || 0;
+    const shippingCost = parseFloat(el.shippingCost.value.replace(",", ".")) || 0;
+    const categoryIndex = parseInt(el.category.value, 10) || 0;
+    const category = categories[categoryIndex] || categories[0];
+
+    return { sellPrice, buyPrice, shippingCost, category };
+  }
+
+  /* ---------------------------------------------------------
+     Kernberechnung der eBay-Gebühren und des Gewinns
+     --------------------------------------------------------- */
+  function calculateFees({ sellPrice, category }) {
+    const netCommission = sellPrice * (category.fee / 100);
+    const commissionPlusFixed = netCommission + FIXED_FEE;
+    const totalFee = commissionPlusFixed * VAT_RATE;
+    const vatAmount = totalFee - commissionPlusFixed;
+
+    return { netCommission, totalFee, vatAmount };
+  }
+
+  function calculateProfit({ sellPrice, buyPrice, shippingCost, totalFee }) {
+    return sellPrice - buyPrice - shippingCost - totalFee;
+  }
+
+  /* ---------------------------------------------------------
+     Aufschlüsselungs-Balken aktualisieren
+     --------------------------------------------------------- */
+  function updateBreakdownBar({ sellPrice, buyPrice, shippingCost, totalFee, profit }) {
+    if (sellPrice <= 0) {
+      [el.segBuy, el.segShip, el.segFee, el.segProfit].forEach((seg) => (seg.style.width = "0%"));
+      return;
+    }
+
+    const clampedProfit = Math.max(profit, 0);
+    const buyPct = Math.min((buyPrice / sellPrice) * 100, 100);
+    const shipPct = Math.min((shippingCost / sellPrice) * 100, 100 - buyPct);
+    const feePct = Math.min((totalFee / sellPrice) * 100, 100 - buyPct - shipPct);
+    const profitPct = Math.max(100 - buyPct - shipPct - feePct, 0);
+
+    el.segBuy.style.width = `${buyPct}%`;
+    el.segShip.style.width = `${shipPct}%`;
+    el.segFee.style.width = `${feePct}%`;
+    el.segProfit.style.width = `${clampedProfit > 0 ? profitPct : 0}%`;
+  }
+
+  /* ---------------------------------------------------------
+     Gesamte Berechnung ausführen und UI aktualisieren
+     --------------------------------------------------------- */
+  function calculate() {
+    const inputs = readInputs();
+    const { sellPrice, buyPrice, shippingCost, category } = inputs;
+    const { netCommission, totalFee, vatAmount } = calculateFees(inputs);
+    const profit = calculateProfit({ sellPrice, buyPrice, shippingCost, totalFee });
+    const margin = sellPrice > 0 ? (profit / sellPrice) * 100 : 0;
+
+    // Detail-Grid befüllen
+    el.outSellPrice.textContent = formatCurrency(sellPrice);
+    el.outBuyPrice.textContent = formatCurrency(buyPrice);
+    el.outShipping.textContent = formatCurrency(shippingCost);
+    el.outCategory.textContent = category.name;
+    el.outFeeRate.textContent = formatPercent(category.fee, 1);
+    el.outNetCommission.textContent = formatCurrency(netCommission);
+    el.outFixedFee.textContent = formatCurrency(FIXED_FEE);
+    el.outVat.textContent = formatCurrency(vatAmount);
+    el.outTotalFee.textContent = formatCurrency(totalFee);
+
+    // Gewinn-Karte
+    el.profitValue.textContent = formatCurrency(profit);
+    el.profitMargin.textContent = `Marge: ${formatPercent(margin, 1)}`;
+    el.profitCard.classList.toggle("is-negative", profit < 0);
+
+    // Balken
+    updateBreakdownBar({ sellPrice, buyPrice, shippingCost, totalFee, profit });
+
+    // Aktuellen Zustand persistieren
+    saveState(inputs);
+
+    return { ...inputs, netCommission, totalFee, vatAmount, profit, margin };
+  }
+
+  /* ---------------------------------------------------------
+     LocalStorage: Speichern & Wiederherstellen
+     --------------------------------------------------------- */
+  function saveState({ sellPrice, buyPrice, shippingCost }) {
+    const state = {
+      sellPrice: el.sellPrice.value,
+      buyPrice: el.buyPrice.value,
+      shippingCost: el.shippingCost.value,
+      categoryIndex: el.category.value,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function restoreState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+      const state = JSON.parse(raw);
+      el.sellPrice.value = state.sellPrice ?? "";
+      el.buyPrice.value = state.buyPrice ?? "";
+      el.shippingCost.value = state.shippingCost ?? "";
+      if (state.categoryIndex !== undefined) {
+        el.category.value = state.categoryIndex;
+      }
+    } catch (err) {
+      console.warn("Gespeicherter Zustand konnte nicht gelesen werden:", err);
+    }
+  }
+
+  /* ---------------------------------------------------------
+     Zurücksetzen
+     --------------------------------------------------------- */
+  function resetAll() {
+    el.sellPrice.value = "";
+    el.buyPrice.value = "";
+    el.shippingCost.value = "";
+    el.category.selectedIndex = 0;
+    localStorage.removeItem(STORAGE_KEY);
+    calculate();
+    el.sellPrice.focus();
+  }
+
+  /* ---------------------------------------------------------
+     Ergebnis in die Zwischenablage kopieren
+     --------------------------------------------------------- */
+  async function copyResult() {
+    const data = calculate();
+    const text = [
+      "eBay Gebühren- & Gewinnrechner",
+      "--------------------------------",
+      `Kategorie: ${data.category.name}`,
+      `Verkaufspreis: ${formatCurrency(data.sellPrice)}`,
+      `Einkaufspreis: ${formatCurrency(data.buyPrice)}`,
+      `Versandkosten: ${formatCurrency(data.shippingCost)}`,
+      `Verkaufsprovision: ${formatPercent(data.category.fee)}`,
+      `Netto-Provision: ${formatCurrency(data.netCommission)}`,
+      `Festgebühr: ${formatCurrency(FIXED_FEE)}`,
+      `USt. auf eBay-Gebühren: ${formatCurrency(data.vatAmount)}`,
+      `Gesamte eBay-Gebühr: ${formatCurrency(data.totalFee)}`,
+      `Endgewinn: ${formatCurrency(data.profit)}`,
+    ].join("\n");
+
+    try {
+      await navigator.clipboard.writeText(text);
+      showCopyFeedback("Ergebnis wurde kopiert ✓");
+    } catch (err) {
+      showCopyFeedback("Kopieren nicht möglich – Berechtigung fehlt");
+      console.error("Clipboard-Fehler:", err);
+    }
+  }
+
+  let feedbackTimeout;
+  function showCopyFeedback(message) {
+    el.copyFeedback.textContent = message;
+    el.copyFeedback.classList.add("is-visible");
+    clearTimeout(feedbackTimeout);
+    feedbackTimeout = setTimeout(() => {
+      el.copyFeedback.classList.remove("is-visible");
+    }, 2400);
+  }
+
+  /* ---------------------------------------------------------
+     Event-Listener registrieren
+     --------------------------------------------------------- */
+  function attachListeners() {
+    [el.sellPrice, el.buyPrice, el.shippingCost, el.category].forEach((input) => {
+      input.addEventListener("input", calculate);
+      input.addEventListener("change", calculate);
+    });
+
+    el.resetBtn.addEventListener("click", resetAll);
+    el.copyBtn.addEventListener("click", copyResult);
+  }
+
+  /* ---------------------------------------------------------
+     Initialisierung
+     --------------------------------------------------------- */
+  function init() {
+    populateCategories();
+    restoreState();
+    attachListeners();
+    calculate();
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+
+  </script>
+</body>
+</html>
