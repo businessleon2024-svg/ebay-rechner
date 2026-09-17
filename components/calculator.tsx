@@ -9,12 +9,19 @@ import { ResultPanel } from './result-panel';
 
 const STORAGE_KEY = 'ebayCalc.v3';
 
+/** Artikelzustände wie im eBay-Angebotsformular. */
 const CONDITIONS: ReadonlyArray<{ value: ItemCondition; label: string }> = [
   { value: 'new', label: 'Neu' },
-  { value: 'used', label: 'Gebraucht' },
   { value: 'new_other', label: 'Neu: Sonstige' },
-  { value: 'refurbished_certified', label: 'Zert. refurbished' },
-  { value: 'refurbished_seller', label: 'Generalüberholt' },
+  { value: 'refurbished_certified', label: 'Zertifiziert – Refurbished' },
+  { value: 'refurbished_excellent', label: 'Hervorragend – Refurbished' },
+  { value: 'refurbished_very_good', label: 'Sehr gut – Refurbished' },
+  { value: 'refurbished_good', label: 'Gut – Refurbished' },
+  { value: 'refurbished_seller', label: 'Vom Verkäufer generalüberholt' },
+  { value: 'used', label: 'Gebraucht' },
+  { value: 'used_excellent', label: 'Gebraucht – Hervorragend' },
+  { value: 'used_good', label: 'Gebraucht – Gut' },
+  { value: 'used_acceptable', label: 'Gebraucht – Akzeptabel' },
 ];
 
 interface FormState {
@@ -121,6 +128,7 @@ export function Calculator() {
     setForm((current) => ({ ...current, [key]: value }));
 
   const marketplace = requireMarketplace(form.marketplaceId);
+  const selectedCategory = marketplace.categories.find((c) => c.id === form.categoryId);
 
   // Kategorien sind je Marktplatz verschieden – beim Wechsel auf die
   // Standardkategorie zurückfallen, statt eine unbekannte ID zu behalten.
@@ -227,25 +235,26 @@ export function Calculator() {
 
           {marketplace.hasConditionDiscount ? (
             <div className="field">
-              <span className="field__label">Artikelzustand</span>
-              <div className="segmented" role="radiogroup" aria-label="Artikelzustand">
-                {CONDITIONS.map((condition) => (
-                  <label
-                    key={condition.value}
-                    className={`segmented__option${form.condition === condition.value ? ' is-active' : ''}`}
-                  >
-                    <input
-                      type="radio"
-                      name="condition"
-                      value={condition.value}
-                      checked={form.condition === condition.value}
-                      onChange={() => update('condition', condition.value)}
-                    />
-                    {condition.label}
-                  </label>
-                ))}
+              <label htmlFor="conditionSelect">Artikelzustand</label>
+              <div className="input-wrap">
+                <select
+                  id="conditionSelect"
+                  className="input"
+                  value={form.condition}
+                  onChange={(event) => update('condition', event.target.value as ItemCondition)}
+                >
+                  {CONDITIONS.map((condition) => (
+                    <option key={condition.value} value={condition.value}>
+                      {condition.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <p className="hint">{marketplace.note}</p>
+              <p className="hint">
+                {selectedCategory?.reducedPercent !== null && selectedCategory !== undefined
+                  ? `In dieser Kategorie kosten gebrauchte und generalüberholte Artikel ${selectedCategory.reducedPercent} % statt ${selectedCategory.standardPercent} %.`
+                  : 'Diese Kategorie kennt keinen reduzierten Satz – der Zustand ändert die Provision hier nicht.'}
+              </p>
             </div>
           ) : (
             <p className="hint hint--standalone">{marketplace.note}</p>

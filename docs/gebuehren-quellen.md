@@ -18,8 +18,17 @@ Bearbeitungsgebühren, die vom Käufer gewählten Versandkosten und die
 Umsatzsteuer. Die ursprüngliche Fassung des Rechners hat nur den Artikelpreis
 angesetzt und die Gebühren dadurch systematisch zu niedrig ausgewiesen.
 
-**Fixgebühr pro Bestellung.** 0,35 € unter 10 € Bestellwert, 0,45 € ab 10 €
-(erhöht zum 12.02.2026). Die ursprüngliche Fassung rechnete pauschal mit 0,50 €.
+**Feste Verkaufsgebühr pro Bestellung.** Bis *einschließlich* 10,00 €
+Bestellwert 0,35 €, erst darüber 0,45 € (erhöht zum 12.02.2026). Die Schwelle
+selbst zählt zum niedrigeren Satz — eine Bestellung über genau 10,00 € kostet
+0,35 €, nicht 0,45 €. Die Gebühr fällt **pro Bestellung** an, nicht pro Artikel:
+drei Artikel in einer Bestellung kosten einmal die feste Gebühr.
+
+**Der reduzierte Satz gilt nicht pauschal.** Die 5 % greifen nur in den
+Kategorien, die eBay dafür ausdrücklich ausweist. Kategorien ohne Beleg tragen
+im Code `reducedPercent: null` und bleiben beim Standardsatz — im Zweifel wird
+die Gebühr also eher zu hoch als zu niedrig angesetzt, weil das die für eine
+Kaufentscheidung ungefährlichere Richtung ist.
 
 **Reform zum 01.07.2026.** In etwa 43 von 80 Kategorien entfällt die Staffelung
 zugunsten eines einheitlichen Satzes zwischen 7 % und 14 %. Gleichzeitig sinkt
@@ -40,9 +49,13 @@ Accessoires, Auto- & Motorradteile sowie Uhren & Schmuck.
 - **Uhren & Schmuck**: Der Satz von 16 % ist belegt, die Staffelgrenze wird je
   nach Quelle mit 500 € oder 990 € angegeben und hängt offenbar vom Shop-Status
   ab. Aktuell 990 €.
-- **Kategorienliste**: Derzeit rund 30 Einträge gegenüber etwa 80 echten
+- **Kategorienliste**: Derzeit rund 34 Einträge gegenüber etwa 80 echten
   eBay-Kategorien. Für die Kategorie-Erkennung der Extension wird die
-  vollständige Liste gebraucht.
+  vollständige Liste gebraucht, samt eBays numerischen Kategorie-IDs. Bisher
+  hinterlegt sind die IDs der Gerätekategorien (58058 Computer/Tablets/Netzwerk,
+  1245 Drucker, 171833 Ersatzteile & Werkzeuge PC/Videospiele, 625 Foto &
+  Camcorder, 18871 und 96991 Speicherkarten, 3323 Objektive, 15032 Handys &
+  Kommunikation, 20710 Haushaltsgeräte).
 - **Nicht abgebildet**: Deckelungen einzelner Kategorien, internationale
   Verkaufsgebühren, Angebotsgebühren oberhalb des Freikontingents,
   Shop-Abogebühren.
@@ -52,6 +65,16 @@ Accessoires, Auto- & Motorradteile sowie Uhren & Schmuck.
 Die Sätze stammen vollständig aus Kauflands eigener Konditionenseite und sind
 damit durchgehend `official`. Markt Deutschland; Kaufland weist für Polen
 abweichende, niedrigere Sätze aus, die hier nicht abgebildet sind.
+
+Die Kategorien sind bewusst **einzeln** hinterlegt und nicht zu Gruppen
+zusammengefasst. Die Zusammenfassung war fehleranfällig: „Küche & Haushalt"
+(14 %) gehört nicht zu den Haushaltselektronik-Kleingeräten (13 %), und ein
+Staubsaugerroboter (7 %) wird anders abgerechnet als ein gewöhnlicher
+Staubsauger (13 %).
+
+Ein Tarif gilt für alle Kaufland-Marktplätze — ein zusätzlicher Marktplatz
+kostet keine weitere Grundgebühr. Provision fällt nur bei tatsächlichem Verkauf
+an; Retouren und Stornierungen werden laut Kaufland nicht belastet.
 
 Drei Unterschiede zu eBay, die der Rechner berücksichtigt:
 

@@ -36,8 +36,15 @@ describe('Fixgebühr pro Bestellung', () => {
     expect(fees.fixedFeeNet).toBe(0.35);
   });
 
-  it('beträgt 0,45 EUR ab 10 EUR Bestellwert', () => {
+  it('beträgt bei genau 10 EUR noch 0,35 EUR', () => {
+    // "bis einschließlich 10,00 EUR" – die Schwelle selbst zählt zum
+    // niedrigeren Satz, nicht zum höheren.
     const { fees } = calculate({ ...usedPhone, itemPrice: 10, buyerShipping: 0 });
+    expect(fees.fixedFeeNet).toBe(0.35);
+  });
+
+  it('beträgt erst oberhalb von 10 EUR 0,45 EUR', () => {
+    const { fees } = calculate({ ...usedPhone, itemPrice: 10.01, buyerShipping: 0 });
     expect(fees.fixedFeeNet).toBe(0.45);
   });
 });
@@ -71,6 +78,39 @@ describe('Artikelzustand', () => {
 
     expect(fees.commissionBasis).toBe('standard');
     expect(fees.commissionPercent).toBe(12);
+  });
+
+  it('wendet 5 % nur an, wo die Kategorie ihn ausdrücklich vorsieht', () => {
+    // Der reduzierte Satz gilt nicht pauschal für jede Kategorie. Kategorien
+    // ohne Beleg tragen reducedPercent: null und bleiben beim Standardsatz.
+    const ohneBeleg = ['games', 'spielzeug', 'buecher', 'sammeln-seltenes'];
+
+    for (const categoryId of ohneBeleg) {
+      const { fees } = calculate({ ...usedPhone, categoryId, condition: 'used' });
+      expect(fees.commissionBasis).toBe('standard');
+      expect(fees.commissionPercent).not.toBe(5);
+    }
+  });
+
+  it('behandelt alle gebrauchten und generalüberholten Abstufungen gleich', () => {
+    const reduziert = [
+      'new_other',
+      'refurbished_certified',
+      'refurbished_excellent',
+      'refurbished_very_good',
+      'refurbished_good',
+      'refurbished_seller',
+      'used',
+      'used_excellent',
+      'used_good',
+      'used_acceptable',
+    ] as const;
+
+    for (const condition of reduziert) {
+      expect(calculate({ ...usedPhone, condition }).fees.commissionPercent).toBe(5);
+    }
+
+    expect(calculate({ ...usedPhone, condition: 'new' }).fees.commissionPercent).toBe(7);
   });
 });
 
@@ -271,7 +311,7 @@ describe('Kaufland', () => {
   const kauflandSale: FeeCalculationInput = {
     marketplaceId: 'kaufland',
     condition: 'used',
-    categoryId: 'kleingeraete-zubehoer',
+    categoryId: 'computer-elektronik-zubehoer',
     itemPrice: 300,
     buyerShipping: 5,
     purchase: { amount: 150, vatDeductible: false },

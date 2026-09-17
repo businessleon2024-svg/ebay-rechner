@@ -22,15 +22,33 @@ export type ItemCondition =
   | 'new'
   | 'new_other'
   | 'refurbished_certified'
+  | 'refurbished_excellent'
+  | 'refurbished_very_good'
+  | 'refurbished_good'
   | 'refurbished_seller'
-  | 'used';
+  | 'used'
+  | 'used_excellent'
+  | 'used_good'
+  | 'used_acceptable';
 
-/** Zustände, die für den reduzierten Satz qualifizieren. */
+/**
+ * Zustände, die für den reduzierten Satz qualifizieren – also alle außer "Neu".
+ *
+ * Achtung: Das ist nur die halbe Bedingung. Der reduzierte Satz gilt
+ * ausschließlich in den Kategorien, die eBay dafür ausdrücklich ausweist
+ * (`reducedPercent !== null`), nicht pauschal in jeder Kategorie.
+ */
 export const REDUCED_RATE_CONDITIONS: readonly ItemCondition[] = [
   'new_other',
   'refurbished_certified',
+  'refurbished_excellent',
+  'refurbished_very_good',
+  'refurbished_good',
   'refurbished_seller',
   'used',
+  'used_excellent',
+  'used_good',
+  'used_acceptable',
 ];
 
 export function qualifiesForReducedRate(condition: ItemCondition): boolean {
@@ -59,6 +77,11 @@ export interface RateTier {
 export interface FeeCategory {
   id: string;
   name: string;
+  /**
+   * Kategorie-ID des Marktplatzes, z. B. eBays numerische ID.
+   * Grundlage für die spätere automatische Kategorie-Erkennung.
+   */
+  externalId?: string;
   /** Regulärer Satz in Prozent (Neuware). */
   standardPercent: number;
   /**
