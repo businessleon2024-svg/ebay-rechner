@@ -63,12 +63,48 @@ export interface FeeCategory {
   standardPercent: number;
   /**
    * Reduzierter Satz in Prozent für gebrauchte/generalüberholte Artikel.
-   * `null`, wenn die Kategorie nicht an der 5-%-Regelung teilnimmt.
+   * `null`, wenn die Kategorie keinen reduzierten Satz kennt.
    */
   reducedPercent: number | null;
   /** Staffelung, falls die Kategorie sie noch hat. */
   tier?: RateTier;
+  /** Zusätzlicher Betrag je Artikel, z. B. 0,70 € in Kauflands Medien-Kategorie. */
+  perItemFeeEur?: number;
   confidence: RateConfidence;
+}
+
+export type MarketplaceId = 'ebay' | 'kaufland';
+
+/** Wählbares Monatspaket eines Marktplatzes. */
+export interface MarketplacePlan {
+  id: string;
+  name: string;
+  /** Monatliche Grundgebühr, netto. */
+  priceNet: number;
+}
+
+export interface Marketplace {
+  id: MarketplaceId;
+  name: string;
+  categories: readonly FeeCategory[];
+  /** Vorauswahl im Formular. */
+  defaultCategoryId: string;
+  /**
+   * Gebühr pro Bestellung, abhängig vom Bestellwert.
+   * eBay staffelt sie, Kaufland erhebt keine.
+   */
+  orderFeeFor(grossTransactionAmount: number): number;
+  /**
+   * Kennt der Marktplatz überhaupt reduzierte Sätze für gebrauchte Ware?
+   * Steuert, ob die Zustandsauswahl angeboten wird.
+   */
+  hasConditionDiscount: boolean;
+  /** Monatliche Grundgebühr, sofern der Marktplatz eine erhebt. */
+  plans?: readonly MarketplacePlan[];
+  /** Stand der hinterlegten Sätze, ISO-Datum. */
+  ratesEffectiveFrom: string;
+  /** Kurzer Hinweis zur Gebührenstruktur, wird in der Oberfläche gezeigt. */
+  note: string;
 }
 
 /** Ein Kostenposten aus Sicht des Verkäufers. */
@@ -83,7 +119,21 @@ export interface CostInput {
   vatDeductible: boolean;
 }
 
+/**
+ * Umlage einer monatlichen Grundgebühr auf den einzelnen Verkauf.
+ *
+ * Kaufland verlangt eine feste Monatsgebühr statt einer Gebühr pro Bestellung.
+ * Ohne Umlage sieht dort jeder einzelne Verkauf profitabler aus, als er ist.
+ */
+export interface MonthlyFeeInput {
+  /** Monatliche Grundgebühr, netto. */
+  amountNet: number;
+  /** Erwartete Bestellungen pro Monat, auf die sie sich verteilt. */
+  ordersPerMonth: number;
+}
+
 export interface FeeCalculationInput {
+  marketplaceId: MarketplaceId;
   categoryId: string;
   condition: ItemCondition;
   /** Artikelpreis in EUR, brutto (was der Käufer für den Artikel zahlt). */
@@ -100,6 +150,8 @@ export interface FeeCalculationInput {
   adRatePercent?: number;
   /** Provisionsrabatt in Prozent, z. B. 10 % für Premium-Shop-Inhaber. */
   shopDiscountPercent?: number;
+  /** Monatliche Grundgebühr, die anteilig auf diesen Verkauf entfällt. */
+  monthlyFee?: MonthlyFeeInput;
 }
 
 export interface FeeBreakdown {
@@ -110,7 +162,10 @@ export interface FeeBreakdown {
   /** Woher der Satz stammt – für die Erklärbarkeit in der UI. */
   commissionBasis: 'reduced_condition' | 'standard' | 'tiered';
   commissionNet: number;
+  /** Gebühr pro Bestellung zuzüglich etwaiger Gebühr je Artikel. */
   fixedFeeNet: number;
+  /** Anteilige monatliche Grundgebühr, 0 wenn keine umgelegt wird. */
+  monthlyFeeShareNet: number;
   adFeeNet: number;
   /** Abgezogener Shop-Rabatt (positiver Betrag). */
   shopDiscountNet: number;
@@ -145,6 +200,7 @@ export interface ProfitBreakdown {
 }
 
 export interface CalculationResult {
+  marketplace: Marketplace;
   category: FeeCategory;
   condition: ItemCondition;
   fees: FeeBreakdown;

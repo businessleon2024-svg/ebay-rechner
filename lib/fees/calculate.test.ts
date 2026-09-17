@@ -4,6 +4,7 @@ import type { FeeCalculationInput } from './types';
 
 /** Gebrauchtes Handy: der typische Reseller-Fall. */
 const usedPhone: FeeCalculationInput = {
+  marketplaceId: 'ebay',
   categoryId: 'handys-kommunikation',
   condition: 'used',
   itemPrice: 300,
@@ -263,5 +264,80 @@ describe('Fehlerfälle', () => {
     expect(() => calculate({ ...usedPhone, categoryId: 'gibt-es-nicht' })).toThrow(
       UnknownCategoryError,
     );
+  });
+});
+
+describe('Kaufland', () => {
+  const kauflandSale: FeeCalculationInput = {
+    marketplaceId: 'kaufland',
+    condition: 'used',
+    categoryId: 'kleingeraete-zubehoer',
+    itemPrice: 300,
+    buyerShipping: 5,
+    purchase: { amount: 150, vatDeductible: false },
+    shipping: { amount: 5, vatDeductible: true },
+  };
+
+  it('erhebt keine Gebühr pro Bestellung', () => {
+    const { fees } = calculate(kauflandSale);
+
+    expect(fees.fixedFeeNet).toBe(0);
+  });
+
+  it('gewährt keinen reduzierten Satz für gebrauchte Ware', () => {
+    const used = calculate(kauflandSale);
+    const brandNew = calculate({ ...kauflandSale, condition: 'new' });
+
+    expect(used.fees.commissionPercent).toBe(13);
+    expect(used.fees.commissionBasis).toBe('standard');
+    expect(used.fees.commissionNet).toBe(brandNew.fees.commissionNet);
+  });
+
+  it('rechnet die Provision auf den Betrag inklusive Versand', () => {
+    const { fees } = calculate(kauflandSale);
+
+    expect(fees.grossTransactionAmount).toBe(305);
+    expect(fees.commissionNet).toBe(39.65); // 305 * 13 %
+  });
+
+  it('berechnet in der Medien-Kategorie zusätzlich 0,70 EUR je Artikel', () => {
+    const { fees } = calculate({ ...kauflandSale, categoryId: 'medien' });
+
+    expect(fees.fixedFeeNet).toBe(0.7);
+  });
+
+  it('legt die monatliche Grundgebühr anteilig auf den Verkauf um', () => {
+    const { fees } = calculate({
+      ...kauflandSale,
+      monthlyFee: { amountNet: 39.95, ordersPerMonth: 50 },
+    });
+
+    expect(fees.monthlyFeeShareNet).toBe(0.8); // 39,95 / 50
+    expect(fees.totalFeeNet).toBe(40.45);
+  });
+
+  it('ignoriert die Grundgebühr ohne erwartete Bestellungen', () => {
+    const { fees } = calculate({
+      ...kauflandSale,
+      monthlyFee: { amountNet: 39.95, ordersPerMonth: 0 },
+    });
+
+    expect(fees.monthlyFeeShareNet).toBe(0);
+  });
+
+  it('senkt den Gewinn gegenüber demselben Verkauf bei eBay', () => {
+    // 13 % ohne Zustandsrabatt gegen 5 % für Gebrauchtware bei eBay.
+    const kaufland = calculate(kauflandSale).profit.profit;
+    const ebay = calculate({ ...kauflandSale, marketplaceId: 'ebay', categoryId: 'handys-kommunikation' }).profit.profit;
+
+    expect(kaufland).toBeLessThan(ebay);
+  });
+});
+
+describe('Marktplatz-Fehlerfälle', () => {
+  it('wirft bei einer Kategorie, die es auf dem Marktplatz nicht gibt', () => {
+    expect(() =>
+      calculate({ ...usedPhone, marketplaceId: 'kaufland', categoryId: 'handys-kommunikation' }),
+    ).toThrow(UnknownCategoryError);
   });
 });

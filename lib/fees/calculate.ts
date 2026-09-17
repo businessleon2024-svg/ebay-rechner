@@ -1,4 +1,4 @@
-import { findCategory, fixedFeeFor, REDUCED_CONDITION_PERCENT } from './categories';
+import { findCategory, requireMarketplace } from './marketplaces';
 import {
   VAT_RATE,
   qualifiesForReducedRate,
@@ -7,6 +7,7 @@ import {
   type FeeBreakdown,
   type FeeCalculationInput,
   type FeeCategory,
+  type Marketplace,
   type ProfitBreakdown,
 } from './types';
 
@@ -28,20 +29,27 @@ const EMPTY_COST: CostInput = { amount: 0, vatDeductible: false };
 /**
  * Verkaufsprovision auf den Gesamt-Transaktionsbetrag.
  *
- * Wichtig: Bemessungsgrundlage ist laut eBay der Artikelpreis *einschließlich*
- * der vom Käufer gezahlten Versandkosten und der Umsatzsteuer – nicht der
- * Artikelpreis allein.
+ * Wichtig: Bemessungsgrundlage ist sowohl bei eBay als auch bei Kaufland der
+ * Artikelpreis *einschließlich* der vom Käufer gezahlten Versandkosten und der
+ * Umsatzsteuer – nicht der Artikelpreis allein.
  */
 function commissionFor(
+  marketplace: Marketplace,
   category: FeeCategory,
   condition: FeeCalculationInput['condition'],
   grossTransactionAmount: number,
 ): Pick<FeeBreakdown, 'commissionPercent' | 'commissionBasis' | 'commissionNet'> {
-  if (qualifiesForReducedRate(condition) && category.reducedPercent !== null) {
+  const reducedApplies =
+    marketplace.hasConditionDiscount &&
+    qualifiesForReducedRate(condition) &&
+    category.reducedPercent !== null;
+
+  if (reducedApplies) {
+    const percent = category.reducedPercent as number;
     return {
-      commissionPercent: category.reducedPercent,
+      commissionPercent: percent,
       commissionBasis: 'reduced_condition',
-      commissionNet: grossTransactionAmount * (category.reducedPercent / 100),
+      commissionNet: grossTransactionAmount * (percent / 100),
     };
   }
 
@@ -71,24 +79,35 @@ function commissionFor(
  * in der Regelbesteuerung.
  */
 export function calculate(input: FeeCalculationInput): CalculationResult {
-  const category = findCategory(input.categoryId);
+  const marketplace = requireMarketplace(input.marketplaceId);
+  const category = findCategory(marketplace, input.categoryId);
   if (!category) throw new UnknownCategoryError(input.categoryId);
 
   const grossTransactionAmount = input.itemPrice + input.buyerShipping;
 
   const { commissionPercent, commissionBasis, commissionNet } = commissionFor(
+    marketplace,
     category,
     input.condition,
     grossTransactionAmount,
   );
 
-  const fixedFeeNet = fixedFeeFor(grossTransactionAmount);
+  const fixedFeeNet =
+    marketplace.orderFeeFor(grossTransactionAmount) + (category.perItemFeeEur ?? 0);
   const adFeeNet = grossTransactionAmount * ((input.adRatePercent ?? 0) / 100);
   const shopDiscountNet = commissionNet * ((input.shopDiscountPercent ?? 0) / 100);
 
-  // Der Regelbesteuerer zieht die USt auf die eBay-Gebühren als Vorsteuer ab,
-  // wirtschaftlich relevant ist damit der Nettobetrag.
-  const totalFeeNet = commissionNet - shopDiscountNet + fixedFeeNet + adFeeNet;
+  // Eine monatliche Grundgebühr gehört anteilig auf den einzelnen Verkauf,
+  // sonst wirkt jeder Verkauf profitabler, als er in Summe ist.
+  const monthlyFeeShareNet =
+    input.monthlyFee && input.monthlyFee.ordersPerMonth > 0
+      ? input.monthlyFee.amountNet / input.monthlyFee.ordersPerMonth
+      : 0;
+
+  // Der Regelbesteuerer zieht die USt auf die Marktplatzgebühren als Vorsteuer
+  // ab, wirtschaftlich relevant ist damit der Nettobetrag.
+  const totalFeeNet =
+    commissionNet - shopDiscountNet + fixedFeeNet + adFeeNet + monthlyFeeShareNet;
   const feeVat = totalFeeNet * VAT_RATE;
 
   const fees: FeeBreakdown = {
@@ -97,6 +116,7 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
     commissionBasis,
     commissionNet: round2(commissionNet),
     fixedFeeNet: round2(fixedFeeNet),
+    monthlyFeeShareNet: round2(monthlyFeeShareNet),
     adFeeNet: round2(adFeeNet),
     shopDiscountNet: round2(shopDiscountNet),
     totalFeeNet: round2(totalFeeNet),
@@ -136,7 +156,7 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
     roiPercent: purchaseNet > 0 ? round2((profit / purchaseNet) * 100) : 0,
   };
 
-  return { category, condition: input.condition, fees, profit: profitBreakdown };
+  return { marketplace, category, condition: input.condition, fees, profit: profitBreakdown };
 }
 
 /**
@@ -146,10 +166,7 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
  * zahlen?" Die Gebühren hängen nicht vom Einkaufspreis ab, daher ist das
  * geschlossen lösbar – kein Iterieren nötig.
  */
-export function maxPurchasePrice(
-  input: FeeCalculationInput,
-  targetProfit = 0,
-): number {
+export function maxPurchasePrice(input: FeeCalculationInput, targetProfit = 0): number {
   const { profit, purchaseNet } = calculate(input).profit;
   // Spielraum gegenüber dem aktuell angesetzten Einkauf.
   const affordableNet = purchaseNet + profit - targetProfit;
@@ -188,5 +205,3 @@ export function breakEvenSellPrice(input: FeeCalculationInput): number {
 
   return round2(high);
 }
-
-export { REDUCED_CONDITION_PERCENT };

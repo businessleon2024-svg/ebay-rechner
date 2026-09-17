@@ -6,8 +6,8 @@ import { formatCurrency } from '@/lib/format';
 
 const STEPS = [
   {
-    title: 'Produkt einordnen',
-    body: 'Kategorie und Artikelzustand wählen. Der Zustand entscheidet, ob 5 % oder bis zu 14 % Provision anfallen.',
+    title: 'Marktplatz und Kategorie wählen',
+    body: 'eBay oder Kaufland, dann Kategorie und Artikelzustand. Bei eBay entscheidet der Zustand, ob 5 % oder bis zu 14 % Provision anfallen.',
   },
   {
     title: 'Preise eintragen',
@@ -36,8 +36,8 @@ export default function LandingPage() {
         <section className="hero">
           <h1 className="hero__title">Finde heraus, ob sich ein Produkt wirklich lohnt.</h1>
           <p className="hero__subtitle">
-            Berechne eBay-Gebühren, Auszahlung, Gewinn und Marge in wenigen Sekunden — mit
-            Umsatzsteuer und dem reduzierten Satz für gebrauchte Ware.
+            Berechne Marktplatzgebühren, Auszahlung, Gewinn und Marge in wenigen Sekunden — für
+            eBay und Kaufland, mit Umsatzsteuer und dem reduzierten Satz für gebrauchte Ware.
           </p>
           <div className="hero__actions">
             <Link className="btn btn--primary btn--lg" href="/rechner">

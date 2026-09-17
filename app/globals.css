@@ -90,11 +90,18 @@ body {
   text-decoration: none;
 }
 
-.topbar__logo {
+/* Wort-Bild-Marke */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logo__mark {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -102,25 +109,25 @@ body {
   flex-shrink: 0;
 }
 
-.topbar__logo svg {
-  width: 18px;
-  height: 18px;
-}
-
-.topbar__title {
-  display: block;
-  font-size: 0.97rem;
+.logo__word {
+  font-size: 1rem;
   font-weight: 650;
-  margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
 }
 
-.topbar__subtitle {
-  display: block;
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  font-weight: 450;
+.logo__word-accent {
+  color: var(--accent-text);
+}
+
+.logo--lg .logo__mark {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+}
+
+.logo--lg .logo__word {
+  font-size: 1.3rem;
 }
 
 .topbar__nav {
@@ -139,6 +146,55 @@ body {
 
 .topbar__nav a:hover {
   color: var(--text);
+}
+
+/* =========================================================
+   MARKTPLATZ-UMSCHALTER
+   ========================================================= */
+
+.calc-shell {
+  padding-top: 1.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.3rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+
+.tab {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.tab:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.tab.is-active {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.calc-shell .layout {
+  padding-top: 0.75rem;
 }
 
 /* =========================================================
@@ -411,6 +467,20 @@ select.input option {
   font-weight: 450;
   color: var(--text-faint);
   line-height: 1.5;
+}
+
+/*
+  Hinweis, der für sich steht statt unter einem Feld zu hängen – etwa wenn ein
+  Marktplatz keine Zustandsauswahl kennt. Muss nach .hint stehen, sonst gewinnt
+  dessen margin bei gleicher Spezifität.
+*/
+.hint--standalone {
+  margin: 0 0 1.15rem;
+  padding: 0.6rem 0.75rem;
+  border-left: 2px solid var(--border-strong);
+  background: var(--surface-2);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-muted);
 }
 
 /* =========================================================

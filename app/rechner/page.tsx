@@ -5,9 +5,9 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 
 export const metadata: Metadata = {
-  title: 'eBay Gebühren- & Gewinnrechner',
+  title: 'Gebühren- & Gewinnrechner für eBay und Kaufland',
   description:
-    'Gebühren, Auszahlung, Gewinn und Marge für gewerbliche eBay-Verkäufer berechnen – inklusive des reduzierten 5-%-Satzes für gebrauchte Artikel.',
+    'Gebühren, Auszahlung, Gewinn und Marge für gewerbliche Verkäufer berechnen – für eBay und Kaufland, inklusive Umsatzsteuer.',
 };
 
 export default function RechnerPage() {

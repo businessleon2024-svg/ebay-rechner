@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { RATES_EFFECTIVE_FROM } from '@/lib/fees/categories';
 import type { CalculationResult } from '@/lib/fees/types';
 import { formatCurrency, formatPercent } from '@/lib/format';
 
@@ -21,31 +20,27 @@ const COMMISSION_BASIS_LABEL: Record<CalculationResult['fees']['commissionBasis'
 const CONFIDENCE_NOTE: Record<CalculationResult['category']['confidence'], string | null> = {
   official: null,
   press:
-    'Dieser Satz stammt aus Berichten zur Gebührenreform, nicht direkt aus eBays Gebührenübersicht.',
+    'Dieser Satz stammt aus Berichten zur Gebührenreform, nicht direkt aus der offiziellen Gebührenübersicht.',
   unverified:
-    'Für diese Kategorie widersprechen sich die vorliegenden Quellen. Vor einer Kaufentscheidung mit der eigenen eBay-Gebührenabrechnung abgleichen.',
+    'Für diese Kategorie widersprechen sich die vorliegenden Quellen. Vor einer Kaufentscheidung mit der eigenen Gebührenabrechnung abgleichen.',
 };
 
 function buildCopyText(
-  { category, fees, profit }: CalculationResult,
+  { marketplace, category, fees, profit }: CalculationResult,
   maxPurchase: number,
 ): string {
   return [
-    'eBay Gebühren- & Gewinnrechner',
+    `Gebührenkompass · ${marketplace.name}`,
     '--------------------------------',
     `Kategorie: ${category.name}`,
-    `Bemessungsgrundlage: ${formatCurrency(fees.grossTransactionAmount)}`,
-    `Verkaufsprovision: ${formatPercent(fees.commissionPercent)} = ${formatCurrency(fees.commissionNet)}`,
-    `Fixgebühr: ${formatCurrency(fees.fixedFeeNet)}`,
-    `eBay-Gebühr netto: ${formatCurrency(fees.totalFeeNet)}`,
-    `eBay-Gebühr brutto: ${formatCurrency(fees.totalFeeGross)}`,
-    `Auszahlung: ${formatCurrency(fees.payout)}`,
-    `USt an das Finanzamt: ${formatCurrency(profit.salesVat)}`,
-    `Einkauf (netto): ${formatCurrency(profit.purchaseNet)}`,
-    `Versand (netto): ${formatCurrency(profit.shippingNet)}`,
+    `Nettoerlös: ${formatCurrency(profit.revenueNet)}`,
+    `${marketplace.name}-Gebühr (netto): ${formatCurrency(fees.totalFeeNet)}`,
+    `Einkauf: ${formatCurrency(profit.purchaseNet)}`,
+    `Versand: ${formatCurrency(profit.shippingNet)}`,
     `Gewinn: ${formatCurrency(profit.profit)}`,
     `Marge: ${formatPercent(profit.marginPercent)}`,
     `ROI: ${formatPercent(profit.roiPercent)}`,
+    `Auszahlung: ${formatCurrency(fees.payout)}`,
     `Max. Einkaufspreis: ${formatCurrency(maxPurchase)}`,
   ].join('\n');
 }
@@ -70,7 +65,7 @@ function Row({ term, note, value, total }: RowProps) {
 }
 
 export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: ResultPanelProps) {
-  const { category, fees, profit } = result;
+  const { marketplace, category, fees, profit } = result;
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
@@ -94,8 +89,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
   const isLoss = !isEmpty && profit.profit < 0;
   const otherCostsTotal = profit.shippingNet + profit.otherCostsNet;
 
-  // Nenner so wählen, dass ein Verlust als eigenes Segment sichtbar wird,
-  // statt wie bisher stillschweigend auf 0 geklemmt zu werden.
+  // Nenner so wählen, dass ein Verlust als eigenes Segment sichtbar wird.
   const denominator = fees.grossTransactionAmount + (isLoss ? -profit.profit : 0);
   const share = (value: number) =>
     denominator > 0 ? `${Math.max((value / denominator) * 100, 0)}%` : '0%';
@@ -123,7 +117,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
 
       <div className="headline">
         <div className="headline__cell">
-          <span className="headline__label">Gewinn nach Steuern</span>
+          <span className="headline__label">Gewinn</span>
           <span
             className={`headline__value ${
               isEmpty
@@ -142,11 +136,11 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
           </span>
         </div>
         <div className="headline__cell">
-          <span className="headline__label">Auszahlung von eBay</span>
+          <span className="headline__label">Auszahlung</span>
           <span className="headline__value headline__value--neutral">
             {isEmpty ? formatCurrency(0) : formatCurrency(fees.payout)}
           </span>
-          <span className="headline__note">vor Steuern und eigenen Kosten</span>
+          <span className="headline__note">was {marketplace.name} überweist</span>
         </div>
       </div>
 
@@ -170,12 +164,10 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
           <span className="kpi__hint">Verkaufspreis ohne Gewinn</span>
         </div>
         <div className="kpi">
-          <span className="kpi__label">eBay-Gebühr</span>
-          <span className={`kpi__value${isLoss ? ' kpi__value--negative' : ''}`}>
-            {formatCurrency(fees.totalFeeGross)}
-          </span>
+          <span className="kpi__label">{marketplace.name}-Gebühr</span>
+          <span className="kpi__value">{formatCurrency(fees.totalFeeGross)}</span>
           <span className="kpi__hint">
-            {isEmpty ? 'brutto' : `${formatPercent(fees.commissionPercent)} + Fixgebühr`}
+            {isEmpty ? 'brutto' : `${formatPercent(fees.commissionPercent)} inkl. aller Gebühren`}
           </span>
         </div>
       </div>
@@ -192,73 +184,120 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
       </div>
       <div className="breakdown-legend">
         <span><i className="dot dot--purchase" />Einkauf</span>
-        <span><i className="dot dot--shipping" />Versand &amp; Sonstiges</span>
-        <span><i className="dot dot--fee" />eBay-Gebühr</span>
+        <span><i className="dot dot--shipping" />Versand</span>
+        <span><i className="dot dot--fee" />Gebühr</span>
         <span><i className="dot dot--vat" />Umsatzsteuer</span>
         <span><i className={`dot ${isLoss ? 'dot--loss' : 'dot--profit'}`} />{isLoss ? 'Verlust' : 'Gewinn'}</span>
       </div>
 
+      {/*
+        Bewusst durchgängig auf Nettobasis: Erlös ohne Umsatzsteuer, Gebühren
+        ohne Vorsteuer. Sonst stünden Brutto- und Nettobeträge nebeneinander
+        und die Rechnung wäre zwar richtig, aber nicht mehr nachvollziehbar.
+      */}
       <div className="ledger">
-        <h3 className="ledger__heading">eBay-Gebühren</h3>
         <div className="ledger__list">
           <Row
-            term="Bemessungsgrundlage"
-            note="Artikelpreis + Versand, den der Käufer zahlt"
-            value={formatCurrency(fees.grossTransactionAmount)}
+            term="Nettoerlös"
+            note="Verkaufspreis ohne Umsatzsteuer"
+            value={formatCurrency(profit.revenueNet)}
           />
           <Row
-            term={`Verkaufsprovision ${formatPercent(fees.commissionPercent)}`}
-            note={COMMISSION_BASIS_LABEL[fees.commissionBasis]}
-            value={formatCurrency(fees.commissionNet)}
-          />
-          <Row
-            term="Fixgebühr"
-            note={fees.grossTransactionAmount >= 10 ? 'ab 10 € Bestellwert' : 'unter 10 € Bestellwert'}
-            value={formatCurrency(fees.fixedFeeNet)}
-          />
-          {fees.adFeeNet > 0 && <Row term="Werbeanzeigen" value={formatCurrency(fees.adFeeNet)} />}
-          {fees.shopDiscountNet > 0 && (
-            <Row term="Shop-Rabatt" value={`−${formatCurrency(fees.shopDiscountNet)}`} />
-          )}
-          <Row
-            term="USt auf Gebühren"
-            note="als Vorsteuer abziehbar"
-            value={formatCurrency(fees.feeVat)}
-          />
-          <Row term="Gebühr brutto" value={formatCurrency(fees.totalFeeGross)} total />
-        </div>
-      </div>
-
-      <div className="ledger">
-        <h3 className="ledger__heading">Vom Erlös zum Gewinn</h3>
-        <div className="ledger__list">
-          <Row term="Auszahlung von eBay" value={formatCurrency(fees.payout)} />
-          <Row
-            term="Umsatzsteuer an das Finanzamt"
-            note="19 % aus dem Bruttoverkaufspreis"
-            value={`−${formatCurrency(profit.salesVat)}`}
+            term={`${marketplace.name}-Gebühr`}
+            note="netto, ohne abziehbare Vorsteuer"
+            value={`−${formatCurrency(fees.totalFeeNet)}`}
           />
           <Row
             term="Einkauf"
-            note={
-              profit.purchaseVatDeducted > 0
-                ? 'netto, Vorsteuer abgezogen'
-                : 'ohne Vorsteuerabzug'
-            }
+            note={profit.purchaseVatDeducted > 0 ? 'netto' : 'ohne Vorsteuerabzug'}
             value={`−${formatCurrency(profit.purchaseNet)}`}
           />
-          <Row term="Eigener Versand" value={`−${formatCurrency(profit.shippingNet)}`} />
+          <Row term="Versand" value={`−${formatCurrency(profit.shippingNet)}`} />
           {profit.otherCostsNet > 0 && (
             <Row term="Sonstige Kosten" value={`−${formatCurrency(profit.otherCostsNet)}`} />
           )}
-          <Row
-            term="Vorsteuer auf Gebühren"
-            note="von eBay berechnet, vom Finanzamt erstattet"
-            value={`+${formatCurrency(fees.feeVat)}`}
-          />
           <Row term="Gewinn" value={formatCurrency(isEmpty ? 0 : profit.profit)} total />
         </div>
       </div>
+
+      <details className="advanced">
+        <summary>Gebühren und Umsatzsteuer im Detail</summary>
+        <div className="advanced__body">
+          <div className="ledger">
+            <h3 className="ledger__heading">Gebühren</h3>
+            <div className="ledger__list">
+              <Row
+                term="Bemessungsgrundlage"
+                note="Artikelpreis + Versand, den der Käufer zahlt"
+                value={formatCurrency(fees.grossTransactionAmount)}
+              />
+              <Row
+                term={`Verkaufsprovision ${formatPercent(fees.commissionPercent)}`}
+                note={COMMISSION_BASIS_LABEL[fees.commissionBasis]}
+                value={formatCurrency(fees.commissionNet)}
+              />
+              {fees.fixedFeeNet > 0 && (
+                <Row
+                  term="Fixgebühr"
+                  note={
+                    marketplace.id === 'ebay'
+                      ? fees.grossTransactionAmount >= 10
+                        ? 'ab 10 € Bestellwert'
+                        : 'unter 10 € Bestellwert'
+                      : 'je Artikel'
+                  }
+                  value={formatCurrency(fees.fixedFeeNet)}
+                />
+              )}
+              {fees.monthlyFeeShareNet > 0 && (
+                <Row
+                  term="Anteil Grundgebühr"
+                  note="monatliche Gebühr auf diesen Verkauf umgelegt"
+                  value={formatCurrency(fees.monthlyFeeShareNet)}
+                />
+              )}
+              {fees.adFeeNet > 0 && <Row term="Werbeanzeigen" value={formatCurrency(fees.adFeeNet)} />}
+              {fees.shopDiscountNet > 0 && (
+                <Row term="Shop-Rabatt" value={`−${formatCurrency(fees.shopDiscountNet)}`} />
+              )}
+              <Row term="Gebühr netto" value={formatCurrency(fees.totalFeeNet)} total />
+              <Row
+                term="USt auf Gebühren"
+                note="als Vorsteuer abziehbar, daher kein echter Kostenfaktor"
+                value={formatCurrency(fees.feeVat)}
+              />
+              <Row
+                term="Gebühr brutto"
+                note="so steht sie auf der Abrechnung"
+                value={formatCurrency(fees.totalFeeGross)}
+              />
+            </div>
+          </div>
+
+          <div className="ledger">
+            <h3 className="ledger__heading">Umsatzsteuer</h3>
+            <div className="ledger__list">
+              <Row
+                term="Verkauf brutto"
+                value={formatCurrency(fees.grossTransactionAmount)}
+              />
+              <Row
+                term="USt an das Finanzamt"
+                note="19 % aus dem Bruttoverkaufspreis"
+                value={`−${formatCurrency(profit.salesVat)}`}
+              />
+              <Row term="Nettoerlös" value={formatCurrency(profit.revenueNet)} total />
+              {profit.inputVatDeducted > 0 && (
+                <Row
+                  term="Vorsteuer aus eigenen Kosten"
+                  note="vom Finanzamt erstattet"
+                  value={formatCurrency(profit.inputVatDeducted)}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </details>
 
       <div className="form-actions">
         <button type="button" className="btn btn--primary" onClick={copyResult}>
@@ -269,7 +308,9 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
         {feedback}
       </p>
 
-      <p className="hint">Gebührensätze auf Stand {RATES_EFFECTIVE_FROM}.</p>
+      <p className="hint">
+        {marketplace.name}-Gebührensätze auf Stand {marketplace.ratesEffectiveFrom}.
+      </p>
     </section>
   );
 }

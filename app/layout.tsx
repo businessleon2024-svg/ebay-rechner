@@ -8,9 +8,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'eBay Gebühren- & Gewinnrechner | Deutschland',
+  title: {
+    default: 'Gebührenkompass | Gebühren, Gewinn und Marge für eBay und Kaufland',
+    template: '%s | Gebührenkompass',
+  },
   description:
-    'Gebühren, Umsatzsteuer und Marge für gewerbliche eBay-Verkäufer – inklusive des reduzierten 5-%-Satzes für gebrauchte Artikel.',
+    'Berechne Marktplatzgebühren, Auszahlung, Umsatzsteuer und Marge für eBay und Kaufland – inklusive des reduzierten 5-%-Satzes für gebrauchte Artikel bei eBay.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -59,7 +59,7 @@ export function can(plan: Plan, feature: keyof Entitlements): boolean {
  * tatsächliche Freischaltung nicht auseinanderlaufen können.
  */
 export const FREE_FEATURES = [
-  'eBay-Gebühren berechnen',
+  'Gebühren für eBay und Kaufland berechnen',
   'Einkaufs-, Verkaufs- und Versandpreis eingeben',
   'Erwartete Auszahlung',
   'Gewinn und Marge',
