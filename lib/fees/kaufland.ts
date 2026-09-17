@@ -26,48 +26,48 @@ export const KAUFLAND_PLANS = [
  */
 const CATEGORIES: readonly FeeCategory[] = [
   // --- 7 % ---
-  { id: 'computer', name: 'Computer', standardPercent: 7, reducedPercent: null, confidence: 'official' },
-  { id: 'unterhaltungselektronik', name: 'Unterhaltungselektronik', standardPercent: 7, reducedPercent: null, confidence: 'official' },
-  { id: 'staubsaugerroboter', name: 'Staubsaugerroboter', standardPercent: 7, reducedPercent: null, confidence: 'official' },
-  { id: 'reifen-felgen', name: 'Reifen, Felgen & Kompletträder', standardPercent: 7, reducedPercent: null, confidence: 'official' },
-  { id: 'haushaltselektronik-gross', name: 'Haushaltselektronik: Großgeräte', standardPercent: 7, reducedPercent: null, confidence: 'official' },
+  { id: 'computer', group: '7 %', name: 'Computer', standardPercent: 7, reducedPercent: null, confidence: 'official' },
+  { id: 'unterhaltungselektronik', group: '7 %', name: 'Unterhaltungselektronik', standardPercent: 7, reducedPercent: null, confidence: 'official' },
+  { id: 'staubsaugerroboter', group: '7 %', name: 'Staubsaugerroboter', standardPercent: 7, reducedPercent: null, confidence: 'official' },
+  { id: 'reifen-felgen', group: '7 %', name: 'Reifen, Felgen & Kompletträder', standardPercent: 7, reducedPercent: null, confidence: 'official' },
+  { id: 'haushaltselektronik-gross', group: '7 %', name: 'Haushaltselektronik: Großgeräte', standardPercent: 7, reducedPercent: null, confidence: 'official' },
 
   // --- 10 % ---
-  { id: 'werkzeug-gartengeraete', name: 'Werkzeug & Gartengeräte', standardPercent: 10, reducedPercent: null, confidence: 'official' },
-  { id: 'parfum', name: 'Parfüm', standardPercent: 10, reducedPercent: null, confidence: 'official' },
+  { id: 'werkzeug-gartengeraete', group: '10 %', name: 'Werkzeug & Gartengeräte', standardPercent: 10, reducedPercent: null, confidence: 'official' },
+  { id: 'parfum', group: '10 %', name: 'Parfüm', standardPercent: 10, reducedPercent: null, confidence: 'official' },
 
   // --- 13 % ---
-  { id: 'haushaltselektronik-klein', name: 'Haushaltselektronik: Kleingeräte', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'computer-elektronik-zubehoer', name: 'Computer- & Elektronik-Zubehör', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'fahrraeder-ebikes', name: 'Fahrräder & E-Bikes', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'koerperpflege-gesundheit', name: 'Körperpflege & Gesundheit', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'auto-motorrad', name: 'Auto & Motorrad', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'baumarkt', name: 'Baumarkt', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'moebel-wohnen', name: 'Möbel & Wohnen', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'lampen-leuchten', name: 'Lampen & Leuchten', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'sport-outdoor', name: 'Sport & Outdoor', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'babyprodukte', name: 'Babyprodukte', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'spielwaren', name: 'Spielwaren', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'lebensmittel', name: 'Lebensmittel', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'sexspielzeug', name: 'Sexspielzeug', standardPercent: 13, reducedPercent: null, confidence: 'official' },
-  { id: 'medien', name: 'Medien', standardPercent: 13, reducedPercent: null, perItemFeeEur: 0.7, confidence: 'official' },
+  { id: 'haushaltselektronik-klein', group: '13 %', name: 'Haushaltselektronik: Kleingeräte', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'computer-elektronik-zubehoer', group: '13 %', name: 'Computer- & Elektronik-Zubehör', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'fahrraeder-ebikes', group: '13 %', name: 'Fahrräder & E-Bikes', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'koerperpflege-gesundheit', group: '13 %', name: 'Körperpflege & Gesundheit', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'auto-motorrad', group: '13 %', name: 'Auto & Motorrad', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'baumarkt', group: '13 %', name: 'Baumarkt', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'moebel-wohnen', group: '13 %', name: 'Möbel & Wohnen', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'lampen-leuchten', group: '13 %', name: 'Lampen & Leuchten', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'sport-outdoor', group: '13 %', name: 'Sport & Outdoor', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'babyprodukte', group: '13 %', name: 'Babyprodukte', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'spielwaren', group: '13 %', name: 'Spielwaren', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'lebensmittel', group: '13 %', name: 'Lebensmittel', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'sexspielzeug', group: '13 %', name: 'Sexspielzeug', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'medien', group: '13 %', name: 'Medien', standardPercent: 13, reducedPercent: null, perItemFeeEur: 0.7, confidence: 'official' },
 
   // --- 14 % ---
-  { id: 'garten', name: 'Garten', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'matratzen', name: 'Matratzen', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'kueche-haushalt', name: 'Küche & Haushalt', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'bekleidung', name: 'Bekleidung', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'taschen-accessoires', name: 'Taschen & Accessoires', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'schuhe', name: 'Schuhe', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'tierbedarf', name: 'Tierbedarf', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'camping', name: 'Camping', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'fitness', name: 'Fitness', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'sup', name: 'SUP', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'garten', group: '14 %', name: 'Garten', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'matratzen', group: '14 %', name: 'Matratzen', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'kueche-haushalt', group: '14 %', name: 'Küche & Haushalt', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'bekleidung', group: '14 %', name: 'Bekleidung', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'taschen-accessoires', group: '14 %', name: 'Taschen & Accessoires', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'schuhe', group: '14 %', name: 'Schuhe', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'tierbedarf', group: '14 %', name: 'Tierbedarf', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'camping', group: '14 %', name: 'Camping', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'fitness', group: '14 %', name: 'Fitness', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'sup', group: '14 %', name: 'SUP', standardPercent: 14, reducedPercent: null, confidence: 'official' },
 
   // --- 16 % ---
-  { id: 'schmuck', name: 'Schmuck', standardPercent: 16, reducedPercent: null, confidence: 'official' },
+  { id: 'schmuck', group: '16 %', name: 'Schmuck', standardPercent: 16, reducedPercent: null, confidence: 'official' },
 
-  { id: 'sonstige', name: 'Alle anderen Kategorien', standardPercent: 13, reducedPercent: null, confidence: 'official' },
+  { id: 'sonstige', group: '13 %', name: 'Alle anderen Kategorien', standardPercent: 13, reducedPercent: null, confidence: 'official' },
 ];
 
 export const KAUFLAND: Marketplace = {

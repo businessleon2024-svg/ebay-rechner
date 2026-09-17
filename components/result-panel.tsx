@@ -45,6 +45,10 @@ function buildCopyText(
   ].join('\n');
 }
 
+/** Abzugsposition. Bei 0 ohne Vorzeichen, "−0,00 €" liest sich falsch. */
+const negative = (value: number): string =>
+  value === 0 ? formatCurrency(0) : `−${formatCurrency(value)}`;
+
 interface RowProps {
   term: string;
   note?: string;
@@ -165,13 +169,26 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
         </div>
         <div className="kpi">
           <span className="kpi__label">{marketplace.name}-Gebühr</span>
-          <span className="kpi__value">{formatCurrency(fees.totalFeeGross)}</span>
+          <span className="kpi__value">
+            {isEmpty ? '–' : formatCurrency(fees.totalFeeGross)}
+          </span>
           <span className="kpi__hint">
             {isEmpty ? 'brutto' : `${formatPercent(fees.commissionPercent)} inkl. aller Gebühren`}
           </span>
         </div>
       </div>
 
+      {isEmpty ? (
+        /*
+          Ohne Verkaufspreis stünde in der Rechnung allein die Fixgebühr –
+          das widerspräche der 0,00 € in der Kopfzeile. Lieber gar nichts
+          zeigen als eine Rechnung, die sich selbst widerspricht.
+        */
+        <p className="placeholder">
+          Trage Verkaufs- und Einkaufspreis ein, um die vollständige Rechnung zu sehen.
+        </p>
+      ) : (
+        <>
       <div className="breakdown-bar" aria-hidden="true">
         <div className="breakdown-bar__segment breakdown-bar__segment--purchase" style={{ width: share(profit.purchaseNet) }} />
         <div className="breakdown-bar__segment breakdown-bar__segment--shipping" style={{ width: share(otherCostsTotal) }} />
@@ -205,18 +222,18 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
           <Row
             term={`${marketplace.name}-Gebühr`}
             note="netto, ohne abziehbare Vorsteuer"
-            value={`−${formatCurrency(fees.totalFeeNet)}`}
+            value={negative(fees.totalFeeNet)}
           />
           <Row
             term="Einkauf"
             note={profit.purchaseVatDeducted > 0 ? 'netto' : 'ohne Vorsteuerabzug'}
-            value={`−${formatCurrency(profit.purchaseNet)}`}
+            value={negative(profit.purchaseNet)}
           />
-          <Row term="Versand" value={`−${formatCurrency(profit.shippingNet)}`} />
+          <Row term="Versand" value={negative(profit.shippingNet)} />
           {profit.otherCostsNet > 0 && (
-            <Row term="Sonstige Kosten" value={`−${formatCurrency(profit.otherCostsNet)}`} />
+            <Row term="Sonstige Kosten" value={negative(profit.otherCostsNet)} />
           )}
-          <Row term="Gewinn" value={formatCurrency(isEmpty ? 0 : profit.profit)} total />
+          <Row term="Gewinn" value={formatCurrency(profit.profit)} total />
         </div>
       </div>
 
@@ -258,7 +275,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
               )}
               {fees.adFeeNet > 0 && <Row term="Werbeanzeigen" value={formatCurrency(fees.adFeeNet)} />}
               {fees.shopDiscountNet > 0 && (
-                <Row term="Shop-Rabatt" value={`−${formatCurrency(fees.shopDiscountNet)}`} />
+                <Row term="Shop-Rabatt" value={negative(fees.shopDiscountNet)} />
               )}
               <Row term="Gebühr netto" value={formatCurrency(fees.totalFeeNet)} total />
               <Row
@@ -284,7 +301,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
               <Row
                 term="USt an das Finanzamt"
                 note="19 % aus dem Bruttoverkaufspreis"
-                value={`−${formatCurrency(profit.salesVat)}`}
+                value={negative(profit.salesVat)}
               />
               <Row term="Nettoerlös" value={formatCurrency(profit.revenueNet)} total />
               {profit.inputVatDeducted > 0 && (
@@ -298,6 +315,8 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
           </div>
         </div>
       </details>
+        </>
+      )}
 
       <div className="form-actions">
         <button type="button" className="btn btn--primary" onClick={copyResult}>

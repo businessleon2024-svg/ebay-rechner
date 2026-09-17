@@ -43,19 +43,20 @@ Accessoires, Auto- & Motorradteile sowie Uhren & Schmuck.
 
 ## Offene Punkte
 
-- **Medien- und Spielekategorien** (Bücher, Filme, Musik, Games, Sammeln): Eine
-  Quelle nennt eine Anhebung von 11 % auf 12 %, eine andere 14 %. Aktuell mit
-  12 % und `unverified` hinterlegt.
+- **Medien- und Spielekategorien** (Bücher, Filme, Musik, Games, Spielzeug,
+  Sammeln, Beauty & Gesundheit): Sie stehen nicht auf der Liste der zum
+  01.07.2026 reformierten Kategorien, behalten also ihre bisherige Struktur.
+  Welche das genau ist, geben die Quellen widersprüchlich an — eine nennt eine
+  Anhebung von 11 % auf 12 %, eine andere 14 %. Aktuell mit 12 %, ohne
+  reduzierten Satz und als `unverified` hinterlegt.
 - **Uhren & Schmuck**: Der Satz von 16 % ist belegt, die Staffelgrenze wird je
   nach Quelle mit 500 € oder 990 € angegeben und hängt offenbar vom Shop-Status
   ab. Aktuell 990 €.
-- **Kategorienliste**: Derzeit rund 34 Einträge gegenüber etwa 80 echten
-  eBay-Kategorien. Für die Kategorie-Erkennung der Extension wird die
-  vollständige Liste gebraucht, samt eBays numerischen Kategorie-IDs. Bisher
-  hinterlegt sind die IDs der Gerätekategorien (58058 Computer/Tablets/Netzwerk,
-  1245 Drucker, 171833 Ersatzteile & Werkzeuge PC/Videospiele, 625 Foto &
-  Camcorder, 18871 und 96991 Speicherkarten, 3323 Objektive, 15032 Handys &
-  Kommunikation, 20710 Haushaltsgeräte).
+- **Kategorie-IDs**: Erst neun der 53 Kategorien tragen eBays numerische ID
+  (58058 Computer/Tablets/Netzwerk, 1245 Drucker, 171833 Ersatzteile & Werkzeuge
+  PC/Videospiele, 625 Foto & Camcorder, 18871 und 96991 Speicherkarten, 3323
+  Objektive, 15032 Handys & Kommunikation, 20710 Haushaltsgeräte). Für die
+  automatische Kategorie-Erkennung der Extension werden die übrigen gebraucht.
 - **Nicht abgebildet**: Deckelungen einzelner Kategorien, internationale
   Verkaufsgebühren, Angebotsgebühren oberhalb des Freikontingents,
   Shop-Abogebühren.

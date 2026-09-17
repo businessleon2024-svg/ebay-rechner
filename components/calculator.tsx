@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { breakEvenSellPrice, calculate, maxPurchasePrice } from '@/lib/fees/calculate';
 import { MARKETPLACES, requireMarketplace } from '@/lib/fees/marketplaces';
-import type { FeeCalculationInput, ItemCondition, MarketplaceId } from '@/lib/fees/types';
+import type { FeeCalculationInput, FeeCategory, ItemCondition, MarketplaceId } from '@/lib/fees/types';
 import { parseNumber } from '@/lib/format';
 import { ResultPanel } from './result-panel';
 
@@ -130,6 +130,19 @@ export function Calculator() {
   const marketplace = requireMarketplace(form.marketplaceId);
   const selectedCategory = marketplace.categories.find((c) => c.id === form.categoryId);
 
+  // Bei rund 45 Kategorien je Marktplatz ist eine flache Liste nicht mehr
+  // überschaubar. Reihenfolge der Gruppen folgt dem ersten Auftreten.
+  const groupedCategories = useMemo(() => {
+    const groups = new Map<string, FeeCategory[]>();
+    for (const category of marketplace.categories) {
+      const key = category.group ?? 'Kategorien';
+      const existing = groups.get(key);
+      if (existing) existing.push(category);
+      else groups.set(key, [category]);
+    }
+    return [...groups.entries()];
+  }, [marketplace]);
+
   // Kategorien sind je Marktplatz verschieden – beim Wechsel auf die
   // Standardkategorie zurückfallen, statt eine unbekannte ID zu behalten.
   const selectMarketplace = (id: MarketplaceId) =>
@@ -224,10 +237,14 @@ export function Calculator() {
                 value={form.categoryId}
                 onChange={(event) => update('categoryId', event.target.value)}
               >
-                {marketplace.categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name} · {category.standardPercent} %
-                  </option>
+                {groupedCategories.map(([group, categories]) => (
+                  <optgroup key={group} label={group}>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name} · {category.standardPercent} %
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

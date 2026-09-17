@@ -82,6 +82,8 @@ export interface FeeCategory {
    * Grundlage für die spätere automatische Kategorie-Erkennung.
    */
   externalId?: string;
+  /** Überschrift, unter der die Kategorie in der Auswahlliste einsortiert wird. */
+  group?: string;
   /** Regulärer Satz in Prozent (Neuware). */
   standardPercent: number;
   /**
