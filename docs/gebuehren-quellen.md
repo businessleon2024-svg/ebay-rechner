@@ -47,6 +47,30 @@ Accessoires, Auto- & Motorradteile sowie Uhren & Schmuck.
   Verkaufsgebühren, Angebotsgebühren oberhalb des Freikontingents,
   Shop-Abogebühren.
 
+## Kaufland
+
+Die Sätze stammen vollständig aus Kauflands eigener Konditionenseite und sind
+damit durchgehend `official`. Markt Deutschland; Kaufland weist für Polen
+abweichende, niedrigere Sätze aus, die hier nicht abgebildet sind.
+
+Drei Unterschiede zu eBay, die der Rechner berücksichtigt:
+
+- **Keine Gebühr pro Bestellung.** Stattdessen eine monatliche Grundgebühr von
+  39,95 € (Basic) oder 59,95 € (Plus), jeweils netto. Sie lässt sich anteilig
+  auf den einzelnen Verkauf umlegen — ohne diese Umlage wirkt jeder Verkauf
+  profitabler, als das Geschäft in Summe ist.
+- **Kein reduzierter Satz für gebrauchte Ware.** Der Artikelzustand spielt für
+  die Provision keine Rolle, die Auswahl wird dort deshalb nicht angeboten.
+- **Zahlungsabwicklung ist in der Provision enthalten**, es fällt keine
+  separate Gebühr an.
+
+Die Bemessungsgrundlage ist wie bei eBay der Bruttoverkaufspreis einschließlich
+Versandkosten. Einzige Ausnahme von der reinen Prozentprovision: die Kategorie
+Medien mit zusätzlich 0,70 € je Artikel.
+
+**Nicht abgebildet**: Gutschein-Einlösegebühr (0,49 € bzw. 0,99 € ab 100 €),
+EPR-Servicegebühr, Performance Coach.
+
 ## Nicht abgebildete Verkäufertypen
 
 Die V1 rechnet ausschließlich für **gewerbliche Verkäufer in der
