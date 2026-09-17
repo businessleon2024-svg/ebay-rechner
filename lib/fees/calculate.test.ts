@@ -381,3 +381,79 @@ describe('Marktplatz-Fehlerfälle', () => {
     ).toThrow(UnknownCategoryError);
   });
 });
+
+describe('Shop-Abo', () => {
+  const schmuck: FeeCalculationInput = {
+    ...usedPhone,
+    categoryId: 'uhren-schmuck',
+    condition: 'new',
+    itemPrice: 1000,
+    buyerShipping: 0,
+  };
+
+  it('staffelt ohne Shop erst ab 990 EUR', () => {
+    const { fees } = calculate(schmuck);
+
+    // 990 * 16 % + 10 * 3 %
+    expect(fees.commissionNet).toBe(158.7);
+  });
+
+  it('staffelt mit Shop bereits ab 500 EUR', () => {
+    const { fees } = calculate({ ...schmuck, hasShopSubscription: true });
+
+    // 500 * 16 % + 500 * 3 %
+    expect(fees.commissionNet).toBe(95);
+  });
+
+  it('ist bei Uhren & Schmuck mit Shop günstiger', () => {
+    const ohne = calculate(schmuck).fees.commissionNet;
+    const mit = calculate({ ...schmuck, hasShopSubscription: true }).fees.commissionNet;
+
+    expect(mit).toBeLessThan(ohne);
+  });
+
+  it('ändert in Kategorien ohne eigene Shop-Staffel nichts', () => {
+    const ohne = calculate({ ...usedPhone, categoryId: 'kleidung-accessoires', itemPrice: 1500 });
+    const mit = calculate({
+      ...usedPhone,
+      categoryId: 'kleidung-accessoires',
+      itemPrice: 1500,
+      hasShopSubscription: true,
+    });
+
+    expect(mit.fees.commissionNet).toBe(ohne.fees.commissionNet);
+  });
+});
+
+describe('Nicht reformierte Kategorien', () => {
+  it('staffelt Medien- und Sammelkategorien ab 990 EUR', () => {
+    for (const categoryId of ['buecher', 'filme-serien', 'musik', 'games', 'sammeln-seltenes']) {
+      const { fees } = calculate({
+        ...usedPhone,
+        categoryId,
+        condition: 'new',
+        itemPrice: 1990,
+        buyerShipping: 0,
+      });
+
+      // 990 * 12 % + 1000 * 3 %
+      expect(fees.commissionNet).toBe(148.8);
+      expect(fees.commissionBasis).toBe('tiered');
+    }
+  });
+
+  it('rechnet Spielzeug und Beauty flach mit 14 %', () => {
+    for (const categoryId of ['spielzeug', 'beauty-gesundheit']) {
+      const { fees } = calculate({
+        ...usedPhone,
+        categoryId,
+        condition: 'new',
+        itemPrice: 2000,
+        buyerShipping: 0,
+      });
+
+      expect(fees.commissionPercent).toBe(14);
+      expect(fees.commissionBasis).toBe('standard');
+    }
+  });
+});

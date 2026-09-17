@@ -91,20 +91,30 @@ const CATEGORIES: readonly FeeCategory[] = [
   { id: 'heimwerker', group: WEITERE, name: 'Heimwerker', standardPercent: 13, reducedPercent: 5, confidence: 'official' },
   { id: 'musikinstrumente', group: WEITERE, name: 'Musikinstrumente', standardPercent: 11, reducedPercent: 5, confidence: 'official' },
 
-  // --- Nicht von der Reform erfasst: Staffelung bleibt, kein reduzierter Satz ---
+  // --- Nicht von der Reform erfasst: Staffelung bleibt, kein reduzierter Satz.
+  //     Sätze und Schwellen direkt aus eBays Gebührenübersicht. ---
   { id: 'kleidung-accessoires', group: UEBRIGE, name: 'Kleidung & Accessoires', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
   { id: 'auto-motorrad-teile', group: UEBRIGE, name: 'Auto & Motorrad: Teile', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
-  { id: 'uhren-schmuck', group: UEBRIGE, name: 'Uhren & Schmuck', standardPercent: 16, reducedPercent: null, tier: LEGACY_TIER, confidence: 'press' },
+  { id: 'buecher', group: UEBRIGE, name: 'Bücher & Zeitschriften', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
+  { id: 'filme-serien', group: UEBRIGE, name: 'Filme & Serien', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
+  { id: 'musik', group: UEBRIGE, name: 'Musik', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
+  { id: 'games', group: UEBRIGE, name: 'PC- & Videospiele', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
+  { id: 'sammeln-seltenes', group: UEBRIGE, name: 'Sammeln & Seltenes', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
+  { id: 'spielzeug', group: UEBRIGE, name: 'Spielzeug', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  { id: 'beauty-gesundheit', group: UEBRIGE, name: 'Beauty & Gesundheit', standardPercent: 14, reducedPercent: null, confidence: 'official' },
 
-  // --- Quellenlage widersprüchlich. Bewusst ohne reduzierten Satz: dass diese
-  //     Kategorien an der 5-%-Regel teilnehmen, ist nicht belegt. ---
-  { id: 'games', group: UEBRIGE, name: 'Games', standardPercent: 12, reducedPercent: null, confidence: 'unverified' },
-  { id: 'buecher', group: UEBRIGE, name: 'Bücher', standardPercent: 12, reducedPercent: null, confidence: 'unverified' },
-  { id: 'filme-serien', group: UEBRIGE, name: 'Filme & Serien', standardPercent: 12, reducedPercent: null, confidence: 'unverified' },
-  { id: 'musik', group: UEBRIGE, name: 'Musik', standardPercent: 12, reducedPercent: null, confidence: 'unverified' },
-  { id: 'spielzeug', group: UEBRIGE, name: 'Spielzeug', standardPercent: 12, reducedPercent: null, confidence: 'unverified' },
-  { id: 'sammeln-seltenes', group: UEBRIGE, name: 'Sammeln & Seltenes', standardPercent: 12, reducedPercent: null, confidence: 'unverified' },
-  { id: 'beauty-gesundheit', group: UEBRIGE, name: 'Beauty & Gesundheit', standardPercent: 12, reducedPercent: null, confidence: 'unverified' },
+  // Einzige Kategorie, in der ein Shop-Abo die Staffelgrenze verschiebt –
+  // und zwar nach unten, also zugunsten des Verkäufers.
+  {
+    id: 'uhren-schmuck',
+    group: UEBRIGE,
+    name: 'Uhren & Schmuck',
+    standardPercent: 16,
+    reducedPercent: null,
+    tier: LEGACY_TIER,
+    tierWithShop: { thresholdEur: 500, abovePercent: 3 },
+    confidence: 'official',
+  },
 ];
 
 export const EBAY: Marketplace = {

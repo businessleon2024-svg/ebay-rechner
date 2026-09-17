@@ -38,6 +38,7 @@ function commissionFor(
   category: FeeCategory,
   condition: FeeCalculationInput['condition'],
   grossTransactionAmount: number,
+  hasShopSubscription: boolean,
 ): Pick<FeeBreakdown, 'commissionPercent' | 'commissionBasis' | 'commissionNet'> {
   const reducedApplies =
     marketplace.hasConditionDiscount &&
@@ -53,7 +54,8 @@ function commissionFor(
     };
   }
 
-  const { tier } = category;
+  const tier =
+    hasShopSubscription && category.tierWithShop ? category.tierWithShop : category.tier;
   if (tier && grossTransactionAmount > tier.thresholdEur) {
     const commissionNet =
       tier.thresholdEur * (category.standardPercent / 100) +
@@ -90,6 +92,7 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
     category,
     input.condition,
     grossTransactionAmount,
+    input.hasShopSubscription ?? false,
   );
 
   const fixedFeeNet =

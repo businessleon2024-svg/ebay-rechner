@@ -38,20 +38,31 @@ ist das der mit Abstand wichtigste Hebel — und genau die Unterscheidung, die d
 ursprüngliche Fassung überhaupt nicht kannte.
 
 **Nicht reformierte Kategorien.** Dort bleibt die Staffelung bestehen: bis 990 €
-der reguläre Satz, für den Anteil darüber 3 %. Betrifft unter anderem Kleidung &
-Accessoires, Auto- & Motorradteile sowie Uhren & Schmuck.
+der reguläre Satz, für den Anteil darüber 3 %. Betrifft Kleidung & Accessoires,
+Auto- & Motorradteile, Bücher & Zeitschriften, Filme & Serien, Musik, PC- &
+Videospiele, Sammeln & Seltenes sowie Uhren & Schmuck. **Ohne** Staffelung, aber
+ebenfalls nicht reformiert: Spielzeug und Beauty & Gesundheit mit flachen 14 %.
+
+**Shop-Abo.** Bei **Uhren & Schmuck** verschiebt ein Shop-Abo die Staffelgrenze
+von 990 € auf 500 € — dort ist der Shop also von Vorteil, weil der reduzierte
+Satz von 3 % früher greift. In allen anderen Kategorien ändert der Shop-Status
+die Schwelle nicht.
+
+## Unterkategorien
+
+Hinterlegt sind die **Hauptkategorien**. eBay und Kaufland veröffentlichen ihre
+Sätze nicht auf Ebene jeder einzelnen Unterkategorie, weshalb sich diese nicht
+vollständig abbilden lassen — einzelne Unterkategorien können abweichen. Darauf
+weist die Oberfläche direkt an der Kategorieauswahl hin, zusätzlich zum
+Haftungsausschluss im Fußbereich. Maßgeblich ist immer die tatsächliche
+Abrechnung des Marktplatzes.
 
 ## Offene Punkte
 
-- **Medien- und Spielekategorien** (Bücher, Filme, Musik, Games, Spielzeug,
-  Sammeln, Beauty & Gesundheit): Sie stehen nicht auf der Liste der zum
-  01.07.2026 reformierten Kategorien, behalten also ihre bisherige Struktur.
-  Welche das genau ist, geben die Quellen widersprüchlich an — eine nennt eine
-  Anhebung von 11 % auf 12 %, eine andere 14 %. Aktuell mit 12 %, ohne
-  reduzierten Satz und als `unverified` hinterlegt.
-- **Uhren & Schmuck**: Der Satz von 16 % ist belegt, die Staffelgrenze wird je
-  nach Quelle mit 500 € oder 990 € angegeben und hängt offenbar vom Shop-Status
-  ab. Aktuell 990 €.
+- **Kategorie-IDs**: siehe unten, bisher nur für neun Kategorien hinterlegt.
+- **Shop-Abo**: Der Shop-Status verschiebt bisher nur bei Uhren & Schmuck die
+  Staffelgrenze (990 € ohne Shop, 500 € mit Shop). Ob er in weiteren Kategorien
+  wirkt, ist nicht abschließend geprüft.
 - **Kategorie-IDs**: Erst neun der 53 Kategorien tragen eBays numerische ID
   (58058 Computer/Tablets/Netzwerk, 1245 Drucker, 171833 Ersatzteile & Werkzeuge
   PC/Videospiele, 625 Foto & Camcorder, 18871 und 96991 Speicherkarten, 3323

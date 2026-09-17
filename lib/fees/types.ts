@@ -93,6 +93,14 @@ export interface FeeCategory {
   reducedPercent: number | null;
   /** Staffelung, falls die Kategorie sie noch hat. */
   tier?: RateTier;
+  /**
+   * Abweichende Staffelung für Verkäufer mit Shop-Abo.
+   *
+   * Betrifft bisher nur Uhren & Schmuck: Dort sinkt die Schwelle, bis zu der
+   * der volle Satz gilt, mit Shop von 990 € auf 500 € — der Shop ist in dieser
+   * Kategorie also von Vorteil.
+   */
+  tierWithShop?: RateTier;
   /** Zusätzlicher Betrag je Artikel, z. B. 0,70 € in Kauflands Medien-Kategorie. */
   perItemFeeEur?: number;
   confidence: RateConfidence;
@@ -175,6 +183,11 @@ export interface FeeCalculationInput {
   adRatePercent?: number;
   /** Provisionsrabatt in Prozent, z. B. 10 % für Premium-Shop-Inhaber. */
   shopDiscountPercent?: number;
+  /**
+   * Besteht ein Shop-Abo? Ändert in einzelnen Kategorien die Staffelgrenze
+   * (siehe `FeeCategory.tierWithShop`).
+   */
+  hasShopSubscription?: boolean;
   /** Monatliche Grundgebühr, die anteilig auf diesen Verkauf entfällt. */
   monthlyFee?: MonthlyFeeInput;
 }

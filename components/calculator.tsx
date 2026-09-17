@@ -41,6 +41,7 @@ interface FormState {
   targetProfit: string;
   monthlyPlanId: string;
   ordersPerMonth: string;
+  hasShopSubscription: boolean;
 }
 
 const INITIAL_STATE: FormState = {
@@ -60,6 +61,7 @@ const INITIAL_STATE: FormState = {
   targetProfit: '',
   monthlyPlanId: 'basic',
   ordersPerMonth: '',
+  hasShopSubscription: false,
 };
 
 function toCalculationInput(form: FormState): FeeCalculationInput {
@@ -87,6 +89,7 @@ function toCalculationInput(form: FormState): FeeCalculationInput {
     },
     adRatePercent: parseNumber(form.adRatePercent),
     shopDiscountPercent: parseNumber(form.shopDiscountPercent),
+    hasShopSubscription: form.hasShopSubscription,
     monthlyFee:
       plan && ordersPerMonth > 0
         ? { amountNet: plan.priceNet, ordersPerMonth }
@@ -248,6 +251,11 @@ export function Calculator() {
                 ))}
               </select>
             </div>
+            <p className="hint">
+              Hinterlegt sind die Hauptkategorien. <strong>Unterkategorien können abweichende
+              Sätze haben</strong> — {marketplace.name} veröffentlicht sie nicht vollständig. Im
+              Zweifel gilt die eigene Gebührenabrechnung.
+            </p>
           </div>
 
           {marketplace.hasConditionDiscount ? (
@@ -351,6 +359,23 @@ export function Calculator() {
                 <div>{moneyField('adRatePercent', 'Werbeanzeigen', { suffix: '%', step: '0.1', placeholder: '0,0' })}</div>
                 <div>{moneyField('shopDiscountPercent', 'Shop-Rabatt', { suffix: '%', step: '1', placeholder: '0' })}</div>
               </div>
+
+              {marketplace.id === 'ebay' && (
+                <div className="field">
+                  <label className="checkline">
+                    <input
+                      type="checkbox"
+                      checked={form.hasShopSubscription}
+                      onChange={(event) => update('hasShopSubscription', event.target.checked)}
+                    />
+                    eBay-Shop vorhanden
+                  </label>
+                  <p className="hint">
+                    Verschiebt bei Uhren &amp; Schmuck die Staffelgrenze von 990 € auf 500 € und
+                    senkt dort die Provision.
+                  </p>
+                </div>
+              )}
 
               <div className="field">
                 {moneyField('targetProfit', 'Zielgewinn je Verkauf', {
