@@ -126,6 +126,11 @@ export interface FeeCategory {
   /** Zusätzlicher Betrag je Artikel, z. B. 0,70 € in Kauflands Medien-Kategorie. */
   perItemFeeEur?: number;
   confidence: RateConfidence;
+  /**
+   * Kategoriespezifischer Vorbehalt, der in der Oberfläche angezeigt wird –
+   * etwa wenn sich Quellen zu einer Schwelle widersprechen.
+   */
+  caveat?: string;
 }
 
 export type MarketplaceId = 'ebay' | 'kaufland';

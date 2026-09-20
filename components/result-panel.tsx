@@ -128,7 +128,9 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
     denominator > 0 ? `${Math.max((value / denominator) * 100, 0)}%` : '0%';
 
   const precisionNote = PRECISION_NOTE[precision];
-  const confidenceNote = CONFIDENCE_NOTE[category.confidence];
+  // Ein kategoriespezifischer Vorbehalt ist konkreter als der allgemeine
+  // Hinweis und ersetzt ihn deshalb.
+  const confidenceNote = category.caveat ?? CONFIDENCE_NOTE[category.confidence];
 
   return (
     <section className="panel result-panel" aria-labelledby="resultHeading">

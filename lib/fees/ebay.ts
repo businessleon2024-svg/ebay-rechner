@@ -120,7 +120,12 @@ const CATEGORIES: readonly FeeCategory[] = [
     reducedPercent: null,
     tiers: JEWELLERY_TIERS,
     tiersWithShop: JEWELLERY_TIERS_WITH_SHOP,
-    confidence: 'official',
+    // Zur Shop-Schwelle widersprechen sich die Quellen: teils 990 € ohne und
+    // 500 € mit Shop, teils 400 € ohne und 500 € mit Shop. Gerechnet wird mit
+    // der ersten Variante, bis eine echte Abrechnung das klärt.
+    confidence: 'unverified',
+    caveat:
+      'Zur Staffelgrenze widersprechen sich die Quellen: teils 990 € ohne und 500 € mit Shop, teils 400 € ohne und 500 € mit Shop. Gerechnet wird mit 990 € beziehungsweise 500 €. Bitte vor einer Kaufentscheidung an einer echten Abrechnung prüfen.',
   },
 ];
 

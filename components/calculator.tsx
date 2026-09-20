@@ -8,6 +8,14 @@ import { parseNumber } from '@/lib/format';
 import { ResultPanel } from './result-panel';
 
 const STORAGE_KEY = 'ebayCalc.v3';
+const DEFAULTS_KEY = 'ebayCalc.defaults.v1';
+
+/**
+ * Felder, die zum einzelnen Artikel gehören und deshalb beim Zurücksetzen
+ * geleert werden. Alles Übrige beschreibt die Verkäufereinrichtung — Kategorie,
+ * Zustand, Shop-Abo, wiederkehrende Gebühren — und bleibt als Standard erhalten.
+ */
+const ITEM_FIELDS = ['itemPrice', 'buyerShipping', 'purchase', 'shipping'] as const;
 
 /** Artikelzustände wie im eBay-Angebotsformular. */
 const CONDITIONS: ReadonlyArray<{ value: ItemCondition; label: string }> = [
@@ -109,8 +117,30 @@ function toCalculationInput(form: FormState): FeeCalculationInput {
   };
 }
 
+/** Gespeicherte Standardeinstellungen, falls vorhanden. */
+function readDefaults(): Partial<FormState> | null {
+  try {
+    const raw = window.localStorage.getItem(DEFAULTS_KEY);
+    return raw ? (JSON.parse(raw) as Partial<FormState>) : null;
+  } catch {
+    window.localStorage.removeItem(DEFAULTS_KEY);
+    return null;
+  }
+}
+
+/** Kategorie, die nicht zum Marktplatz gehört, auf dessen Standard zurückholen. */
+function withValidCategory(state: FormState): FormState {
+  const marketplace = requireMarketplace(state.marketplaceId);
+  const known = marketplace.categories.some((c) => c.id === state.categoryId);
+  return known ? state : { ...state, categoryId: marketplace.defaultCategoryId };
+}
+
+function baseState(): FormState {
+  return withValidCategory({ ...INITIAL_STATE, ...(readDefaults() ?? {}) });
+}
+
 /**
- * Zuletzt eingegebene Werte wiederherstellen.
+ * Zuletzt eingegebene Werte wiederherstellen, sonst die Standardeinstellungen.
  *
  * Läuft ausschließlich im Browser: die Komponente wird bewusst ohne SSR
  * eingebunden (siehe calculator-island.tsx), damit hier direkt aus dem
@@ -119,25 +149,28 @@ function toCalculationInput(form: FormState): FeeCalculationInput {
 function restoreState(): FormState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return INITIAL_STATE;
-    const restored = { ...INITIAL_STATE, ...(JSON.parse(raw) as Partial<FormState>) };
-
-    // Eine gespeicherte Kategorie kann zu einem anderen Marktplatz gehören.
-    const marketplace = requireMarketplace(restored.marketplaceId);
-    const known = marketplace.categories.some((c) => c.id === restored.categoryId);
-    return known ? restored : { ...restored, categoryId: marketplace.defaultCategoryId };
+    if (!raw) return baseState();
+    return withValidCategory({ ...baseState(), ...(JSON.parse(raw) as Partial<FormState>) });
   } catch {
     window.localStorage.removeItem(STORAGE_KEY);
-    return INITIAL_STATE;
+    return baseState();
   }
 }
 
 export function Calculator() {
   const [form, setForm] = useState<FormState>(restoreState);
+  const [hasDefaults, setHasDefaults] = useState(() => readDefaults() !== null);
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
   }, [form]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(''), 2400);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -176,9 +209,29 @@ export function Calculator() {
     };
   }, [form]);
 
+  /** Nur die artikelbezogenen Felder leeren, Einrichtung behalten. */
   const reset = () => {
-    setForm({ ...INITIAL_STATE, marketplaceId: form.marketplaceId, categoryId: marketplace.defaultCategoryId });
-    window.localStorage.removeItem(STORAGE_KEY);
+    setForm((current) => {
+      const cleared = { ...current };
+      for (const field of ITEM_FIELDS) cleared[field] = '';
+      return cleared;
+    });
+  };
+
+  const saveDefaults = () => {
+    // Die Preise des aktuellen Artikels gehören nicht in den Standard.
+    const profile = { ...form };
+    for (const field of ITEM_FIELDS) delete (profile as Partial<FormState>)[field];
+
+    window.localStorage.setItem(DEFAULTS_KEY, JSON.stringify(profile));
+    setHasDefaults(true);
+    setNotice('Als Standard gespeichert');
+  };
+
+  const clearDefaults = () => {
+    window.localStorage.removeItem(DEFAULTS_KEY);
+    setHasDefaults(false);
+    setNotice('Standard gelöscht');
   };
 
   const moneyField = (
@@ -417,9 +470,28 @@ export function Calculator() {
 
           <div className="form-actions">
             <button type="button" className="btn btn--ghost" onClick={reset}>
-              Zurücksetzen
+              Preise leeren
+            </button>
+            <button type="button" className="btn btn--ghost" onClick={saveDefaults}>
+              Als Standard speichern
             </button>
           </div>
+          <p className="hint">
+            Der Standard merkt sich deine Einrichtung — Marktplatz, Kategorie, Artikelzustand,
+            Shop-Abo und wiederkehrende Gebühren. „Preise leeren“ setzt nur Verkaufs-, Einkaufs-
+            und Versandpreis zurück.
+            {hasDefaults && (
+              <>
+                {' '}
+                <button type="button" className="linkbutton" onClick={clearDefaults}>
+                  Standard löschen
+                </button>
+              </>
+            )}
+          </p>
+          <p className={`copy-feedback${notice ? ' is-visible' : ''}`} role="status" aria-live="polite">
+            {notice}
+          </p>
         </section>
 
         <ResultPanel
