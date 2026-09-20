@@ -42,6 +42,10 @@ interface FormState {
   monthlyPlanId: string;
   ordersPerMonth: string;
   hasShopSubscription: boolean;
+  listingFee: string;
+  optionsFee: string;
+  internationalFee: string;
+  currencyConversion: string;
 }
 
 const INITIAL_STATE: FormState = {
@@ -62,6 +66,10 @@ const INITIAL_STATE: FormState = {
   monthlyPlanId: 'basic',
   ordersPerMonth: '',
   hasShopSubscription: false,
+  listingFee: '',
+  optionsFee: '',
+  internationalFee: '',
+  currencyConversion: '',
 };
 
 function toCalculationInput(form: FormState): FeeCalculationInput {
@@ -90,6 +98,10 @@ function toCalculationInput(form: FormState): FeeCalculationInput {
     adRatePercent: parseNumber(form.adRatePercent),
     shopDiscountPercent: parseNumber(form.shopDiscountPercent),
     hasShopSubscription: form.hasShopSubscription,
+    listingFeeNet: parseNumber(form.listingFee),
+    optionsFeeNet: parseNumber(form.optionsFee),
+    internationalFeeNet: parseNumber(form.internationalFee),
+    currencyConversionNet: parseNumber(form.currencyConversion),
     monthlyFee:
       plan && ordersPerMonth > 0
         ? { amountNet: plan.priceNet, ordersPerMonth }
@@ -361,20 +373,37 @@ export function Calculator() {
               </div>
 
               {marketplace.id === 'ebay' && (
-                <div className="field">
-                  <label className="checkline">
-                    <input
-                      type="checkbox"
-                      checked={form.hasShopSubscription}
-                      onChange={(event) => update('hasShopSubscription', event.target.checked)}
-                    />
-                    eBay-Shop vorhanden
-                  </label>
+                <>
+                  <div className="field">
+                    <label className="checkline">
+                      <input
+                        type="checkbox"
+                        checked={form.hasShopSubscription}
+                        onChange={(event) => update('hasShopSubscription', event.target.checked)}
+                      />
+                      eBay-Shop vorhanden
+                    </label>
+                    <p className="hint">
+                      Beeinflusst nur Gebührenregeln, bei denen eBay ausdrücklich zwischen Shop-
+                      und Nicht-Shop-Verkäufern unterscheidet. Derzeit betrifft das allein Uhren
+                      &amp; Schmuck, wo die Staffelgrenze von 990 € auf 500 € sinkt. Ein Shop
+                      senkt die Verkaufsprovision nicht allgemein.
+                    </p>
+                  </div>
+
+                  <div className="field field-row">
+                    <div>{moneyField('listingFee', 'Angebotsgebühr')}</div>
+                    <div>{moneyField('optionsFee', 'Zusatzoptionen')}</div>
+                  </div>
+                  <div className="field field-row">
+                    <div>{moneyField('internationalFee', 'Internationale Gebühr')}</div>
+                    <div>{moneyField('currencyConversion', 'Währungsumrechnung')}</div>
+                  </div>
                   <p className="hint">
-                    Verschiebt bei Uhren &amp; Schmuck die Staffelgrenze von 990 € auf 500 € und
-                    senkt dort die Provision.
+                    Jeweils netto und nur eintragen, wenn sie tatsächlich anfallen. Sie lassen sich
+                    nicht aus dem Verkaufspreis ableiten.
                   </p>
-                </div>
+                </>
               )}
 
               <div className="field">

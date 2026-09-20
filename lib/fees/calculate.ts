@@ -1,4 +1,5 @@
-import { findCategory, requireMarketplace } from './marketplaces';
+import { requireMarketplace, resolveCategory } from './marketplaces';
+import { calculateTieredFee, isTiered, tiersFor } from './tiers';
 import {
   VAT_RATE,
   qualifiesForReducedRate,
@@ -39,40 +40,36 @@ function commissionFor(
   condition: FeeCalculationInput['condition'],
   grossTransactionAmount: number,
   hasShopSubscription: boolean,
-): Pick<FeeBreakdown, 'commissionPercent' | 'commissionBasis' | 'commissionNet'> {
+): Pick<
+  FeeBreakdown,
+  'commissionPercent' | 'commissionBasis' | 'commissionNet' | 'appliedTiers'
+> {
   const reducedApplies =
     marketplace.hasConditionDiscount &&
     qualifiesForReducedRate(condition) &&
     category.reducedPercent !== null;
 
-  if (reducedApplies) {
-    const percent = category.reducedPercent as number;
-    return {
-      commissionPercent: percent,
-      commissionBasis: 'reduced_condition',
-      commissionNet: grossTransactionAmount * (percent / 100),
-    };
-  }
+  // Der reduzierte Zustandssatz ist flach und ersetzt jede Staffelung.
+  const tiers = reducedApplies
+    ? [{ rate: (category.reducedPercent as number) / 100 }]
+    : tiersFor(category, hasShopSubscription);
 
-  const tier =
-    hasShopSubscription && category.tierWithShop ? category.tierWithShop : category.tier;
-  if (tier && grossTransactionAmount > tier.thresholdEur) {
-    const commissionNet =
-      tier.thresholdEur * (category.standardPercent / 100) +
-      (grossTransactionAmount - tier.thresholdEur) * (tier.abovePercent / 100);
+  const commissionNet = calculateTieredFee(grossTransactionAmount, tiers);
 
-    return {
-      commissionPercent:
-        grossTransactionAmount > 0 ? (commissionNet / grossTransactionAmount) * 100 : 0,
-      commissionBasis: 'tiered',
-      commissionNet,
-    };
-  }
+  const commissionBasis: FeeBreakdown['commissionBasis'] = reducedApplies
+    ? 'reduced_condition'
+    : isTiered(grossTransactionAmount, tiers)
+      ? 'tiered'
+      : 'standard';
 
   return {
-    commissionPercent: category.standardPercent,
-    commissionBasis: 'standard',
-    commissionNet: grossTransactionAmount * (category.standardPercent / 100),
+    commissionPercent:
+      grossTransactionAmount > 0
+        ? (commissionNet / grossTransactionAmount) * 100
+        : tiers[0].rate * 100,
+    commissionBasis,
+    commissionNet,
+    appliedTiers: tiers.length > 1 ? tiers : undefined,
   };
 }
 
@@ -82,12 +79,18 @@ function commissionFor(
  */
 export function calculate(input: FeeCalculationInput): CalculationResult {
   const marketplace = requireMarketplace(input.marketplaceId);
-  const category = findCategory(marketplace, input.categoryId);
-  if (!category) throw new UnknownCategoryError(input.categoryId);
+  const match = resolveCategory(marketplace, {
+    externalId: input.externalCategoryId,
+    categoryId: input.categoryId,
+  });
+  if (!match || (input.categoryId && match.precision === 'fallback')) {
+    throw new UnknownCategoryError(input.categoryId);
+  }
+  const { category, precision } = match;
 
   const grossTransactionAmount = input.itemPrice + input.buyerShipping;
 
-  const { commissionPercent, commissionBasis, commissionNet } = commissionFor(
+  const { commissionPercent, commissionBasis, commissionNet, appliedTiers } = commissionFor(
     marketplace,
     category,
     input.condition,
@@ -107,20 +110,40 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
       ? input.monthlyFee.amountNet / input.monthlyFee.ordersPerMonth
       : 0;
 
+  const listingFeeNet = input.listingFeeNet ?? 0;
+  const optionsFeeNet = input.optionsFeeNet ?? 0;
+  const internationalFeeNet = input.internationalFeeNet ?? 0;
+  const currencyConversionNet = input.currencyConversionNet ?? 0;
+
   // Der Regelbesteuerer zieht die USt auf die Marktplatzgebühren als Vorsteuer
   // ab, wirtschaftlich relevant ist damit der Nettobetrag.
   const totalFeeNet =
-    commissionNet - shopDiscountNet + fixedFeeNet + adFeeNet + monthlyFeeShareNet;
+    commissionNet -
+    shopDiscountNet +
+    fixedFeeNet +
+    adFeeNet +
+    monthlyFeeShareNet +
+    listingFeeNet +
+    optionsFeeNet +
+    internationalFeeNet +
+    currencyConversionNet;
   const feeVat = totalFeeNet * VAT_RATE;
 
   const fees: FeeBreakdown = {
+    itemPrice: round2(input.itemPrice),
+    buyerShipping: round2(input.buyerShipping),
     grossTransactionAmount: round2(grossTransactionAmount),
     commissionPercent: Math.round(commissionPercent * 100) / 100,
     commissionBasis,
+    appliedTiers,
     commissionNet: round2(commissionNet),
     fixedFeeNet: round2(fixedFeeNet),
     monthlyFeeShareNet: round2(monthlyFeeShareNet),
     adFeeNet: round2(adFeeNet),
+    listingFeeNet: round2(listingFeeNet),
+    optionsFeeNet: round2(optionsFeeNet),
+    internationalFeeNet: round2(internationalFeeNet),
+    currencyConversionNet: round2(currencyConversionNet),
     shopDiscountNet: round2(shopDiscountNet),
     totalFeeNet: round2(totalFeeNet),
     feeVat: round2(feeVat),
@@ -159,7 +182,14 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
     roiPercent: purchaseNet > 0 ? round2((profit / purchaseNet) * 100) : 0,
   };
 
-  return { marketplace, category, condition: input.condition, fees, profit: profitBreakdown };
+  return {
+    marketplace,
+    category,
+    precision,
+    condition: input.condition,
+    fees,
+    profit: profitBreakdown,
+  };
 }
 
 /**

@@ -627,9 +627,24 @@ select.input option {
 }
 
 .kpi__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
   font-size: 0.72rem;
   font-weight: 550;
   color: var(--text-muted);
+}
+
+.kpi__tag {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-faint);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+  white-space: nowrap;
 }
 
 .kpi__value {

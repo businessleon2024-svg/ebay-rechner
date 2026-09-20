@@ -53,10 +53,15 @@ niemals unterschiedliche Zahlen anzeigen.
 
 ## Gebührensätze
 
-Jede Kategorie trägt eine Angabe dazu, wie gut ihr Satz belegt ist. Sätze ohne
-offiziellen Beleg werden in der Oberfläche als ungeprüft gekennzeichnet, statt
-Genauigkeit vorzutäuschen. Hintergrund und offene Punkte:
-[`docs/gebuehren-quellen.md`](docs/gebuehren-quellen.md).
+Alle hinterlegten Gebührensätze wurden anhand der verfügbaren offiziellen
+Gebühreninformationen von eBay und Kaufland geprüft. Das heißt nicht, dass
+sämtliche Unterkategorien abgebildet sind — beide Marktplätze weisen ihre Sätze
+nicht für jede Unterkategorie öffentlich aus. Hinterlegt sind die
+Hauptkategorien; die Oberfläche kennzeichnet den angewandten Satz deshalb als
+„Geschätzter Satz", solange er nicht über eine Kategorie-ID des Marktplatzes
+eindeutig aufgelöst wurde.
+
+Hintergrund und offene Punkte: [`docs/gebuehren-quellen.md`](docs/gebuehren-quellen.md).
 
 ## Hinweis zum Deployment
 

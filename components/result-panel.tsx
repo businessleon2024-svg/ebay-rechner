@@ -11,10 +11,39 @@ interface ResultPanelProps {
   targetProfit: number;
 }
 
-const COMMISSION_BASIS_LABEL: Record<CalculationResult['fees']['commissionBasis'], string> = {
-  reduced_condition: 'Reduzierter Satz für gebrauchte Ware',
-  standard: 'Regulärer Kategoriesatz',
-  tiered: 'Gestaffelt, ab 990 € nur 3 %',
+/**
+ * Erklärung, wie der Satz zustande kam.
+ *
+ * Die Staffelgrenze wird aus den tatsächlich angewandten Stufen gelesen, nicht
+ * fest hinterlegt – mit Shop-Abo kann sie abweichen.
+ */
+function commissionBasisLabel(fees: CalculationResult['fees']): string {
+  switch (fees.commissionBasis) {
+    case 'reduced_condition':
+      return 'Reduzierter Satz für gebrauchte Ware';
+    case 'tiered': {
+      const schwelle = fees.appliedTiers?.[0]?.upTo;
+      const satzDarueber = fees.appliedTiers?.at(-1)?.rate;
+      if (schwelle === undefined || satzDarueber === undefined) return 'Gestaffelt';
+      return `Gestaffelt, über ${formatCurrency(schwelle)} nur ${formatPercent(satzDarueber * 100)}`;
+    }
+    default:
+      return 'Regulärer Kategoriesatz';
+  }
+}
+
+const PRECISION_LABEL: Record<CalculationResult['precision'], string> = {
+  exact: 'Exakter Satz',
+  main_category: 'Geschätzter Satz',
+  fallback: 'Geschätzter Satz',
+};
+
+const PRECISION_NOTE: Record<CalculationResult['precision'], string | null> = {
+  exact: null,
+  main_category:
+    'Für diese Kategorie konnte kein eindeutiger Unterkategorie-Satz hinterlegt werden. Prüfe im Zweifel die aktuelle Gebührenabrechnung.',
+  fallback:
+    'Es wurde keine passende Kategorie gefunden, gerechnet wird mit der Auffangkategorie. Prüfe im Zweifel die aktuelle Gebührenabrechnung.',
 };
 
 const CONFIDENCE_NOTE: Record<CalculationResult['category']['confidence'], string | null> = {
@@ -69,7 +98,7 @@ function Row({ term, note, value, total }: RowProps) {
 }
 
 export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: ResultPanelProps) {
-  const { marketplace, category, fees, profit } = result;
+  const { marketplace, category, precision, fees, profit } = result;
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
@@ -98,6 +127,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
   const share = (value: number) =>
     denominator > 0 ? `${Math.max((value / denominator) * 100, 0)}%` : '0%';
 
+  const precisionNote = PRECISION_NOTE[precision];
   const confidenceNote = CONFIDENCE_NOTE[category.confidence];
 
   return (
@@ -105,6 +135,19 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
       <h2 id="resultHeading" className="panel__heading">
         Ergebnis
       </h2>
+
+      {precisionNote && (
+        <div className="notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v5" />
+            <path d="M12 16h.01" />
+          </svg>
+          <span>
+            <strong>{PRECISION_LABEL[precision]}.</strong> {precisionNote}
+          </span>
+        </div>
+      )}
 
       {confidenceNote && (
         <div className="notice">
@@ -168,7 +211,10 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
           <span className="kpi__hint">Verkaufspreis ohne Gewinn</span>
         </div>
         <div className="kpi">
-          <span className="kpi__label">{marketplace.name}-Gebühr</span>
+          <span className="kpi__label">
+            {marketplace.name}-Gebühr
+            <span className="kpi__tag">{PRECISION_LABEL[precision]}</span>
+          </span>
           <span className="kpi__value">
             {isEmpty ? '–' : formatCurrency(fees.totalFeeGross)}
           </span>
@@ -241,52 +287,80 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
         <summary>Gebühren und Umsatzsteuer im Detail</summary>
         <div className="advanced__body">
           <div className="ledger">
-            <h3 className="ledger__heading">Gebühren</h3>
+            <h3 className="ledger__heading">Vom Verkaufspreis zur Auszahlung</h3>
             <div className="ledger__list">
+              <Row term="Verkaufspreis" value={formatCurrency(fees.itemPrice)} />
+              <Row term="Versand" value={`+ ${formatCurrency(fees.buyerShipping)}`} />
               <Row
-                term="Bemessungsgrundlage"
-                note="Artikelpreis + Versand, den der Käufer zahlt"
+                term="Transaktionswert"
+                note="Bemessungsgrundlage der Provision"
                 value={formatCurrency(fees.grossTransactionAmount)}
+                total
               />
+
               <Row
                 term={`Verkaufsprovision ${formatPercent(fees.commissionPercent)}`}
-                note={COMMISSION_BASIS_LABEL[fees.commissionBasis]}
-                value={formatCurrency(fees.commissionNet)}
+                note={commissionBasisLabel(fees)}
+                value={negative(fees.commissionNet)}
               />
               {fees.fixedFeeNet > 0 && (
                 <Row
-                  term="Fixgebühr"
+                  term="Feste Verkaufsgebühr"
                   note={
                     marketplace.id === 'ebay'
-                      ? fees.grossTransactionAmount >= 10
-                        ? 'ab 10 € Bestellwert'
-                        : 'unter 10 € Bestellwert'
+                      ? fees.grossTransactionAmount > 10
+                        ? 'über 10 € Bestellwert'
+                        : 'bis 10 € Bestellwert'
                       : 'je Artikel'
                   }
-                  value={formatCurrency(fees.fixedFeeNet)}
+                  value={negative(fees.fixedFeeNet)}
                 />
+              )}
+              {fees.listingFeeNet > 0 && (
+                <Row term="Angebotsgebühr" value={negative(fees.listingFeeNet)} />
+              )}
+              {fees.optionsFeeNet > 0 && (
+                <Row term="Zusatzoptionen" value={negative(fees.optionsFeeNet)} />
+              )}
+              {fees.adFeeNet > 0 && <Row term="Werbekosten" value={negative(fees.adFeeNet)} />}
+              {fees.internationalFeeNet > 0 && (
+                <Row term="Internationale Gebühr" value={negative(fees.internationalFeeNet)} />
+              )}
+              {fees.currencyConversionNet > 0 && (
+                <Row term="Währungsumrechnung" value={negative(fees.currencyConversionNet)} />
               )}
               {fees.monthlyFeeShareNet > 0 && (
                 <Row
                   term="Anteil Grundgebühr"
                   note="monatliche Gebühr auf diesen Verkauf umgelegt"
-                  value={formatCurrency(fees.monthlyFeeShareNet)}
+                  value={negative(fees.monthlyFeeShareNet)}
                 />
               )}
-              {fees.adFeeNet > 0 && <Row term="Werbeanzeigen" value={formatCurrency(fees.adFeeNet)} />}
               {fees.shopDiscountNet > 0 && (
-                <Row term="Shop-Rabatt" value={negative(fees.shopDiscountNet)} />
+                <Row term="Shop-Rabatt" value={`+ ${formatCurrency(fees.shopDiscountNet)}`} />
               )}
-              <Row term="Gebühr netto" value={formatCurrency(fees.totalFeeNet)} total />
+
               <Row
-                term="USt auf Gebühren"
-                note="als Vorsteuer abziehbar, daher kein echter Kostenfaktor"
-                value={formatCurrency(fees.feeVat)}
+                term={`${marketplace.name}-Kosten netto`}
+                value={formatCurrency(fees.totalFeeNet)}
+                total
               />
               <Row
-                term="Gebühr brutto"
-                note="so steht sie auf der Abrechnung"
+                term="USt auf die Gebühren"
+                note="als Vorsteuer abziehbar, daher kein echter Kostenfaktor"
+                value={`+ ${formatCurrency(fees.feeVat)}`}
+              />
+              <Row
+                term={`${marketplace.name}-Kosten brutto`}
+                note="so stehen sie auf der Abrechnung"
                 value={formatCurrency(fees.totalFeeGross)}
+                total
+              />
+              <Row
+                term="Auszahlung"
+                note={`Transaktionswert abzüglich der ${marketplace.name}-Kosten`}
+                value={formatCurrency(fees.payout)}
+                total
               />
             </div>
           </div>

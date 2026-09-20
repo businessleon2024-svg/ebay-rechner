@@ -64,15 +64,33 @@ export function qualifiesForReducedRate(condition: ItemCondition): boolean {
 export type RateConfidence = 'official' | 'press' | 'unverified';
 
 /**
- * Staffelung für Kategorien, die von der Reform zum 01.07.2026 nicht
- * erfasst wurden: bis zur Schwelle der reguläre Satz, darüber ein reduzierter.
+ * Eine Stufe einer gestaffelten Gebühr.
+ *
+ * Die Stufen wirken wie ein Steuertarif: Jede gilt nur für den Betragsanteil,
+ * der in sie fällt – nicht rückwirkend auf den Gesamtbetrag. Die letzte Stufe
+ * lässt `upTo` offen und gilt bis unendlich.
  */
-export interface RateTier {
-  /** Schwellenwert in EUR, bezogen auf den Gesamt-Transaktionsbetrag. */
-  thresholdEur: number;
-  /** Satz in Prozent für den Anteil oberhalb der Schwelle. */
-  abovePercent: number;
+export interface FeeTier {
+  /** Obergrenze dieser Stufe in EUR, einschließlich. Offen bei der letzten Stufe. */
+  upTo?: number;
+  /** Satz als Anteil, also 0.12 für 12 %. */
+  rate: number;
 }
+
+/**
+ * Wie genau der angewandte Satz zum konkreten Angebot passt.
+ *
+ * Solange nur eine Hauptkategorie bekannt ist, bleibt der Satz eine Schätzung:
+ * eBay veröffentlicht nicht für jede Unterkategorie einen eigenen Satz, und
+ * einzelne Unterkategorien können abweichen.
+ */
+export type RatePrecision =
+  /** Über die Kategorie-ID des Marktplatzes eindeutig aufgelöst. */
+  | 'exact'
+  /** Manuell gewählte Hauptkategorie – Unterkategorien können abweichen. */
+  | 'main_category'
+  /** Auffangkategorie, weil keine passendere gefunden wurde. */
+  | 'fallback';
 
 export interface FeeCategory {
   id: string;
@@ -91,16 +109,20 @@ export interface FeeCategory {
    * `null`, wenn die Kategorie keinen reduzierten Satz kennt.
    */
   reducedPercent: number | null;
-  /** Staffelung, falls die Kategorie sie noch hat. */
-  tier?: RateTier;
+  /**
+   * Staffelung, falls die Kategorie eine hat. Ohne Angabe gilt
+   * `standardPercent` auf den gesamten Betrag.
+   */
+  tiers?: readonly FeeTier[];
   /**
    * Abweichende Staffelung für Verkäufer mit Shop-Abo.
    *
    * Betrifft bisher nur Uhren & Schmuck: Dort sinkt die Schwelle, bis zu der
    * der volle Satz gilt, mit Shop von 990 € auf 500 € — der Shop ist in dieser
-   * Kategorie also von Vorteil.
+   * Kategorie also von Vorteil. Weitere Shop-abhängige Regeln gehören hierher,
+   * nicht in die Rechenlogik.
    */
-  tierWithShop?: RateTier;
+  tiersWithShop?: readonly FeeTier[];
   /** Zusätzlicher Betrag je Artikel, z. B. 0,70 € in Kauflands Medien-Kategorie. */
   perItemFeeEur?: number;
   confidence: RateConfidence;
@@ -168,6 +190,11 @@ export interface MonthlyFeeInput {
 export interface FeeCalculationInput {
   marketplaceId: MarketplaceId;
   categoryId: string;
+  /**
+   * Kategorie-ID des Marktplatzes, falls bekannt – etwa aus einem Angebot
+   * ausgelesen. Hat Vorrang vor `categoryId` und führt zu einem exakten Treffer.
+   */
+  externalCategoryId?: string;
   condition: ItemCondition;
   /** Artikelpreis in EUR, brutto (was der Käufer für den Artikel zahlt). */
   itemPrice: number;
@@ -181,6 +208,14 @@ export interface FeeCalculationInput {
   otherCosts?: CostInput;
   /** Werbeanzeigen (Promoted Listings) in Prozent des Verkaufsbetrags. */
   adRatePercent?: number;
+  /**
+   * Weitere Gebühren, die als fester Betrag anfallen und sich nicht aus dem
+   * Verkaufspreis ableiten lassen. Jeweils netto.
+   */
+  listingFeeNet?: number;
+  optionsFeeNet?: number;
+  internationalFeeNet?: number;
+  currencyConversionNet?: number;
   /** Provisionsrabatt in Prozent, z. B. 10 % für Premium-Shop-Inhaber. */
   shopDiscountPercent?: number;
   /**
@@ -193,18 +228,31 @@ export interface FeeCalculationInput {
 }
 
 export interface FeeBreakdown {
+  /** Artikelpreis brutto, wie eingegeben. */
+  itemPrice: number;
+  /** Vom Käufer gezahlter Versand, wie eingegeben. */
+  buyerShipping: number;
   /** Basis der Verkaufsprovision: Artikelpreis + Käufer-Versand, inkl. USt. */
   grossTransactionAmount: number;
   /** Effektiv angewandter Provisionssatz in Prozent. */
   commissionPercent: number;
   /** Woher der Satz stammt – für die Erklärbarkeit in der UI. */
   commissionBasis: 'reduced_condition' | 'standard' | 'tiered';
+  /**
+   * Tatsächlich angewandte Staffelung, sofern eine greift. Nötig, damit die
+   * Oberfläche die richtige Schwelle nennt — mit Shop kann sie abweichen.
+   */
+  appliedTiers?: readonly FeeTier[];
   commissionNet: number;
   /** Gebühr pro Bestellung zuzüglich etwaiger Gebühr je Artikel. */
   fixedFeeNet: number;
   /** Anteilige monatliche Grundgebühr, 0 wenn keine umgelegt wird. */
   monthlyFeeShareNet: number;
   adFeeNet: number;
+  listingFeeNet: number;
+  optionsFeeNet: number;
+  internationalFeeNet: number;
+  currencyConversionNet: number;
   /** Abgezogener Shop-Rabatt (positiver Betrag). */
   shopDiscountNet: number;
   totalFeeNet: number;
@@ -240,6 +288,8 @@ export interface ProfitBreakdown {
 export interface CalculationResult {
   marketplace: Marketplace;
   category: FeeCategory;
+  /** Wie genau der Satz zum konkreten Angebot passt. */
+  precision: RatePrecision;
   condition: ItemCondition;
   fees: FeeBreakdown;
   profit: ProfitBreakdown;

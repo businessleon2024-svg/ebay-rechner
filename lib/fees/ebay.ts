@@ -34,7 +34,14 @@ export const REDUCED_CONDITION_PERCENT = 5;
  * Standard-Staffelung der nicht reformierten Kategorien: oberhalb von 990 EUR
  * Transaktionsbetrag fallen nur noch 3 % an.
  */
-const LEGACY_TIER = { thresholdEur: 990, abovePercent: 3 } as const;
+const LEGACY_TIERS = [
+  { upTo: 990, rate: 0.12 },
+  { rate: 0.03 },
+] as const;
+
+/** Uhren & Schmuck: 16 % bis zur Schwelle, darüber 3 %. */
+const JEWELLERY_TIERS = [{ upTo: 990, rate: 0.16 }, { rate: 0.03 }] as const;
+const JEWELLERY_TIERS_WITH_SHOP = [{ upTo: 500, rate: 0.16 }, { rate: 0.03 }] as const;
 
 const GERAETE = 'Geräte';
 const ZUBEHOER = 'Zubehör';
@@ -93,13 +100,13 @@ const CATEGORIES: readonly FeeCategory[] = [
 
   // --- Nicht von der Reform erfasst: Staffelung bleibt, kein reduzierter Satz.
   //     Sätze und Schwellen direkt aus eBays Gebührenübersicht. ---
-  { id: 'kleidung-accessoires', group: UEBRIGE, name: 'Kleidung & Accessoires', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
-  { id: 'auto-motorrad-teile', group: UEBRIGE, name: 'Auto & Motorrad: Teile', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
-  { id: 'buecher', group: UEBRIGE, name: 'Bücher & Zeitschriften', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
-  { id: 'filme-serien', group: UEBRIGE, name: 'Filme & Serien', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
-  { id: 'musik', group: UEBRIGE, name: 'Musik', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
-  { id: 'games', group: UEBRIGE, name: 'PC- & Videospiele', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
-  { id: 'sammeln-seltenes', group: UEBRIGE, name: 'Sammeln & Seltenes', standardPercent: 12, reducedPercent: null, tier: LEGACY_TIER, confidence: 'official' },
+  { id: 'kleidung-accessoires', group: UEBRIGE, name: 'Kleidung & Accessoires', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  { id: 'auto-motorrad-teile', group: UEBRIGE, name: 'Auto & Motorrad: Teile', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  { id: 'buecher', group: UEBRIGE, name: 'Bücher & Zeitschriften', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  { id: 'filme-serien', group: UEBRIGE, name: 'Filme & Serien', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  { id: 'musik', group: UEBRIGE, name: 'Musik', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  { id: 'games', group: UEBRIGE, name: 'PC- & Videospiele', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  { id: 'sammeln-seltenes', group: UEBRIGE, name: 'Sammeln & Seltenes', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   { id: 'spielzeug', group: UEBRIGE, name: 'Spielzeug', standardPercent: 14, reducedPercent: null, confidence: 'official' },
   { id: 'beauty-gesundheit', group: UEBRIGE, name: 'Beauty & Gesundheit', standardPercent: 14, reducedPercent: null, confidence: 'official' },
 
@@ -111,8 +118,8 @@ const CATEGORIES: readonly FeeCategory[] = [
     name: 'Uhren & Schmuck',
     standardPercent: 16,
     reducedPercent: null,
-    tier: LEGACY_TIER,
-    tierWithShop: { thresholdEur: 500, abovePercent: 3 },
+    tiers: JEWELLERY_TIERS,
+    tiersWithShop: JEWELLERY_TIERS_WITH_SHOP,
     confidence: 'official',
   },
 ];

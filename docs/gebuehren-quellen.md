@@ -1,5 +1,12 @@
 # Gebührensätze: Herkunft und offene Punkte
 
+> **Status:** Alle im Rechner hinterlegten Gebührensätze wurden anhand der
+> verfügbaren offiziellen Gebühreninformationen von eBay und Kaufland geprüft.
+>
+> Das bedeutet **nicht**, dass sämtliche Unterkategorien abgebildet sind: eBay
+> und Kaufland weisen ihre Sätze nicht für jede Unterkategorie öffentlich aus.
+> Hinterlegt sind die Hauptkategorien, einzelne Unterkategorien können abweichen.
+
 Ein falscher Gebührensatz führt hier unmittelbar zu einer falschen Kaufentscheidung.
 Deshalb trägt jede Kategorie in `lib/fees/categories.ts` ein `confidence`-Feld, und
 die Oberfläche weist ungeprüfte Sätze aus, statt Genauigkeit vorzutäuschen.

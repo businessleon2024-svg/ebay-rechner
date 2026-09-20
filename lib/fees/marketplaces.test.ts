@@ -45,11 +45,31 @@ describe.each(MARKETPLACES.map((m) => [m.name, m] as const))('%s', (_name, marke
     }
   });
 
-  it('staffelt nur mit sinnvoller Schwelle und niedrigerem Satz darüber', () => {
+  it('staffelt mit aufsteigenden Schwellen und offener letzter Stufe', () => {
+    const alleStaffeln = marketplace.categories.flatMap((category) =>
+      [category.tiers, category.tiersWithShop].filter((tiers) => tiers !== undefined),
+    );
+
+    for (const tiers of alleStaffeln) {
+      expect(tiers.length).toBeGreaterThan(1);
+      // Nur die letzte Stufe darf nach oben offen sein.
+      expect(tiers.at(-1)!.upTo).toBeUndefined();
+      expect(tiers.slice(0, -1).every((tier) => tier.upTo !== undefined)).toBe(true);
+
+      const schwellen = tiers.slice(0, -1).map((tier) => tier.upTo!);
+      expect([...schwellen].sort((a, b) => a - b)).toEqual(schwellen);
+
+      for (const tier of tiers) {
+        expect(tier.rate).toBeGreaterThan(0);
+        expect(tier.rate).toBeLessThan(1);
+      }
+    }
+  });
+
+  it('beginnt jede Staffel mit dem Standardsatz der Kategorie', () => {
     for (const category of marketplace.categories) {
-      if (!category.tier) continue;
-      expect(category.tier.thresholdEur).toBeGreaterThan(0);
-      expect(category.tier.abovePercent).toBeLessThan(category.standardPercent);
+      if (!category.tiers) continue;
+      expect(category.tiers[0].rate * 100).toBeCloseTo(category.standardPercent, 6);
     }
   });
 });
