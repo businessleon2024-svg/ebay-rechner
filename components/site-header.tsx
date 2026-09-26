@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from './logo';
+import { ThemeToggle } from './theme-toggle';
 
 export function SiteHeader() {
   return (
@@ -11,6 +12,7 @@ export function SiteHeader() {
       <nav className="topbar__nav" aria-label="Hauptnavigation">
         <Link href="/rechner">Rechner</Link>
         <Link href="/#tarife">Tarife</Link>
+        <ThemeToggle />
       </nav>
     </header>
   );

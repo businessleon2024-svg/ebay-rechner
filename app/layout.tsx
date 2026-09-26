@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { THEME_INIT_SCRIPT } from '@/components/theme-toggle';
 import './globals.css';
 
 const inter = Inter({
@@ -18,7 +19,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={inter.className}>
+    <html lang="de" className={inter.className} suppressHydrationWarning>
+      <head>
+        {/*
+          Setzt Hell oder Dunkel noch vor dem ersten Zeichnen. Ohne das würde
+          die Seite bei dunkler Systemeinstellung kurz hell aufblitzen.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );
