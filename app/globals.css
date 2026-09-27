@@ -1261,8 +1261,184 @@ select.input optgroup {
 }
 
 /* =========================================================
+   RECHTSSEITEN
+   ========================================================= */
+
+.legal {
+  max-width: 76ch;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 4rem) var(--gutter) clamp(3rem, 7vw, 4.5rem);
+  font-size: 0.93rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.legal__title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  margin: 0 0 1.75rem;
+}
+
+.legal h2 {
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin: 2.25rem 0 0.6rem;
+}
+
+.legal p,
+.legal ul {
+  margin: 0 0 1rem;
+}
+
+.legal ul {
+  padding-left: 1.2rem;
+}
+
+.legal li {
+  margin-bottom: 0.3rem;
+}
+
+.legal strong {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.legal a {
+  color: var(--accent-text);
+}
+
+.legal__meta {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+/* Noch fehlende Angabe – muss vor dem Livegang auffallen. */
+.pending {
+  background: rgba(212, 161, 84, 0.22);
+  color: var(--text);
+  font-weight: 600;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  border-bottom: 2px solid var(--caution);
+}
+
+/* =========================================================
+   EINWILLIGUNG
+   ========================================================= */
+
+.consent {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: var(--surface);
+  border-top: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lift);
+}
+
+.consent__inner {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 1.35rem var(--gutter);
+}
+
+.consent__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.consent__text {
+  margin: 0;
+  max-width: 78ch;
+  font-size: 0.86rem;
+  font-weight: 450;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.consent__list {
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  max-width: 78ch;
+}
+
+.consent__item {
+  padding-left: 0.85rem;
+  border-left: 2px solid var(--border);
+}
+
+.consent__purpose,
+.consent__services {
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.consent__services {
+  color: var(--text-faint);
+  font-size: 0.76rem;
+}
+
+.consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+
+.consent__actions .btn {
+  flex: 0 1 auto;
+  min-width: 150px;
+}
+
+.consent__legal {
+  margin: 0.85rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.consent__legal a {
+  color: var(--accent-text);
+}
+
+/* =========================================================
    FUSSBEREICH
    ========================================================= */
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.83rem;
+  font-weight: 550;
+}
+
+.footer__links a,
+.footer__links .linkbutton {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.footer__links a:hover,
+.footer__links .linkbutton:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
 
 .footer {
   max-width: var(--shell);

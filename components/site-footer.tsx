@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { ConsentSettingsLink } from './consent-settings-link';
+
 export function SiteFooter() {
   return (
     <footer className="footer">
@@ -15,10 +18,19 @@ export function SiteFooter() {
         hier nicht vollständig abbilden lassen.
       </p>
       <p>Der Rechner stellt keine Steuer-, Rechts- oder Finanzberatung dar.</p>
+
+      <nav className="footer__links" aria-label="Rechtliches">
+        <Link href="/gebuehren">Gebührenübersicht</Link>
+        <Link href="/impressum">Impressum</Link>
+        <Link href="/datenschutz">Datenschutz</Link>
+        <ConsentSettingsLink label="Einwilligung ändern" />
+      </nav>
+
       <p className="footer__meta">
-        Berechnet für gewerbliche Verkäufer in der Regelbesteuerung: Provision auf den Gesamtbetrag
-        einschließlich des vom Käufer gezahlten Versands, zuzüglich etwaiger Fixgebühren, abzüglich
-        19 % Umsatzsteuer auf den Verkauf. Gebührenstand eBay Juli 2026, Kaufland Juni 2026.
+        Berechnet wahlweise für Regelbesteuerung, Differenzbesteuerung nach § 25a UStG oder
+        Kleinunternehmer nach § 19 UStG. Provision auf den Gesamtbetrag einschließlich des vom
+        Käufer gezahlten Versands, zuzüglich etwaiger Fixgebühren. Gebührenstand eBay Juli 2026,
+        Kaufland Juni 2026.
       </p>
     </footer>
   );

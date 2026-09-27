@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { ConsentBanner } from '@/components/consent-banner';
 import { THEME_INIT_SCRIPT } from '@/components/theme-toggle';
 import './globals.css';
 
@@ -27,7 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ConsentBanner />
+      </body>
     </html>
   );
 }
