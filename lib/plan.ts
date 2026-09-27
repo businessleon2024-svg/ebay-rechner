@@ -10,6 +10,17 @@ export type Plan = 'free' | 'pro';
 
 export const PRO_PRICE_EUR = 4.99;
 
+/**
+ * Ist der kostenpflichtige Tarif öffentlich sichtbar?
+ *
+ * Solange Extension, Produkterkennung und Preisvergleich nicht existieren,
+ * hätte Pro nichts zu bieten außer Werbefreiheit — und Werbung gibt es auch
+ * noch nicht. Einen Tarif zu bewerben, den man nicht liefern kann, schadet
+ * mehr als er nützt. Auf `true` setzen, sobald die Pro-Funktionen stehen;
+ * Tarifvergleich, Navigation und Hinweise erscheinen dann automatisch wieder.
+ */
+export const PRO_AVAILABLE = false;
+
 export interface Entitlements {
   /** Keine Werbeflächen. */
   adFree: boolean;

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { can } from '@/lib/plan';
+import { can, PRO_AVAILABLE } from '@/lib/plan';
 import { usePlan } from './use-plan';
 
 /**
@@ -18,6 +18,10 @@ import { usePlan } from './use-plan';
 export function AdSlot() {
   const plan = usePlan();
 
+  // Weder ein Werbepartner noch ein buchbarer Tarif: Es gibt schlicht nichts
+  // anzuzeigen. Eine Fläche, die auf ein nicht existierendes Angebot verweist,
+  // wäre nur Ballast.
+  if (!PRO_AVAILABLE) return null;
   if (can(plan, 'adFree')) return null;
 
   return (
