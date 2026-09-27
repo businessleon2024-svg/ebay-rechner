@@ -34,11 +34,24 @@ export const OPERATOR = {
  * Hosting und zu einem etwaigen Drittlandtransfer sagen muss.
  */
 export const HOSTING = {
-  /** NOCH ZU ENTSCHEIDEN: Anbieter eintragen, sobald das Hosting feststeht. */
-  provider: null as string | null,
-  /** Liegt der Serverstandort außerhalb der EU? */
-  outsideEu: false,
+  provider: 'Vercel Inc.',
+  /**
+   * Genaue Anschrift noch aus dem Auftragsverarbeitungsvertrag übernehmen,
+   * sobald dieser bei Vercel abgeschlossen ist. Bis dahin genügt Firma und
+   * Land — beides ist zutreffend.
+   */
+  country: 'USA',
+  /** Auslieferung über die Region Frankfurt am Main. */
+  region: 'Frankfurt am Main',
+  outsideEu: true,
 } as const;
+
+/**
+ * Die Domain ist bei netcup registriert. Der Registrar verarbeitet keine
+ * Daten der Websitebesucher und gehört deshalb nicht in die
+ * Datenschutzerklärung.
+ */
+export const REGISTRAR = 'netcup GmbH' as const;
 
 export const isLaunchReady = (): boolean =>
   OPERATOR.email !== null && HOSTING.provider !== null;

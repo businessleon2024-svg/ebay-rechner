@@ -5,7 +5,7 @@ import { Pending } from '@/components/pending';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { CONSENT_REQUIRING_SERVICES } from '@/lib/consent';
-import { HOSTING, OPERATOR } from '@/lib/site';
+import { HOSTING, OPERATOR, REGISTRAR } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung',
@@ -69,31 +69,24 @@ export default function DatenschutzPage() {
         </p>
 
         <h2>Bereitstellung der Website und Server-Logfiles</h2>
-        {HOSTING.provider ? (
-          <p>
-            Die Website wird bei {HOSTING.provider} gehostet. Beim Aufruf verarbeitet der Anbieter
-            technisch notwendige Verbindungsdaten wie IP-Adresse, Datum und Uhrzeit des Abrufs, die
-            aufgerufene Seite, den verwendeten Browser und das Betriebssystem. Diese Daten sind zum
-            Ausliefern der Seite und zur Abwehr von Angriffen erforderlich. Rechtsgrundlage ist
-            Art. 6 Abs. 1 lit. f DSGVO; unser berechtigtes Interesse liegt im sicheren und stabilen
-            Betrieb.
-            {HOSTING.outsideEu && (
-              <>
-                {' '}
-                Dabei können Daten in ein Land außerhalb der EU übertragen werden. Der Anbieter ist
-                über Standardvertragsklauseln nach Art. 46 DSGVO gebunden.
-              </>
-            )}
-          </p>
-        ) : (
-          <p>
-            <Pending>
-              Hosting-Anbieter noch festzulegen. Dieser Abschnitt muss vor dem Livegang den
-              tatsächlichen Anbieter, die verarbeiteten Verbindungsdaten, die Speicherdauer und –
-              bei einem Anbieter außerhalb der EU – die Grundlage des Drittlandtransfers benennen.
-            </Pending>
-          </p>
-        )}
+        <p>
+          Die Website wird bei {HOSTING.provider} ({HOSTING.country}) gehostet, die Auslieferung
+          erfolgt über die Region {HOSTING.region}. Beim Aufruf verarbeitet der Anbieter technisch
+          notwendige Verbindungsdaten wie IP-Adresse, Datum und Uhrzeit des Abrufs, die aufgerufene
+          Seite, den verwendeten Browser und das Betriebssystem. Diese Daten sind zum Ausliefern
+          der Seite und zur Abwehr von Angriffen erforderlich. Rechtsgrundlage ist Art. 6 Abs. 1
+          lit. f DSGVO; unser berechtigtes Interesse liegt im sicheren und stabilen Betrieb.
+        </p>
+        <p>
+          Da es sich um ein Unternehmen mit Sitz in den {HOSTING.country} handelt, können dabei
+          Daten in ein Land außerhalb der Europäischen Union übertragen werden. Mit dem Anbieter
+          besteht ein Vertrag zur Auftragsverarbeitung, der Standardvertragsklauseln nach Art. 46
+          Abs. 2 lit. c DSGVO einschließt.
+        </p>
+        <p>
+          Die Domain ist bei der {REGISTRAR} registriert. Ein Registrar verwaltet ausschließlich
+          den Domainnamen und verarbeitet keine Daten der Besucher dieser Website.
+        </p>
 
         <h2>Kontaktaufnahme</h2>
         <p>
