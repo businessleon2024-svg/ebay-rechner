@@ -153,19 +153,41 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
   const internationalFeeNet = input.internationalFeeNet ?? 0;
   const currencyConversionNet = input.currencyConversionNet ?? 0;
 
-  // Der Regelbesteuerer zieht die USt auf die Marktplatzgebühren als Vorsteuer
-  // ab, wirtschaftlich relevant ist damit der Nettobetrag.
-  const totalFeeNet =
-    commissionNet -
-    shopDiscountNet +
-    fixedFeeNet +
-    adFeeNet +
-    monthlyFeeShareNet +
-    listingFeeNet +
-    optionsFeeNet +
-    internationalFeeNet +
-    currencyConversionNet;
-  const feeVat = totalFeeNet * VAT_RATE;
+  /*
+    Jede Gebührenposition wird einzeln auf Cent gerundet, bevor summiert wird,
+    und die Umsatzsteuer entsteht auf dieser Summe gerundeter Beträge.
+
+    Das ist nicht Geschmackssache, sondern an echten eBay-Abrechnungen
+    abgelesen: Bei einer Provision von 411,99 € × 7 % = 28,8393 € weist eBay
+    28,84 € aus, rechnet mit diesem Betrag weiter und kommt auf 5,57 € Steuer.
+    Wer stattdessen durchgängig ungerundet rechnet, landet bei 5,56 € und liegt
+    damit einen Cent daneben.
+  */
+  const positions = {
+    commission: round2(commissionNet),
+    shopDiscount: round2(shopDiscountNet),
+    fixedFee: round2(fixedFeeNet),
+    adFee: round2(adFeeNet),
+    monthlyFeeShare: round2(monthlyFeeShareNet),
+    listingFee: round2(listingFeeNet),
+    optionsFee: round2(optionsFeeNet),
+    internationalFee: round2(internationalFeeNet),
+    currencyConversion: round2(currencyConversionNet),
+  };
+
+  const totalFeeNet = round2(
+    positions.commission -
+      positions.shopDiscount +
+      positions.fixedFee +
+      positions.adFee +
+      positions.monthlyFeeShare +
+      positions.listingFee +
+      positions.optionsFee +
+      positions.internationalFee +
+      positions.currencyConversion,
+  );
+  const feeVat = round2(totalFeeNet * VAT_RATE);
+  const totalFeeGross = round2(totalFeeNet + feeVat);
 
   const fees: FeeBreakdown = {
     itemPrice: round2(input.itemPrice),
@@ -174,19 +196,19 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
     commissionPercent: Math.round(commissionPercent * 100) / 100,
     commissionBasis,
     appliedTiers,
-    commissionNet: round2(commissionNet),
-    fixedFeeNet: round2(fixedFeeNet),
-    monthlyFeeShareNet: round2(monthlyFeeShareNet),
-    adFeeNet: round2(adFeeNet),
-    listingFeeNet: round2(listingFeeNet),
-    optionsFeeNet: round2(optionsFeeNet),
-    internationalFeeNet: round2(internationalFeeNet),
-    currencyConversionNet: round2(currencyConversionNet),
-    shopDiscountNet: round2(shopDiscountNet),
-    totalFeeNet: round2(totalFeeNet),
-    feeVat: round2(feeVat),
-    totalFeeGross: round2(totalFeeNet + feeVat),
-    payout: round2(grossTransactionAmount - (totalFeeNet + feeVat)),
+    commissionNet: positions.commission,
+    fixedFeeNet: positions.fixedFee,
+    monthlyFeeShareNet: positions.monthlyFeeShare,
+    adFeeNet: positions.adFee,
+    listingFeeNet: positions.listingFee,
+    optionsFeeNet: positions.optionsFee,
+    internationalFeeNet: positions.internationalFee,
+    currencyConversionNet: positions.currencyConversion,
+    shopDiscountNet: positions.shopDiscount,
+    totalFeeNet,
+    feeVat,
+    totalFeeGross,
+    payout: round2(grossTransactionAmount - totalFeeGross),
   };
 
   const otherCosts = input.otherCosts ?? EMPTY_COST;

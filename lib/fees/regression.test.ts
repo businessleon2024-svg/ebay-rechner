@@ -93,15 +93,20 @@ describe('Uhren & Schmuck: Staffelgrenze hängt am Shop-Abo', () => {
 });
 
 describe('Kategorien mit flachem Satz', () => {
-  it.each([
-    ['spielzeug', 140],
-    ['beauty-gesundheit', 140],
-  ])('%s: 1.000 € neu ergibt %s € Provision', (categoryId, erwartet) => {
-    const { fees } = calculate(verkauf({ categoryId, itemPrice: 1000 }));
+  it('beauty-gesundheit: 1.000 € neu ergibt 140,00 € Provision', () => {
+    const { fees } = calculate(verkauf({ categoryId: 'beauty-gesundheit', itemPrice: 1000 }));
 
-    expect(fees.commissionNet).toBe(erwartet);
+    expect(fees.commissionNet).toBe(140);
     expect(fees.commissionPercent).toBe(14);
     expect(fees.commissionBasis).toBe('standard');
+  });
+
+  it('spielzeug ist gestaffelt, nicht flach', () => {
+    // Korrigiert nach einer echten Abrechnung: 12 % bis 990 €, darüber 3 %.
+    const { fees } = calculate(verkauf({ categoryId: 'spielzeug', itemPrice: 1000 }));
+
+    expect(fees.commissionNet).toBe(119.1); // 990 × 12 % + 10 × 3 %
+    expect(fees.commissionBasis).toBe('tiered');
   });
 });
 

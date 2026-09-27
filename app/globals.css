@@ -1260,6 +1260,22 @@ select.input optgroup {
   text-decoration: underline;
 }
 
+/* Rückmeldung zu abweichenden Sätzen */
+.report-rate {
+  margin: 1rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.79rem;
+  font-weight: 450;
+  color: var(--text-faint);
+  line-height: 1.55;
+}
+
+.report-rate a {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
 /* =========================================================
    RECHTSSEITEN
    ========================================================= */

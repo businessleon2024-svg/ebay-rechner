@@ -226,8 +226,10 @@ describe('Zusatzkosten', () => {
   it('zieht den Shop-Provisionsrabatt von der Provision ab', () => {
     const { fees } = calculate({ ...usedPhone, shopDiscountPercent: 10 });
 
+    // Jede Position wird einzeln auf Cent gerundet, bevor summiert wird –
+    // so rechnet eBay auch ab. 15,25 − 1,53 + 0,45 = 14,17.
     expect(fees.shopDiscountNet).toBe(1.53); // 10 % von 15,25
-    expect(fees.totalFeeNet).toBe(14.18);
+    expect(fees.totalFeeNet).toBe(14.17);
   });
 
   it('rechnet sonstige Kosten wie Verpackung mit ein', () => {
@@ -442,8 +444,8 @@ describe('Nicht reformierte Kategorien', () => {
     }
   });
 
-  it('rechnet Spielzeug und Beauty flach mit 14 %', () => {
-    for (const categoryId of ['spielzeug', 'beauty-gesundheit']) {
+  it('rechnet Beauty & Gesundheit flach mit 14 %', () => {
+    for (const categoryId of ['beauty-gesundheit']) {
       const { fees } = calculate({
         ...usedPhone,
         categoryId,

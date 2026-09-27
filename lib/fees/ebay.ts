@@ -107,8 +107,23 @@ const CATEGORIES: readonly FeeCategory[] = [
   { id: 'musik', group: UEBRIGE, name: 'Musik', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   { id: 'games', group: UEBRIGE, name: 'PC- & Videospiele', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   { id: 'sammeln-seltenes', group: UEBRIGE, name: 'Sammeln & Seltenes', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
-  { id: 'spielzeug', group: UEBRIGE, name: 'Spielzeug', standardPercent: 14, reducedPercent: null, confidence: 'official' },
-  { id: 'beauty-gesundheit', group: UEBRIGE, name: 'Beauty & Gesundheit', standardPercent: 14, reducedPercent: null, confidence: 'official' },
+  // 12 % gestaffelt, abgelesen an einer echten Abrechnung vom 27.09.2026:
+  // "Variabler Prozentsatz · Kategorie Spielzeug · Tarif für 0,00 € – 990,00 €
+  // · 32,98 € × 12,0 %". Zuvor stand hier 14 % aus einer Sekundärquelle.
+  { id: 'spielzeug', group: UEBRIGE, name: 'Spielzeug', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+
+  // Derselbe Beleg, der für Spielzeug 14 % nannte, hat sich als falsch
+  // erwiesen. Bis eine Abrechnung das klärt, gilt dieser Satz als ungeprüft.
+  {
+    id: 'beauty-gesundheit',
+    group: UEBRIGE,
+    name: 'Beauty & Gesundheit',
+    standardPercent: 14,
+    reducedPercent: null,
+    confidence: 'unverified',
+    caveat:
+      'Dieser Satz stammt aus derselben Quelle, die für Spielzeug nachweislich einen falschen Wert nannte. Bitte an einer echten Abrechnung prüfen.',
+  },
 
   // Einzige Kategorie, in der ein Shop-Abo die Staffelgrenze verschiebt –
   // und zwar nach unten, also zugunsten des Verkäufers.
