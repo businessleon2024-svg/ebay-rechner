@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { breakEvenSellPrice, calculate, maxPurchasePrice } from '@/lib/fees/calculate';
 import { MARKETPLACES, requireMarketplace } from '@/lib/fees/marketplaces';
-import type { FeeCalculationInput, FeeCategory, ItemCondition, MarketplaceId } from '@/lib/fees/types';
+import type {
+  FeeCalculationInput,
+  FeeCategory,
+  ItemCondition,
+  MarketplaceId,
+  TaxScheme,
+} from '@/lib/fees/types';
 import { parseNumber } from '@/lib/format';
 import { ResultPanel } from './result-panel';
 
@@ -33,8 +39,28 @@ const CONDITIONS: ReadonlyArray<{ value: ItemCondition; label: string }> = [
   { value: 'used_acceptable', label: 'Gebraucht – Akzeptabel' },
 ];
 
+/** Besteuerungsformen mit kurzer Erläuterung für die Auswahl. */
+const TAX_SCHEMES: ReadonlyArray<{ value: TaxScheme; label: string; hint: string }> = [
+  {
+    value: 'standard',
+    label: 'Regelbesteuerung',
+    hint: '19 % Umsatzsteuer aus dem Bruttoverkaufspreis, Vorsteuer abziehbar.',
+  },
+  {
+    value: 'margin',
+    label: 'Differenzbesteuerung (§ 25a)',
+    hint: 'Umsatzsteuer nur auf die Spanne zwischen Verkauf und Einkauf. Für Gebrauchtware aus Privatankauf der Normalfall. Aus dem Einkauf ist dann keine Vorsteuer abziehbar.',
+  },
+  {
+    value: 'small_business',
+    label: 'Kleinunternehmer (§ 19)',
+    hint: 'Keine Umsatzsteuer auf den Verkauf, dafür kein Vorsteuerabzug — die Marktplatzgebühren wirken brutto.',
+  },
+];
+
 interface FormState {
   marketplaceId: MarketplaceId;
+  taxScheme: TaxScheme;
   categoryId: string;
   condition: ItemCondition;
   itemPrice: string;
@@ -59,6 +85,7 @@ interface FormState {
 
 const INITIAL_STATE: FormState = {
   marketplaceId: 'ebay',
+  taxScheme: 'standard',
   categoryId: 'handys-kommunikation',
   condition: 'used',
   itemPrice: '',
@@ -88,6 +115,7 @@ function toCalculationInput(form: FormState): FeeCalculationInput {
 
   return {
     marketplaceId: form.marketplaceId,
+    taxScheme: form.taxScheme,
     categoryId: form.categoryId,
     condition: form.condition,
     itemPrice: parseNumber(form.itemPrice),
@@ -261,18 +289,28 @@ export function Calculator() {
     </>
   );
 
+  /**
+   * Der Vorsteuer-Schalter erscheint nur, wo er etwas bewirkt: Kleinunternehmer
+   * sind nie abzugsberechtigt, und bei der Differenzbesteuerung gilt das für
+   * den Einkauf. Ein wirkungsloser Schalter wäre irreführend.
+   */
   const vatToggle = (
     key: 'purchaseVatDeductible' | 'shippingVatDeductible' | 'otherCostsVatDeductible',
-  ) => (
-    <label className="checkline">
-      <input
-        type="checkbox"
-        checked={form[key]}
-        onChange={(event) => update(key, event.target.checked)}
-      />
-      Rechnung mit ausgewiesener USt
-    </label>
-  );
+  ) => {
+    if (form.taxScheme === 'small_business') return null;
+    if (form.taxScheme === 'margin' && key === 'purchaseVatDeductible') return null;
+
+    return (
+      <label className="checkline">
+        <input
+          type="checkbox"
+          checked={form[key]}
+          onChange={(event) => update(key, event.target.checked)}
+        />
+        Rechnung mit ausgewiesener USt
+      </label>
+    );
+  };
 
   return (
     <div className="calc-shell">
@@ -296,6 +334,27 @@ export function Calculator() {
           <h2 id="formHeading" className="panel__heading">
             Angaben zum Verkauf
           </h2>
+
+          <div className="field">
+            <label htmlFor="taxSchemeSelect">Besteuerung</label>
+            <div className="input-wrap">
+              <select
+                id="taxSchemeSelect"
+                className="input"
+                value={form.taxScheme}
+                onChange={(event) => update('taxScheme', event.target.value as TaxScheme)}
+              >
+                {TAX_SCHEMES.map((scheme) => (
+                  <option key={scheme.value} value={scheme.value}>
+                    {scheme.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="hint">
+              {TAX_SCHEMES.find((scheme) => scheme.value === form.taxScheme)?.hint}
+            </p>
+          </div>
 
           <div className="field">
             <label htmlFor="categorySelect">Kategorie</label>

@@ -32,6 +32,12 @@ function commissionBasisLabel(fees: CalculationResult['fees']): string {
   }
 }
 
+const TAX_NOTE: Record<CalculationResult['profit']['taxScheme'], string> = {
+  standard: '19 % aus dem Bruttoverkaufspreis',
+  margin: '19 % aus der Differenz, nicht aus dem vollen Verkaufspreis',
+  small_business: 'Kleinunternehmer führen keine Umsatzsteuer ab',
+};
+
 const PRECISION_LABEL: Record<CalculationResult['precision'], string> = {
   exact: 'Exakter Satz',
   main_category: 'Geschätzter Satz',
@@ -263,18 +269,32 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
       <div className="ledger">
         <div className="ledger__list">
           <Row
-            term="Nettoerlös"
-            note="Verkaufspreis ohne Umsatzsteuer"
+            term={profit.taxScheme === 'small_business' ? 'Verkaufserlös' : 'Nettoerlös'}
+            note={
+              profit.taxScheme === 'small_business'
+                ? 'keine Umsatzsteuer abzuführen'
+                : 'Verkaufspreis abzüglich der Umsatzsteuer'
+            }
             value={formatCurrency(profit.revenueNet)}
           />
           <Row
             term={`${marketplace.name}-Gebühr`}
-            note="netto, ohne abziehbare Vorsteuer"
-            value={negative(fees.totalFeeNet)}
+            note={
+              profit.taxScheme === 'small_business'
+                ? 'brutto, kein Vorsteuerabzug möglich'
+                : 'netto, ohne abziehbare Vorsteuer'
+            }
+            value={negative(profit.feeCost)}
           />
           <Row
             term="Einkauf"
-            note={profit.purchaseVatDeducted > 0 ? 'netto' : 'ohne Vorsteuerabzug'}
+            note={
+              profit.purchaseVatDeducted > 0
+                ? 'netto, Vorsteuer abgezogen'
+                : profit.taxScheme === 'margin'
+                  ? '§ 25a setzt Erwerb ohne ausgewiesene USt voraus'
+                  : 'ohne Vorsteuerabzug'
+            }
             value={negative(profit.purchaseNet)}
           />
           <Row term="Versand" value={negative(profit.shippingNet)} />
@@ -374,9 +394,16 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
                 term="Verkauf brutto"
                 value={formatCurrency(fees.grossTransactionAmount)}
               />
+              {profit.marginTaxBase !== null && (
+                <Row
+                  term="Differenz zum Einkauf"
+                  note="Bemessungsgrundlage nach § 25a"
+                  value={formatCurrency(profit.marginTaxBase)}
+                />
+              )}
               <Row
                 term="USt an das Finanzamt"
-                note="19 % aus dem Bruttoverkaufspreis"
+                note={TAX_NOTE[profit.taxScheme]}
                 value={negative(profit.salesVat)}
               />
               <Row term="Nettoerlös" value={formatCurrency(profit.revenueNet)} total />

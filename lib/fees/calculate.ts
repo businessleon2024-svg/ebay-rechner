@@ -10,6 +10,7 @@ import {
   type FeeCategory,
   type Marketplace,
   type ProfitBreakdown,
+  type TaxScheme,
 } from './types';
 
 export class UnknownCategoryError extends Error {
@@ -21,11 +22,48 @@ export class UnknownCategoryError extends Error {
 
 const round2 = (value: number): number => Math.round((value + Number.EPSILON) * 100) / 100;
 
-/** Nettobetrag eines Kostenpostens – Vorsteuer nur abziehbar, wenn ausgewiesen. */
-const netOf = (cost: CostInput): number =>
-  cost.vatDeductible ? cost.amount / (1 + VAT_RATE) : cost.amount;
+/**
+ * Betrag, mit dem ein Kostenposten wirtschaftlich zu Buche schlägt.
+ *
+ * Die Vorsteuer ist nur abziehbar, wenn sie ausgewiesen *und* der Verkäufer
+ * zum Abzug berechtigt ist. Kleinunternehmer sind das nie, und bei der
+ * Differenzbesteuerung gilt es nicht für den Einkauf selbst.
+ */
+const netOf = (cost: CostInput, deductible: boolean): number =>
+  deductible && cost.vatDeductible ? cost.amount / (1 + VAT_RATE) : cost.amount;
 
 const EMPTY_COST: CostInput = { amount: 0, vatDeductible: false };
+
+/**
+ * Umsatzsteuer auf den Verkauf, je nach Besteuerungsform.
+ *
+ * Bei der Differenzbesteuerung ist Bemessungsgrundlage allein die Spanne
+ * zwischen Verkaufs- und Einkaufspreis; aus ihr wird die Steuer
+ * herausgerechnet. Verkauft der Händler unter Einkaufspreis, fällt keine an —
+ * eine negative Spanne führt nicht zu einer Erstattung.
+ */
+function salesVatFor(
+  taxScheme: TaxScheme,
+  grossTransactionAmount: number,
+  purchaseGross: number,
+): { salesVat: number; marginTaxBase: number | null } {
+  switch (taxScheme) {
+    case 'small_business':
+      return { salesVat: 0, marginTaxBase: null };
+    case 'margin': {
+      const marginTaxBase = Math.max(grossTransactionAmount - purchaseGross, 0);
+      return {
+        salesVat: marginTaxBase * (VAT_RATE / (1 + VAT_RATE)),
+        marginTaxBase,
+      };
+    }
+    default:
+      return {
+        salesVat: grossTransactionAmount * (VAT_RATE / (1 + VAT_RATE)),
+        marginTaxBase: null,
+      };
+  }
+}
 
 /**
  * Verkaufsprovision auf den Gesamt-Transaktionsbetrag.
@@ -152,30 +190,47 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
   };
 
   const otherCosts = input.otherCosts ?? EMPTY_COST;
+  const taxScheme = input.taxScheme ?? 'standard';
 
-  const revenueNet = round2(grossTransactionAmount / (1 + VAT_RATE));
-  const purchaseNet = round2(netOf(input.purchase));
-  const shippingNet = round2(netOf(input.shipping));
-  const otherCostsNet = round2(netOf(otherCosts));
+  // Kleinunternehmer sind gar nicht zum Vorsteuerabzug berechtigt; bei der
+  // Differenzbesteuerung gilt er für alles außer den Einkauf selbst.
+  const deductsInputVat = taxScheme !== 'small_business';
+  const deductsPurchaseVat = deductsInputVat && taxScheme !== 'margin';
+
+  const { salesVat: rawSalesVat, marginTaxBase } = salesVatFor(
+    taxScheme,
+    grossTransactionAmount,
+    input.purchase.amount,
+  );
+
+  const salesVat = round2(rawSalesVat);
+  const revenueNet = round2(grossTransactionAmount - rawSalesVat);
+  const purchaseNet = round2(netOf(input.purchase, deductsPurchaseVat));
+  const shippingNet = round2(netOf(input.shipping, deductsInputVat));
+  const otherCostsNet = round2(netOf(otherCosts, deductsInputVat));
+
+  // Ohne Vorsteuerabzug trägt der Verkäufer die Gebühren brutto.
+  const feeCost = deductsInputVat ? fees.totalFeeNet : fees.totalFeeGross;
 
   // Aus den gerundeten Positionen ableiten, damit die angezeigte
   // Aufschlüsselung immer exakt aufgeht.
-  const profit = round2(
-    revenueNet - purchaseNet - shippingNet - otherCostsNet - fees.totalFeeNet,
-  );
+  const profit = round2(revenueNet - purchaseNet - shippingNet - otherCostsNet - feeCost);
 
   const profitBreakdown: ProfitBreakdown = {
+    taxScheme,
     revenueNet,
-    salesVat: round2(grossTransactionAmount - revenueNet),
+    salesVat,
+    marginTaxBase: marginTaxBase === null ? null : round2(marginTaxBase),
+    feeCost,
     purchaseNet,
-    purchaseVatDeducted: round2(input.purchase.amount - netOf(input.purchase)),
+    purchaseVatDeducted: round2(input.purchase.amount - netOf(input.purchase, deductsPurchaseVat)),
     shippingNet,
     otherCostsNet,
     inputVatDeducted: round2(
       input.purchase.amount -
-        netOf(input.purchase) +
-        (input.shipping.amount - netOf(input.shipping)) +
-        (otherCosts.amount - netOf(otherCosts)),
+        netOf(input.purchase, deductsPurchaseVat) +
+        (input.shipping.amount - netOf(input.shipping, deductsInputVat)) +
+        (otherCosts.amount - netOf(otherCosts, deductsInputVat)),
     ),
     profit,
     marginPercent: revenueNet > 0 ? round2((profit / revenueNet) * 100) : 0,
@@ -200,16 +255,29 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
  * geschlossen lösbar – kein Iterieren nötig.
  */
 export function maxPurchasePrice(input: FeeCalculationInput, targetProfit = 0): number {
-  const { profit, purchaseNet } = calculate(input).profit;
-  // Spielraum gegenüber dem aktuell angesetzten Einkauf.
-  const affordableNet = purchaseNet + profit - targetProfit;
-  if (affordableNet <= 0) return 0;
+  const profitAt = (amount: number) =>
+    calculate({ ...input, purchase: { ...input.purchase, amount } }).profit.profit;
 
-  const gross = input.purchase.vatDeductible
-    ? affordableNet * (1 + VAT_RATE)
-    : affordableNet;
+  // Schon ohne Wareneinsatz nicht erreichbar.
+  if (profitAt(0) < targetProfit) return 0;
 
-  return round2(gross);
+  let low = 0;
+  let high = 1;
+  while (profitAt(high) >= targetProfit) {
+    high *= 2;
+    if (high > 10_000_000) return round2(high);
+  }
+
+  for (let i = 0; i < 60; i += 1) {
+    const mid = (low + high) / 2;
+    if (profitAt(mid) >= targetProfit) low = mid;
+    else high = mid;
+  }
+
+  // Das Runden darf den Zielgewinn nicht kippen: Liegt der gerundete Preis
+  // knapp über der Grenze, einen Cent zurück.
+  const rounded = round2(low);
+  return profitAt(rounded) >= targetProfit ? rounded : round2(rounded - 0.01);
 }
 
 /**

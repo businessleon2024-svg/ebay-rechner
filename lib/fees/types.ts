@@ -11,6 +11,26 @@
 export const VAT_RATE = 0.19;
 
 /**
+ * Besteuerungsform des Verkäufers. Bestimmt, wie viel Umsatzsteuer auf den
+ * Verkauf anfällt und welche Vorsteuer abziehbar ist.
+ */
+export type TaxScheme =
+  /** Regelbesteuerung: 19 % aus dem Bruttoverkaufspreis, Vorsteuer abziehbar. */
+  | 'standard'
+  /**
+   * Differenzbesteuerung nach § 25a UStG. Umsatzsteuer nur auf die Differenz
+   * zwischen Verkaufs- und Einkaufspreis. Voraussetzung ist ein Erwerb ohne
+   * ausgewiesene Umsatzsteuer, weshalb aus dem Einkauf keine Vorsteuer
+   * abziehbar ist — aus Gebühren und übrigen Kosten dagegen schon.
+   */
+  | 'margin'
+  /**
+   * Kleinunternehmer nach § 19 UStG. Keine Umsatzsteuer auf den Verkauf,
+   * dafür überhaupt kein Vorsteuerabzug: Gebühren und Kosten wirken brutto.
+   */
+  | 'small_business';
+
+/**
  * Artikelzustand laut eBay-Angebotsformular.
  *
  * Die Unterscheidung ist seit der Gebührenreform zum 01.07.2026 der wichtigste
@@ -194,6 +214,8 @@ export interface MonthlyFeeInput {
 
 export interface FeeCalculationInput {
   marketplaceId: MarketplaceId;
+  /** Besteuerungsform des Verkäufers. Ohne Angabe Regelbesteuerung. */
+  taxScheme?: TaxScheme;
   categoryId: string;
   /**
    * Kategorie-ID des Marktplatzes, falls bekannt – etwa aus einem Angebot
@@ -272,10 +294,22 @@ export interface FeeBreakdown {
 }
 
 export interface ProfitBreakdown {
+  /** Angewandte Besteuerungsform. */
+  taxScheme: TaxScheme;
   /** Nettoerlös nach Abführung der Umsatzsteuer. */
   revenueNet: number;
   /** An das Finanzamt abzuführende USt aus dem Verkauf. */
   salesVat: number;
+  /**
+   * Bemessungsgrundlage der Umsatzsteuer bei Differenzbesteuerung: die
+   * Spanne zwischen Verkaufs- und Einkaufspreis. Sonst `null`.
+   */
+  marginTaxBase: number | null;
+  /**
+   * Betrag, mit dem die Marktplatzgebühren als Kosten zu Buche schlagen.
+   * Netto, solange Vorsteuer abziehbar ist — für Kleinunternehmer brutto.
+   */
+  feeCost: number;
   purchaseNet: number;
   /** Vorsteuer, die allein auf den Einkauf entfiel (0 ohne USt-Rechnung). */
   purchaseVatDeducted: number;
