@@ -21,13 +21,12 @@ export const OPERATOR = {
   vatId: 'DE451771926',
 
   /**
-   * NOCH EINZUTRAGEN: E-Mail-Adresse der Domain.
-   *
-   * Ohne sie darf die Seite nicht online gehen — eine erreichbare
-   * E-Mail-Adresse ist nach § 5 DDG zwingend. Sobald das Postfach steht,
-   * hier eintragen; Impressum und Datenschutzerklärung ziehen automatisch nach.
+   * Vorläufig eine Gmail-Adresse. Rechtlich genügt das — § 5 DDG verlangt eine
+   * erreichbare Adresse, keine Domain-Adresse. Sobald ein Postfach unter
+   * gebuehrenkompass.de steht, hier tauschen; Impressum und
+   * Datenschutzerklärung ziehen automatisch nach.
    */
-  email: null as string | null,
+  email: 'businessleon2024@gmail.com' as string | null,
 } as const;
 
 /**
