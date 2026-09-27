@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { CalculationResult } from '@/lib/fees/types';
-import { formatCurrency, formatPercent } from '@/lib/format';
+import { formatCurrency, formatMonth, formatPercent } from '@/lib/format';
 
 interface ResultPanelProps {
   result: CalculationResult;
@@ -404,7 +404,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
       </p>
 
       <p className="hint">
-        {marketplace.name}-Gebührensätze auf Stand {marketplace.ratesEffectiveFrom}.
+        {marketplace.name}-Gebührensätze auf Stand {formatMonth(marketplace.ratesEffectiveFrom)}.
       </p>
     </section>
   );

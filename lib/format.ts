@@ -17,6 +17,14 @@ export function formatPercent(value: number, decimals = 1): string {
   })} %`;
 }
 
+const monthFormatter = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' });
+
+/** ISO-Datum als "Juli 2026" – für Angaben zum Gebührenstand. */
+export function formatMonth(isoDate: string): string {
+  const parsed = new Date(`${isoDate}T00:00:00Z`);
+  return Number.isNaN(parsed.getTime()) ? isoDate : monthFormatter.format(parsed);
+}
+
 /** Akzeptiert sowohl "12,50" als auch "12.50" – deutsche Eingabe ist der Normalfall. */
 export function parseNumber(raw: string): number {
   const parsed = Number.parseFloat(raw.replace(',', '.'));

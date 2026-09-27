@@ -915,6 +915,118 @@ select.input optgroup {
   padding: 0.2rem 0.7rem;
 }
 
+.hero--compact {
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+/* =========================================================
+   GEBÜHRENTABELLE
+   ========================================================= */
+
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+
+.fee-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.89rem;
+}
+
+.fee-table thead th {
+  position: sticky;
+  top: 0;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-faint);
+  background: var(--surface);
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.fee-table thead th:not(:first-child),
+.fee-table tbody td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fee-table__group th {
+  text-align: left;
+  font-size: 0.73rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  padding: 0.6rem 1.25rem;
+}
+
+.fee-table tbody th[scope='row'] {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text);
+  padding: 0.7rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.fee-table tbody td {
+  font-weight: 550;
+  color: var(--text);
+  padding: 0.7rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.fee-table tbody td.is-muted {
+  color: var(--text-faint);
+  font-weight: 450;
+}
+
+.fee-table tbody tr:last-child th,
+.fee-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.fee-table__note {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 450;
+  color: var(--text-faint);
+}
+
+/* =========================================================
+   HÄUFIGE FRAGEN
+   ========================================================= */
+
+.faq {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.75rem 2.5rem;
+  max-width: 1000px;
+}
+
+.faq__question {
+  margin: 0 0 0.45rem;
+  font-size: 0.97rem;
+  font-weight: 650;
+}
+
+.faq__answer {
+  margin: 0;
+  font-size: 0.89rem;
+  font-weight: 450;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
 /* Ablaufschritte */
 .steps {
   display: grid;

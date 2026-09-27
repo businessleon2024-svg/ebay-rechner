@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { breakEvenSellPrice, calculate, maxPurchasePrice } from '@/lib/fees/calculate';
 import { MARKETPLACES, requireMarketplace } from '@/lib/fees/marketplaces';
@@ -319,7 +320,10 @@ export function Calculator() {
             <p className="hint">
               Hinterlegt sind die Hauptkategorien. <strong>Unterkategorien können abweichende
               Sätze haben</strong> — {marketplace.name} veröffentlicht sie nicht vollständig. Im
-              Zweifel gilt die eigene Gebührenabrechnung.
+              Zweifel gilt die eigene Gebührenabrechnung.{' '}
+              <Link className="linkbutton" href="/gebuehren">
+                Alle Sätze ansehen
+              </Link>
             </p>
           </div>
 
