@@ -1539,3 +1539,13 @@ select.input optgroup {
     transition: none !important;
   }
 }
+
+/* 404-Kennung */
+.notfound__code {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
