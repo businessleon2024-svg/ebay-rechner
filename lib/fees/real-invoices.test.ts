@@ -108,3 +108,41 @@ describe('Feste Verkaufsgebühr laut Abrechnung', () => {
     expect(calculate(verkauf({ itemPrice: 10.01 })).fees.fixedFeeNet).toBe(0.45);
   });
 });
+
+describe('Logitech MX Brio Webcam · 12 % trotz Kategorie "Computer, Tablets & Netzwerk"', () => {
+  /*
+    Diese Abrechnung belegt das Unterkategorie-Problem erstmals unmittelbar:
+    eBay weist dieselbe Kategoriebezeichnung aus wie beim Arbeitsspeicher
+    (7 %), rechnet hier aber mit 12 %. Maßgeblich ist offensichtlich die
+    Unterkategorie — Zubehör statt Gerät —, und die veröffentlicht eBay nicht.
+
+    Im Rechner ist dieser Fall über eine der Zubehör-Kategorien abzubilden.
+    Artikelpreis 148,00 € plus Versand ergibt 153,99 € Gebührengrundlage.
+  */
+  const { fees } = calculate(
+    verkauf({ categoryId: 'notebook-desktop-zubehoer', itemPrice: 153.99 }),
+  );
+
+  it('trifft die Verkaufsprovision von 18,48 € bei 12 %', () => {
+    expect(fees.commissionPercent).toBe(12);
+    expect(fees.commissionNet).toBe(18.48);
+  });
+
+  it('trifft Gesamtgebühren, Umsatzsteuer und Auszahlung', () => {
+    expect(fees.totalFeeNet).toBe(18.93);
+    expect(fees.feeVat).toBe(3.6);
+    expect(fees.totalFeeGross).toBe(22.53);
+    expect(fees.payout).toBe(131.46);
+  });
+
+  it('läge über die Geräte-Kategorie deutlich zu niedrig', () => {
+    // Was passiert wäre, hätte man nach der Bezeichnung auf der Abrechnung
+    // die 7-%-Kategorie gewählt.
+    const zuNiedrig = calculate(
+      verkauf({ categoryId: 'computer-tablets-netzwerk', itemPrice: 153.99 }),
+    ).fees;
+
+    expect(zuNiedrig.commissionNet).toBe(10.78);
+    expect(fees.commissionNet - zuNiedrig.commissionNet).toBeCloseTo(7.7, 2);
+  });
+});
