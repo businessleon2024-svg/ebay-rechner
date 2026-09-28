@@ -6,66 +6,86 @@ import type { CalculationResult } from '@/lib/fees/types';
 import { formatCurrency, formatPercent, parseNumber } from '@/lib/format';
 
 /**
- * Meldung eines abweichenden Gebührensatzes.
+ * Meldung abweichender Gebührensätze.
  *
- * Die Sätze der Unterkategorien veröffentlicht kein Marktplatz vollständig —
- * diese Lücke lässt sich durch Recherche allein nicht schließen. Wer eine echte
- * Abrechnung vor sich hat, weiß es besser als jede Quelle.
+ * Die Sätze der Unterkategorien veröffentlicht kein Marktplatz. Kein noch so
+ * gründlicher Rechner kann sie deshalb aus öffentlichen Quellen ableiten — die
+ * einzige verlässliche Quelle sind echte Abrechnungen. Genau das ist der Zweck
+ * dieses Formulars: aus vielen Einzelmeldungen eine Datengrundlage aufzubauen,
+ * die es sonst nirgends gibt.
  *
- * Deshalb wird hier nicht nur „stimmt nicht" gemeldet, sondern die
- * tatsächlichen Werte erfasst. Erst damit ist eine Rückmeldung verwertbar: Aus
- * „12 % statt 14 % laut Abrechnung, Kategorie Spielzeug" wird eine Korrektur,
- * aus „stimmt irgendwie nicht" nichts.
+ * Damit das trägt, muss eine Meldung zwei Dinge liefern: den tatsächlichen
+ * Satz **und** eine eindeutige Kennung des Artikels. Ohne Produktkennung lässt
+ * sich später nicht mehr nachvollziehen, welche Unterkategorie gemeint war —
+ * die Meldung wäre dann wertlos.
  *
- * Versand per E-Mail statt über ein Formular auf dem Server: Es braucht keine
- * Infrastruktur, bei uns entstehen keine personenbezogenen Daten, und der
- * Absender behält die Nachricht im eigenen Postausgang.
+ * Die Nachricht ist bewusst maschinenlesbar aufgebaut (feste Schlüssel, eine
+ * Angabe pro Zeile). So lassen sich eingehende Meldungen später automatisch
+ * auswerten, ohne dass das Format nachträglich geändert werden müsste.
  */
 
+const REPORT_FORMAT_VERSION = 1;
+
 interface ReportForm {
+  actualPercent: string;
   actualCommission: string;
   actualTotalGross: string;
   exactCategory: string;
+  productName: string;
+  ean: string;
+  itemNumber: string;
   orderNumber: string;
   note: string;
 }
 
 const EMPTY: ReportForm = {
+  actualPercent: '',
   actualCommission: '',
   actualTotalGross: '',
   exactCategory: '',
+  productName: '',
+  ean: '',
+  itemNumber: '',
   orderNumber: '',
   note: '',
 };
 
+/** Nur gefüllte Angaben aufnehmen – leere Zeilen erschweren die Auswertung. */
+function line(key: string, value: string | number | undefined): string | null {
+  if (value === undefined || value === '' || value === null) return null;
+  return `${key}: ${value}`;
+}
+
 function buildMail(result: CalculationResult, form: ReportForm): string {
   const { marketplace, category, fees, condition, precision } = result;
 
-  const gemeldet = [
-    form.actualCommission && `  Verkaufsprovision: ${form.actualCommission} €`,
-    form.actualTotalGross && `  Gesamtgebühr brutto: ${form.actualTotalGross} €`,
-    form.exactCategory && `  Genaue Kategorie im Angebot: ${form.exactCategory}`,
-    form.orderNumber && `  Bestellnummer: ${form.orderNumber}`,
-  ].filter(Boolean);
+  const felder = [
+    line('marktplatz', marketplace.id),
+    line('kategorie_gewaehlt', category.id),
+    line('kategorie_angebot', form.exactCategory.trim()),
+    line('zustand', condition),
+    line('genauigkeit', precision),
+    line('grundlage', fees.grossTransactionAmount),
+    line('satz_gerechnet', fees.commissionPercent),
+    line('satz_tatsaechlich', form.actualPercent.trim()),
+    line('provision_gerechnet', fees.commissionNet),
+    line('provision_tatsaechlich', form.actualCommission.trim()),
+    line('gebuehr_brutto_gerechnet', fees.totalFeeGross),
+    line('gebuehr_brutto_tatsaechlich', form.actualTotalGross.trim()),
+    line('produkt', form.productName.trim()),
+    line('ean', form.ean.trim()),
+    line('artikelnummer', form.itemNumber.trim()),
+    line('bestellnummer', form.orderNumber.trim()),
+    line('anmerkung', form.note.trim().replace(/\n+/g, ' ')),
+  ].filter((entry): entry is string => entry !== null);
 
   return [
-    'Meine Abrechnung weicht vom Rechner ab.',
+    'Meine Abrechnung weicht vom Rechner ab. Die Angaben unten stammen aus der',
+    'tatsächlichen Gebührenabrechnung.',
     '',
-    '— Laut Abrechnung —',
-    ...(gemeldet.length > 0 ? gemeldet : ['  (keine Angaben gemacht)']),
-    ...(form.note ? ['', '— Anmerkung —', `  ${form.note}`] : []),
-    '',
-    '— Was der Rechner ausgegeben hat —',
-    `  Marktplatz: ${marketplace.name}`,
-    `  Kategorie: ${category.name} (${category.id})`,
-    `  Artikelzustand: ${condition}`,
-    `  Genauigkeit: ${precision}`,
-    `  Gebührengrundlage: ${formatCurrency(fees.grossTransactionAmount)}`,
-    `  Angesetzter Satz: ${formatPercent(fees.commissionPercent)} (${fees.commissionBasis})`,
-    `  Verkaufsprovision: ${formatCurrency(fees.commissionNet)}`,
-    `  Feste Verkaufsgebühr: ${formatCurrency(fees.fixedFeeNet)}`,
-    `  Gebühr netto: ${formatCurrency(fees.totalFeeNet)}`,
-    `  Gebühr brutto: ${formatCurrency(fees.totalFeeGross)}`,
+    `--- GEBUEHRENKOMPASS-MELDUNG v${REPORT_FORMAT_VERSION} ---`,
+    ...felder,
+    '--- ENDE ---',
   ].join('\n');
 }
 
@@ -79,67 +99,78 @@ export function ReportRate({ result }: { result: CalculationResult }) {
 
   const { fees, marketplace } = result;
 
-  // Sofortige Rückmeldung zur Abweichung: Wer sie beziffert sieht, merkt
+  // Sofortige Rückmeldung zur Abweichung: Wer sie beziffert sieht, erkennt
   // schneller, ob er sich vertippt hat oder wirklich etwas nicht stimmt.
   const gemeldeteProvision = parseNumber(form.actualCommission);
   const abweichung =
     form.actualCommission.trim() !== '' ? gemeldeteProvision - fees.commissionNet : null;
 
-  const betreff = `Abweichender Gebührensatz: ${marketplace.name} · ${result.category.name}`;
+  // Eine Meldung ist nur verwertbar, wenn sie einen tatsächlichen Wert nennt
+  // und sich der Artikel später zuordnen lässt.
+  const hatWert =
+    form.actualPercent.trim() !== '' ||
+    form.actualCommission.trim() !== '' ||
+    form.actualTotalGross.trim() !== '';
+  const hatKennung =
+    form.exactCategory.trim() !== '' ||
+    form.productName.trim() !== '' ||
+    form.ean.trim() !== '' ||
+    form.itemNumber.trim() !== '';
+  const verwertbar = hatWert && hatKennung;
+
+  const betreff = `Gebührenmeldung: ${marketplace.name} · ${result.category.name}`;
   const href = `mailto:${OPERATOR.email}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(buildMail(result, form))}`;
 
-  const etwasAngegeben =
-    form.actualCommission.trim() !== '' ||
-    form.actualTotalGross.trim() !== '' ||
-    form.exactCategory.trim() !== '';
+  const feld = (
+    id: keyof ReportForm & string,
+    label: string,
+    options: { placeholder?: string; suffix?: string; type?: string; step?: string } = {},
+  ) => (
+    <div>
+      <label htmlFor={id}>{label}</label>
+      <div className="input-wrap">
+        <input
+          id={id}
+          className="input"
+          type={options.type ?? 'text'}
+          inputMode={options.type === 'number' ? 'decimal' : undefined}
+          step={options.step}
+          min={options.type === 'number' ? '0' : undefined}
+          placeholder={options.placeholder}
+          autoComplete="off"
+          value={form[id]}
+          onChange={(event) => set(id, event.target.value)}
+        />
+        {options.suffix && <span className="input-suffix">{options.suffix}</span>}
+      </div>
+    </div>
+  );
 
   return (
     <details className="advanced report">
-      <summary>Stimmt die Gebühr bei dir nicht?</summary>
+      <summary>Gebühr weicht ab? Hilf mit, den Rechner genauer zu machen</summary>
       <div className="advanced__body">
         <p className="hint hint--standalone">
-          Trag ein, was tatsächlich auf deiner Abrechnung steht. Je genauer, desto eher lässt sich
-          der Satz korrigieren — am hilfreichsten ist die genaue Unterkategorie, denn die
-          veröffentlichen die Marktplätze nicht.
+          eBay und Kaufland veröffentlichen ihre Sätze nicht für jede Unterkategorie. Kein Rechner
+          kann sie deshalb vollständig kennen — <strong>echte Abrechnungen sind die einzige
+          verlässliche Quelle</strong>. Je mehr Meldungen zusammenkommen, desto genauer wird der
+          Rechner für alle.
         </p>
 
+        <h3 className="report__heading">Was stand auf der Abrechnung?</h3>
         <div className="field field-row">
-          <div>
-            <label htmlFor="actualCommission">Verkaufsprovision laut Abrechnung</label>
-            <div className="input-wrap">
-              <input
-                id="actualCommission"
-                className="input"
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                placeholder={formatCurrency(fees.commissionNet).replace(/\s?€/, '')}
-                autoComplete="off"
-                value={form.actualCommission}
-                onChange={(event) => set('actualCommission', event.target.value)}
-              />
-              <span className="input-suffix">€</span>
-            </div>
-          </div>
-          <div>
-            <label htmlFor="actualTotalGross">Gesamtgebühr brutto</label>
-            <div className="input-wrap">
-              <input
-                id="actualTotalGross"
-                className="input"
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                placeholder={formatCurrency(fees.totalFeeGross).replace(/\s?€/, '')}
-                autoComplete="off"
-                value={form.actualTotalGross}
-                onChange={(event) => set('actualTotalGross', event.target.value)}
-              />
-              <span className="input-suffix">€</span>
-            </div>
-          </div>
+          {feld('actualPercent', 'Prozentsatz', {
+            type: 'number',
+            step: '0.1',
+            suffix: '%',
+            placeholder: formatPercent(fees.commissionPercent).replace(/\s?%/, ''),
+          })}
+          {feld('actualCommission', 'Verkaufsprovision', {
+            type: 'number',
+            step: '0.01',
+            suffix: '€',
+            placeholder: formatCurrency(fees.commissionNet).replace(/\s?€/, ''),
+          })}
         </div>
 
         {abweichung !== null && (
@@ -150,43 +181,39 @@ export function ReportRate({ result }: { result: CalculationResult }) {
           </p>
         )}
 
-        <div className="field">
-          <label htmlFor="exactCategory">Genaue Kategorie im Angebot</label>
-          <div className="input-wrap">
-            <input
-              id="exactCategory"
-              className="input"
-              type="text"
-              placeholder="z. B. Spielzeug &gt; Tonies"
-              autoComplete="off"
-              value={form.exactCategory}
-              onChange={(event) => set('exactCategory', event.target.value)}
-            />
-          </div>
-          <p className="hint">
-            So, wie sie im Angebot steht — gern mit Unterkategorie. Das ist die wertvollste Angabe.
-          </p>
+        <div className="field field-row">
+          {feld('actualTotalGross', 'Gesamtgebühr brutto', {
+            type: 'number',
+            step: '0.01',
+            suffix: '€',
+            placeholder: formatCurrency(fees.totalFeeGross).replace(/\s?€/, ''),
+          })}
+          {feld('exactCategory', 'Kategorie im Angebot', {
+            placeholder: 'Spielzeug › Tonies',
+          })}
+        </div>
+
+        <h3 className="report__heading">Um welchen Artikel ging es?</h3>
+        <p className="hint hint--standalone">
+          Ohne Artikelkennung lässt sich später nicht mehr nachvollziehen, welche Unterkategorie
+          gemeint war. Eine Angabe genügt — die Artikelnummer ist am eindeutigsten.
+        </p>
+
+        <div className="field">{feld('productName', 'Produktname', { placeholder: 'Logitech MX Brio Webcam' })}</div>
+
+        <div className="field field-row">
+          {feld('ean', 'EAN / GTIN', { placeholder: '4251192110466' })}
+          {feld('itemNumber', 'Artikelnummer', { placeholder: '820175879319' })}
+        </div>
+
+        <div className="field field-row">
+          {feld('orderNumber', 'Bestellnummer (freiwillig)', { placeholder: '11-15218-13403' })}
         </div>
 
         <div className="field">
-          <label htmlFor="orderNumber">Bestellnummer (freiwillig)</label>
-          <div className="input-wrap">
-            <input
-              id="orderNumber"
-              className="input"
-              type="text"
-              placeholder="11-15218-13403"
-              autoComplete="off"
-              value={form.orderNumber}
-              onChange={(event) => set('orderNumber', event.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="field">
-          <label htmlFor="reportNote">Anmerkung (freiwillig)</label>
+          <label htmlFor="note">Anmerkung (freiwillig)</label>
           <textarea
-            id="reportNote"
+            id="note"
             className="input input--area"
             rows={3}
             placeholder="Shop-Abo, Aktion, internationale Lieferung …"
@@ -197,16 +224,17 @@ export function ReportRate({ result }: { result: CalculationResult }) {
 
         <div className="form-actions">
           <a
-            className={`btn btn--primary${etwasAngegeben ? '' : ' is-disabled'}`}
-            href={etwasAngegeben ? href : undefined}
-            aria-disabled={!etwasAngegeben}
+            className={`btn btn--primary${verwertbar ? '' : ' is-disabled'}`}
+            href={verwertbar ? href : undefined}
+            aria-disabled={!verwertbar}
           >
-            Rückmeldung per E-Mail
+            Meldung senden
           </a>
         </div>
         <p className="hint">
-          Öffnet dein E-Mail-Programm mit einer fertigen Nachricht. Die Berechnung ist darin bereits
-          enthalten — du kannst alles vor dem Senden noch lesen und ändern.
+          {verwertbar
+            ? 'Öffnet dein E-Mail-Programm mit einer fertigen Nachricht. Du kannst alles vor dem Senden lesen und ändern.'
+            : 'Bitte einen tatsächlichen Wert und eine Angabe zum Artikel eintragen — sonst lässt sich die Meldung später nicht zuordnen.'}
         </p>
       </div>
     </details>
