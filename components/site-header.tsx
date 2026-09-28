@@ -13,6 +13,7 @@ export function SiteHeader() {
       <nav className="topbar__nav" aria-label="Hauptnavigation">
         <Link href="/rechner">Rechner</Link>
         <Link href="/gebuehren">Gebühren</Link>
+        <Link href="/support">Hilfe</Link>
         {PRO_AVAILABLE && <Link href="/#tarife">Tarife</Link>}
         <ThemeToggle />
       </nav>

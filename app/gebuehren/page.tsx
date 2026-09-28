@@ -93,9 +93,18 @@ function FeeTable({ marketplace }: { marketplace: Marketplace }) {
                     {category.name}
                     {perItem && <span className="fee-table__note">{perItem}</span>}
                   </th>
-                  <td>{describeStandardRate(category)}</td>
+                  {/*
+                    data-label trägt die Spaltenüberschrift mit. Auf schmalen
+                    Bildschirmen wird die Tabelle zu gestapelten Zeilen, die
+                    Kopfzeile ist dann nicht mehr sichtbar — ohne Beschriftung
+                    stünden dort bloß Zahlen ohne Bedeutung.
+                  */}
+                  <td data-label="Provision">{describeStandardRate(category)}</td>
                   {zeigtZustand && (
-                    <td className={category.reducedPercent === null ? 'is-muted' : undefined}>
+                    <td
+                      data-label="Gebraucht"
+                      className={category.reducedPercent === null ? 'is-muted' : undefined}
+                    >
                       {describeReducedRate(category)}
                     </td>
                   )}

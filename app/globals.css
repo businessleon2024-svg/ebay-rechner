@@ -1605,3 +1605,138 @@ select.input optgroup {
 .report__heading:first-of-type {
   margin-top: 0;
 }
+
+/*
+  Gebührentabelle auf schmalen Bildschirmen.
+
+  Als echte Tabelle wäre sie 552 px breit und müsste bei 375 px Bildschirm
+  seitlich gescrollt werden — die Prozentsätze lägen außerhalb und wären
+  praktisch unsichtbar. Deshalb werden die Zeilen hier gestapelt: Kategorie
+  oben, darunter die Sätze mit ihrer Beschriftung aus data-label.
+*/
+@media (max-width: 620px) {
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  .fee-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .fee-table tbody tr:not(.fee-table__group) {
+    display: block;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .fee-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .fee-table tbody th[scope='row'],
+  .fee-table tbody td {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+    white-space: normal;
+  }
+
+  .fee-table tbody th[scope='row'] {
+    margin-bottom: 0.45rem;
+    font-weight: 600;
+  }
+
+  .fee-table tbody td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: right;
+    padding: 0.2rem 0;
+  }
+
+  .fee-table tbody td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-weight: 450;
+    font-variant-numeric: normal;
+    text-align: left;
+  }
+}
+
+/* =========================================================
+   HILFE & KONTAKT
+   ========================================================= */
+
+.support {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.4fr) 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.support__link {
+  display: inline-block;
+  margin-top: 0.85rem;
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.support__link:hover {
+  text-decoration: underline;
+}
+
+.support__aside {
+  font-size: 0.87rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  border-left: 2px solid var(--border);
+  padding-left: 1.5rem;
+}
+
+.support__aside p,
+.support__aside ul {
+  margin: 0 0 1.25rem;
+}
+
+.support__aside ul {
+  padding-left: 1.1rem;
+}
+
+.support__aside li {
+  margin-bottom: 0.4rem;
+}
+
+.support__aside a {
+  color: var(--accent-text);
+}
+
+.support__aside-heading {
+  margin: 0 0 0.5rem;
+  font-size: 0.73rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+
+@media (max-width: 820px) {
+  .support {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+
+  .support__aside {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 1.5rem;
+  }
+}
