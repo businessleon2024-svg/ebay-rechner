@@ -21,6 +21,7 @@ export function SiteFooter() {
 
       <nav className="footer__links" aria-label="Rechtliches">
         <Link href="/gebuehren">Gebührenübersicht</Link>
+        <Link href="/support">Hilfe &amp; Kontakt</Link>
         <Link href="/impressum">Impressum</Link>
         <Link href="/datenschutz">Datenschutz</Link>
         <ConsentSettingsLink label="Einwilligung ändern" />
