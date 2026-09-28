@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
-import { FREE_FEATURES, PRO_FEATURES, PRO_PRICE_EUR } from '@/lib/plan';
+import { FREE_FEATURES, PRO_AVAILABLE, PRO_FEATURES, PRO_PRICE_EUR } from '@/lib/plan';
 import { formatCurrency } from '@/lib/format';
 
 const STEPS = [
@@ -43,8 +43,8 @@ export default function LandingPage() {
             <Link className="btn btn--primary btn--lg" href="/rechner">
               Kostenlos berechnen
             </Link>
-            <Link className="btn btn--ghost btn--lg" href="#extension">
-              Chrome Extension entdecken
+            <Link className="btn btn--ghost btn--lg" href="/gebuehren">
+              Alle Gebührensätze ansehen
             </Link>
           </div>
         </section>
@@ -82,12 +82,17 @@ export default function LandingPage() {
             ))}
           </ol>
           <p className="section__note">
-            Die Extension ist noch nicht verfügbar. Sie erscheint als Teil von Pro, sobald geklärt
-            ist, welche Produktdaten sich über offizielle Schnittstellen sauber und dauerhaft
-            abrufen lassen.
+            Die Extension ist noch nicht verfügbar. Sie entsteht, sobald geklärt ist, welche
+            Produktdaten sich über offizielle Schnittstellen sauber und dauerhaft abrufen lassen.
           </p>
         </section>
 
+        {/*
+          Der Tarifvergleich erscheint erst, wenn Pro auch lieferbar ist.
+          Solange nur der kostenlose Rechner existiert, würde ein Vergleich
+          einen Umfang suggerieren, den es nicht gibt.
+        */}
+        {PRO_AVAILABLE ? (
         <section className="section" id="tarife" aria-labelledby="plans-heading">
           <h2 className="section__heading" id="plans-heading">
             Tarife
@@ -129,6 +134,22 @@ export default function LandingPage() {
             </article>
           </div>
         </section>
+        ) : (
+          <section className="section" aria-labelledby="kostenlos-heading">
+            <h2 className="section__heading" id="kostenlos-heading">
+              Kostenlos und ohne Konto
+            </h2>
+            <p className="section__lead">
+              Der Rechner ist vollständig nutzbar, ohne Anmeldung und ohne Werbung. Deine Eingaben
+              bleiben in deinem Browser — sie werden nicht an uns übertragen.
+            </p>
+            <ul className="plan-card__list plan-card__list--wide">
+              {FREE_FEATURES.map((feature) => (
+                <li key={feature}>{feature}</li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
 
       <SiteFooter />

@@ -91,7 +91,8 @@ const INITIAL_STATE: FormState = {
   itemPrice: '',
   buyerShipping: '',
   purchase: '',
-  purchaseVatDeductible: false,
+  // Passend zur voreingestellten Regelbesteuerung, siehe selectTaxScheme.
+  purchaseVatDeductible: true,
   shipping: '',
   shippingVatDeductible: true,
   otherCosts: '',
@@ -220,6 +221,28 @@ export function Calculator() {
     return [...groups.entries()];
   }, [marketplace]);
 
+  /**
+   * Besteuerungsform wechseln und die davon abhängigen Schalter mitziehen.
+   *
+   * Wer regelbesteuert ist, kauft im Regelfall mit ausgewiesener Umsatzsteuer
+   * ein und zieht sie als Vorsteuer ab — der Schalter gehört dann an. Bei
+   * Differenzbesteuerung ist das Gegenteil der Fall, sie setzt einen Erwerb
+   * ohne ausgewiesene Steuer voraus. Kleinunternehmer dürfen überhaupt keine
+   * Vorsteuer ziehen.
+   *
+   * Die Schalter bleiben einzeln änderbar; hier wird nur der jeweils
+   * typische Fall vorbelegt, statt ihn jedes Mal von Hand herstellen zu
+   * lassen.
+   */
+  const selectTaxScheme = (taxScheme: TaxScheme) =>
+    setForm((current) => ({
+      ...current,
+      taxScheme,
+      purchaseVatDeductible: taxScheme === 'standard',
+      shippingVatDeductible: taxScheme !== 'small_business',
+      otherCostsVatDeductible: taxScheme !== 'small_business',
+    }));
+
   // Kategorien sind je Marktplatz verschieden – beim Wechsel auf die
   // Standardkategorie zurückfallen, statt eine unbekannte ID zu behalten.
   const selectMarketplace = (id: MarketplaceId) =>
@@ -342,7 +365,7 @@ export function Calculator() {
                 id="taxSchemeSelect"
                 className="input"
                 value={form.taxScheme}
-                onChange={(event) => update('taxScheme', event.target.value as TaxScheme)}
+                onChange={(event) => selectTaxScheme(event.target.value as TaxScheme)}
               >
                 {TAX_SCHEMES.map((scheme) => (
                   <option key={scheme.value} value={scheme.value}>

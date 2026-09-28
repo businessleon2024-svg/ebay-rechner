@@ -50,7 +50,25 @@ const UEBRIGE = 'Übrige Kategorien';
 
 const CATEGORIES: readonly FeeCategory[] = [
   // --- Geräte: einheitlich 7 %, ausgewiesene Zustände 5 % ---
-  { id: 'computer-tablets-netzwerk', externalId: '58058', group: GERAETE, name: 'Computer, Tablets & Netzwerk', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  /*
+    Achtung, an zwei echten Abrechnungen belegt: eBay weist für Geräte und für
+    Zubehör dieselbe Kategoriebezeichnung "Computer, Tablets & Netzwerk" aus,
+    rechnet aber unterschiedlich ab. Arbeitsspeicher wurde mit 7 % abgerechnet
+    (22.09.2026), eine Webcam mit 12 % (27.09.2026). Maßgeblich ist die
+    Unterkategorie, die eBay nicht veröffentlicht. Wer Zubehör verkauft, muss
+    deshalb eine der Zubehör-Kategorien wählen, nicht diese hier.
+  */
+  {
+    id: 'computer-tablets-netzwerk',
+    externalId: '58058',
+    group: GERAETE,
+    name: 'Computer, Tablets & Netzwerk (Geräte)',
+    standardPercent: 7,
+    reducedPercent: 5,
+    confidence: 'official',
+    caveat:
+      'Gilt für Geräte wie Rechner, Notebooks, Tablets oder Arbeitsspeicher. Zubehör wird trotz derselben Bezeichnung auf der Abrechnung mit 12 % abgerechnet — für Webcams, Tastaturen, Kabel oder Notebook-Zubehör bitte die passende Zubehör-Kategorie wählen.',
+  },
   { id: 'drucker', externalId: '1245', group: GERAETE, name: 'Drucker', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   { id: 'scanner', group: GERAETE, name: 'Scanner', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   { id: 'foto-camcorder', externalId: '625', group: GERAETE, name: 'Foto & Camcorder', standardPercent: 7, reducedPercent: 5, confidence: 'official' },

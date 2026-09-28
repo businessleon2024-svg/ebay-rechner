@@ -166,7 +166,10 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
             <path d="M12 16h.01" />
           </svg>
           <span>
-            <strong>Gebührensatz ungeprüft.</strong> {confidenceNote}
+            <strong>
+              {category.caveat ? 'Hinweis zur Kategorie.' : 'Gebührensatz ungeprüft.'}
+            </strong>{' '}
+            {confidenceNote}
           </span>
         </div>
       )}
