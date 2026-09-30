@@ -14,12 +14,14 @@ import {
   FIXED_FEE_UP_TO_THRESHOLD,
 } from '@/lib/fees/ebay';
 import { formatCurrency, formatMonth } from '@/lib/format';
+import { JsonLd, faqSchema } from '@/lib/structured-data';
 import type { FeeCategory, Marketplace } from '@/lib/fees/types';
 
 export const metadata: Metadata = {
   title: 'eBay- und Kaufland-Gebühren 2026 im Überblick',
   description:
     'Alle Verkaufsprovisionen für eBay und Kaufland nach Kategorie, inklusive reduziertem Satz für gebrauchte Artikel, Staffelungen und fester Verkaufsgebühr. Stand Juli 2026.',
+  alternates: { canonical: '/gebuehren' },
 };
 
 /** Kategorien nach ihrer Gruppe bündeln, Reihenfolge wie in der Konfiguration. */
@@ -121,6 +123,8 @@ function FeeTable({ marketplace }: { marketplace: Marketplace }) {
 export default function GebuehrenPage() {
   return (
     <>
+      {/* Deckt sich eins zu eins mit dem Abschnitt „Häufige Fragen“ weiter unten. */}
+      <JsonLd data={faqSchema(FAQ)} />
       <SiteHeader />
 
       <main>
