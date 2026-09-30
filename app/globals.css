@@ -303,7 +303,14 @@ a:hover {
   margin-bottom: 1.25rem;
 }
 
-.field label,
+/*
+  Die Beschriftung über einem Eingabefeld. Kontrollkästchen sind ausgenommen:
+  Sie stehen neben ihrer Beschriftung, nicht darüber, und bringen mit
+  `.checkline` ihr eigenes Layout mit. Ohne das `:not()` gewinnt `.field label`
+  wegen der höheren Spezifität und setzt `display: block` — das Kästchen wird
+  dann wie ein Buchstabe auf die Schriftlinie gesetzt und sitzt sichtbar zu hoch.
+*/
+.field label:not(.checkline),
 .field__label {
   display: block;
   font-size: 0.82rem;
@@ -405,6 +412,8 @@ select.input optgroup {
   gap: 0.55rem;
   margin-top: 0.6rem;
   font-size: 0.8rem;
+  /* Ausdrücklich gesetzt, weil die Ausrichtung des Kästchens damit rechnet. */
+  line-height: 1.5;
   font-weight: 450;
   color: var(--text-muted);
   cursor: pointer;
@@ -420,13 +429,22 @@ select.input optgroup {
     zurückgesetzt wird, und schiebt das Kästchen gegenüber der Schrift nach
     oben. Deshalb ausdrücklich auf null setzen.
   */
+  /*
+    Ohne `font: inherit` behält das Kontrollkästchen die Schriftgröße, die der
+    Browser Formularelementen von sich aus gibt (rund 13,3 px). Alle
+    schriftbezogenen Maße unten würden sich dann auf diese fremde Größe
+    beziehen statt auf die Beschriftung daneben.
+  */
+  font: inherit;
   margin: 0;
   /*
-    Das Kästchen mittig zur ersten Zeile setzen: Die Zeile ist 1,5-fach so hoch
-    wie die Schrift, das Kästchen 16 px. Der halbe Überschuss bringt beide auf
-    dieselbe Mitte — und passt sich an, wenn sich die Schriftgröße ändert.
+    Das Kästchen mittig zur ersten Textzeile setzen: halber Überschuss der
+    Zeilenhöhe über die 16 px des Kästchens. Die erste Zeile ist die
+    Rückfallebene für Browser ohne `lh`, die zweite rechnet mit der
+    tatsächlichen Zeilenhöhe und stimmt auch, wenn sie sich einmal ändert.
   */
   margin-top: calc((1.5em - 16px) / 2);
+  margin-top: calc((1lh - 16px) / 2);
   width: 16px;
   height: 16px;
   flex-shrink: 0;
@@ -1583,6 +1601,68 @@ select.input optgroup {
 
 .report {
   margin-top: 1.25rem;
+}
+
+/*
+  Der Einstieg ist als eigener Block gestaltet, nicht als weiterer kleiner
+  Aufklapp-Link zwischen den anderen. Die Meldungen sind die einzige Quelle
+  für die Sätze der Unterkategorien — wer die Möglichkeit nicht sieht, meldet
+  auch nichts, und dann gibt es die Datengrundlage nie.
+*/
+.report {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--accent-quiet);
+  padding-top: 0;
+}
+
+.report > summary {
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  font-size: 0.9rem;
+}
+
+/* Das Dreieck an der ersten Zeile ausrichten, nicht am ganzen Block. */
+.report > summary::before {
+  margin-top: 0.42em;
+}
+
+.report__prompt-lead {
+  display: block;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.report__prompt-note {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  font-weight: 450;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.report > summary:hover .report__prompt-lead {
+  color: var(--accent-text);
+}
+
+.report .advanced__body {
+  margin-top: 0;
+  padding: 0.25rem 1rem 1.15rem;
+}
+
+/* Rückmeldung zur Prüfziffer, direkt unter dem Eingabefeld. */
+.report__check {
+  margin: 0.4rem 0 0;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--negative);
+}
+
+.report__check.is-match {
+  color: var(--positive);
 }
 
 .report__delta {
