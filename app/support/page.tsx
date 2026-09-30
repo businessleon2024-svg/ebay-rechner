@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Hilfe & Kontakt',
   description:
     'Fragen zur Gebührenberechnung, Meldung abweichender Sätze, Fehlerberichte und Vorschläge zum Gebührenkompass.',
+  alternates: { canonical: '/support' },
 };
 
 const SELBSTHILFE = [

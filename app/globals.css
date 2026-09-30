@@ -97,6 +97,23 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/*
+  Grundfarbe für Verweise im Fließtext. Ohne sie zeichnet der Browser sie in
+  seinem Standardblau, das neben dem grünen Akzent wie ein Fremdkörper wirkt
+  und in der dunklen Ansicht kaum lesbar ist. Navigation, Fußzeile und
+  Schaltflächen setzen ihre eigene Farbe und bleiben davon unberührt — sie
+  sind spezifischer als diese Regel.
+*/
+a {
+  color: var(--accent-text);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
 /* =========================================================
    KOPFZEILE
    ========================================================= */

@@ -3,6 +3,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { FREE_FEATURES, PRO_AVAILABLE, PRO_FEATURES, PRO_PRICE_EUR } from '@/lib/plan';
 import { formatCurrency } from '@/lib/format';
+import { JsonLd, organizationSchema } from '@/lib/structured-data';
 
 const STEPS = [
   {
@@ -30,6 +31,7 @@ const EXTENSION_FLOW = [
 export default function LandingPage() {
   return (
     <>
+      <JsonLd data={organizationSchema()} />
       <SiteHeader />
 
       <main>
