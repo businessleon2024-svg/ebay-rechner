@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { OPERATOR } from '@/lib/site';
 import type { CalculationResult } from '@/lib/fees/types';
 import { formatCurrency, formatPercent, parseNumber } from '@/lib/format';
+import { checkGtin, normalizeGtin } from '@/lib/gtin';
 
 /**
  * Meldung abweichender Gebührensätze.
@@ -73,7 +74,9 @@ function buildMail(result: CalculationResult, form: ReportForm): string {
     line('gebuehr_brutto_gerechnet', fees.totalFeeGross),
     line('gebuehr_brutto_tatsaechlich', form.actualTotalGross.trim()),
     line('produkt', form.productName.trim()),
-    line('ean', form.ean.trim()),
+    // Normalisiert, damit „4-251192-110466" und „4251192110466" in der
+    // Sammlung später nicht als zwei verschiedene Artikel erscheinen.
+    line('ean', normalizeGtin(form.ean)),
     line('artikelnummer', form.itemNumber.trim()),
     line('bestellnummer', form.orderNumber.trim()),
     line('anmerkung', form.note.trim().replace(/\n+/g, ' ')),
@@ -111,10 +114,35 @@ export function ReportRate({ result }: { result: CalculationResult }) {
     form.actualPercent.trim() !== '' ||
     form.actualCommission.trim() !== '' ||
     form.actualTotalGross.trim() !== '';
+
+  // Eine EAN mit Zahlendreher zeigt später auf ein Produkt, das es nicht gibt.
+  // Sie zählt deshalb erst als Kennung, wenn die Prüfziffer aufgeht.
+  const eanPruefung = checkGtin(form.ean);
+  const eanHinweis = (() => {
+    switch (eanPruefung.status) {
+      case 'gueltig':
+        return { text: `Gültige EAN (GTIN-${eanPruefung.laenge}).`, gut: true };
+      case 'keine_ziffern':
+        return { text: 'Eine EAN besteht nur aus Ziffern.', gut: false };
+      case 'laenge':
+        return {
+          text: `${eanPruefung.laenge} Stellen — eine EAN hat 8, 12, 13 oder 14.`,
+          gut: false,
+        };
+      case 'pruefziffer':
+        return {
+          text: `Prüfziffer stimmt nicht, erwartet wäre ${eanPruefung.erwartet}. Bitte noch einmal vergleichen.`,
+          gut: false,
+        };
+      default:
+        return null;
+    }
+  })();
+
   const hatKennung =
     form.exactCategory.trim() !== '' ||
     form.productName.trim() !== '' ||
-    form.ean.trim() !== '' ||
+    eanPruefung.status === 'gueltig' ||
     form.itemNumber.trim() !== '';
   const verwertbar = hatWert && hatKennung;
 
@@ -124,7 +152,14 @@ export function ReportRate({ result }: { result: CalculationResult }) {
   const feld = (
     id: keyof ReportForm & string,
     label: string,
-    options: { placeholder?: string; suffix?: string; type?: string; step?: string } = {},
+    options: {
+      placeholder?: string;
+      suffix?: string;
+      type?: string;
+      step?: string;
+      inputMode?: 'numeric' | 'decimal';
+      hint?: { text: string; gut: boolean } | null;
+    } = {},
   ) => (
     <div>
       <label htmlFor={id}>{label}</label>
@@ -133,22 +168,45 @@ export function ReportRate({ result }: { result: CalculationResult }) {
           id={id}
           className="input"
           type={options.type ?? 'text'}
-          inputMode={options.type === 'number' ? 'decimal' : undefined}
+          inputMode={options.inputMode ?? (options.type === 'number' ? 'decimal' : undefined)}
           step={options.step}
           min={options.type === 'number' ? '0' : undefined}
           placeholder={options.placeholder}
           autoComplete="off"
+          aria-describedby={options.hint ? `${id}-hinweis` : undefined}
           value={form[id]}
           onChange={(event) => set(id, event.target.value)}
         />
         {options.suffix && <span className="input-suffix">{options.suffix}</span>}
       </div>
+      {options.hint && (
+        // aria-live, damit Screenreader die Rückmeldung beim Tippen mitbekommen.
+        <p
+          id={`${id}-hinweis`}
+          className={`report__check${options.hint.gut ? ' is-match' : ''}`}
+          aria-live="polite"
+        >
+          {options.hint.text}
+        </p>
+      )}
     </div>
   );
 
   return (
     <details className="advanced report">
-      <summary>Gebühr weicht ab? Hilf mit, den Rechner genauer zu machen</summary>
+      {/*
+        Bewusst als auffälliger Block gestaltet und nicht als weiterer kleiner
+        Aufklapp-Link: Wer nicht sieht, dass es die Möglichkeit gibt, meldet
+        auch nichts — und ohne Meldungen gibt es die Datengrundlage nicht.
+      */}
+      <summary>
+        <span className="report__prompt">
+          <span className="report__prompt-lead">Stimmt die Gebühr nicht mit deiner Abrechnung überein?</span>
+          <span className="report__prompt-note">
+            Trag deine echten Werte und den Artikel ein — damit wird der Rechner für alle genauer.
+          </span>
+        </span>
+      </summary>
       <div className="advanced__body">
         <p className="hint hint--standalone">
           eBay und Kaufland veröffentlichen ihre Sätze nicht für jede Unterkategorie. Kein Rechner
@@ -157,7 +215,7 @@ export function ReportRate({ result }: { result: CalculationResult }) {
           Rechner für alle.
         </p>
 
-        <h3 className="report__heading">Was stand auf der Abrechnung?</h3>
+        <h3 className="report__heading">Schritt 1 — Was stand auf der Abrechnung?</h3>
         <div className="field field-row">
           {feld('actualPercent', 'Prozentsatz', {
             type: 'number',
@@ -193,7 +251,7 @@ export function ReportRate({ result }: { result: CalculationResult }) {
           })}
         </div>
 
-        <h3 className="report__heading">Um welchen Artikel ging es?</h3>
+        <h3 className="report__heading">Schritt 2 — Um welchen Artikel ging es?</h3>
         <p className="hint hint--standalone">
           Ohne Artikelkennung lässt sich später nicht mehr nachvollziehen, welche Unterkategorie
           gemeint war. Eine Angabe genügt — die Artikelnummer ist am eindeutigsten.
@@ -202,7 +260,11 @@ export function ReportRate({ result }: { result: CalculationResult }) {
         <div className="field">{feld('productName', 'Produktname', { placeholder: 'Logitech MX Brio Webcam' })}</div>
 
         <div className="field field-row">
-          {feld('ean', 'EAN / GTIN', { placeholder: '4251192110466' })}
+          {feld('ean', 'EAN / GTIN', {
+            placeholder: '4251192110466',
+            inputMode: 'numeric',
+            hint: eanHinweis,
+          })}
           {feld('itemNumber', 'Artikelnummer', { placeholder: '820175879319' })}
         </div>
 
