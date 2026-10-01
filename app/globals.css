@@ -473,6 +473,78 @@ select.input optgroup {
   color: var(--text);
 }
 
+/* =========================================================
+   EAN-ABFRAGE
+   ========================================================= */
+
+.ean-lookup__fehler {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--negative);
+}
+
+/*
+  Der Befund steht eingerückt hinter einer farbigen Kante statt in einem
+  eigenen Kasten. Er gehört zum Feld darüber, und ein weiterer Rahmen im
+  Formular würde die Ebenen stapeln, ohne etwas zu trennen.
+*/
+.ean-lookup__befund {
+  margin-top: 0.6rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--accent);
+}
+
+.ean-lookup__satz {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 450;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.ean-lookup__beleg {
+  margin: 0.3rem 0 0;
+  font-size: 0.76rem;
+  font-weight: 450;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+.ean-lookup__treffer {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--positive);
+}
+
+.ean-lookup__abweichung {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 450;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.ean-lookup__aktion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.45rem;
+}
+
+.ean-lookup__aktion .ean-lookup__abweichung {
+  margin: 0;
+  flex: 1 1 14rem;
+}
+
+.btn--small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.78rem;
+}
+
 /* Aufklappbarer Detailbereich */
 .advanced {
   border-top: 1px solid var(--border);
