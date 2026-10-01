@@ -1,4 +1,5 @@
 import { werteAntwortAus, type GtinBefund } from './browse';
+import { baueKategoriekarte, type Kategoriepfad } from './taxonomy';
 
 /**
  * Zugriff auf die eBay Browse API.
@@ -85,6 +86,46 @@ async function holeToken(zugangsdaten: EbayZugang): Promise<string> {
   return tokenSpeicher.token;
 }
 
+const TAXONOMY_BASIS = 'https://api.ebay.com/commerce/taxonomy/v1';
+
+/**
+ * Kategoriebaum des Marktplatzes, einmal geholt und als flache Karte gehalten.
+ *
+ * Die Antwort umfasst zehntausende Knoten — sie je Abfrage zu holen wäre
+ * absurd. Einmal geholt kostet jede weitere Auflösung nichts mehr, weder Zeit
+ * noch Abrufkontingent. Kategoriebäume ändern sich selten; eine Serverinstanz
+ * lebt ohnehin kürzer als der Baum stabil bleibt.
+ */
+let baumSpeicher: { marketplaceId: string; karte: Map<string, Kategoriepfad> } | null = null;
+
+async function kategoriekarte(
+  zugangsdaten: EbayZugang,
+  token: string,
+): Promise<Map<string, Kategoriepfad>> {
+  if (baumSpeicher?.marketplaceId === zugangsdaten.marketplaceId) return baumSpeicher.karte;
+
+  const kopf = { Authorization: `Bearer ${token}` };
+
+  // Die Baumnummer hängt am Marktplatz und ist nicht geraten, sondern erfragt.
+  const idAntwort = await fetch(
+    `${TAXONOMY_BASIS}/get_default_category_tree_id?marketplace_id=${zugangsdaten.marketplaceId}`,
+    { headers: kopf, cache: 'no-store' },
+  );
+  if (!idAntwort.ok) throw new Error(`Baumnummer nicht abrufbar (HTTP ${idAntwort.status}).`);
+  const { categoryTreeId } = (await idAntwort.json()) as { categoryTreeId?: string };
+  if (!categoryTreeId) throw new Error('Antwort enthielt keine Baumnummer.');
+
+  const baumAntwort = await fetch(`${TAXONOMY_BASIS}/category_tree/${categoryTreeId}`, {
+    headers: { ...kopf, 'Accept-Encoding': 'gzip' },
+    cache: 'no-store',
+  });
+  if (!baumAntwort.ok) throw new Error(`Kategoriebaum nicht abrufbar (HTTP ${baumAntwort.status}).`);
+
+  const karte = baueKategoriekarte(await baumAntwort.json());
+  baumSpeicher = { marketplaceId: zugangsdaten.marketplaceId, karte };
+  return karte;
+}
+
 const ergebnisSpeicher = new Map<string, { befund: GtinBefund; gueltigBis: number }>();
 
 /** Sucht Angebote zu einer EAN und zählt aus, in welchen Kategorien sie stehen. */
@@ -119,6 +160,26 @@ export async function kategorienZuGtin(
   }
 
   const befund = werteAntwortAus(gtin, await antwort.json());
-  ergebnisSpeicher.set(gtin, { befund, gueltigBis: Date.now() + ERGEBNIS_HALTBARKEIT_MS });
-  return befund;
+
+  /*
+    Pfade ergänzen. Scheitert der Baumabruf, bleibt der Befund trotzdem
+    nutzbar — die Kategorienummern allein tragen das Ergebnis schon, der Pfad
+    macht es nur lesbar. Ein Ausfall hier darf die Abfrage nicht umwerfen.
+  */
+  let mitPfad = befund;
+  try {
+    const karte = await kategoriekarte(zugangsdaten, token);
+    mitPfad = {
+      ...befund,
+      kategorien: befund.kategorien.map((eintrag) => ({
+        ...eintrag,
+        pfad: karte.get(eintrag.id),
+      })),
+    };
+  } catch (fehler) {
+    console.error('Kategoriebaum nicht verfügbar, Pfade fehlen:', fehler);
+  }
+
+  ergebnisSpeicher.set(gtin, { befund: mitPfad, gueltigBis: Date.now() + ERGEBNIS_HALTBARKEIT_MS });
+  return mitPfad;
 }

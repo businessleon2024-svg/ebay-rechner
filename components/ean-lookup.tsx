@@ -25,7 +25,11 @@ interface Kategorie {
   name?: string;
   anzahl: number;
   anteil: number;
+  /** Vollständiger Pfad, etwa „Computer, Tablets & Netzwerk › Webcams". */
+  pfadText?: string;
   hinterlegteKategorie: { id: string; name: string } | null;
+  /** Auf welcher Ebene die Zuordnung gelang. */
+  treffer: 'exakt' | 'hauptkategorie' | 'keiner';
 }
 
 interface Befund {
@@ -180,12 +184,25 @@ export function EanLookup({
           <div className="ean-lookup__befund">
             <p className="ean-lookup__satz">
               eBay-Angebote zu dieser EAN stehen überwiegend unter{' '}
-              <strong>{beste.name ?? `Kategorie ${beste.id}`}</strong> —{' '}
+              <strong>{beste.pfadText ?? beste.name ?? `Kategorie ${beste.id}`}</strong> —{' '}
               {beste.anzahl} von {befund!.ausgewertet} Angeboten.
             </p>
 
             {befund!.beispielTitel && (
               <p className="ean-lookup__beleg">Beispiel: {befund!.beispielTitel}</p>
+            )}
+
+            {/*
+              Ein Treffer über die Hauptkategorie ist eine schwächere Auskunft
+              als ein exakter: Die Unterkategorie kann abweichend abgerechnet
+              werden, genau wie bei Webcams und Streaming-Sticks. Das wird
+              gesagt, statt es unter den Tisch fallen zu lassen.
+            */}
+            {beste.treffer === 'hauptkategorie' && (
+              <p className="ean-lookup__abweichung">
+                Für diese Unterkategorie ist kein eigener Satz hinterlegt — gerechnet wird mit der
+                Hauptkategorie darüber. Unterkategorien werden mitunter abweichend abgerechnet.
+              </p>
             )}
 
             {beste.hinterlegteKategorie ? (
@@ -210,9 +227,8 @@ export function EanLookup({
               )
             ) : (
               <p className="ean-lookup__abweichung">
-                Für diese Unterkategorie ist hier kein eigener Satz hinterlegt — gerechnet wird mit
-                der Hauptkategorie, der tatsächliche Satz kann abweichen. Wenn deine Abrechnung da
-                ist, trag sie bitte unten ein.
+                Zu dieser Kategorie ist hier kein Satz hinterlegt — auch keiner auf höherer Ebene.
+                Bitte von Hand wählen und, sobald deine Abrechnung da ist, unten melden.
               </p>
             )}
           </div>
