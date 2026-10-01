@@ -12,6 +12,7 @@ import type {
   TaxScheme,
 } from '@/lib/fees/types';
 import { parseNumber } from '@/lib/format';
+import { EanLookup } from './ean-lookup';
 import { ResultPanel } from './result-panel';
 
 const STORAGE_KEY = 'ebayCalc.v3';
@@ -408,6 +409,18 @@ export function Calculator() {
               </Link>
             </p>
           </div>
+
+          {/*
+            Nur bei eBay: Die Abfrage beruht auf eBay-Angeboten, für Kaufland
+            gibt es keine entsprechende Quelle. Ohne hinterlegte Zugangsdaten
+            blendet sich der Block selbst aus.
+          */}
+          {marketplace.id === 'ebay' && (
+            <EanLookup
+              gewaehlteKategorie={form.categoryId}
+              aufKategorie={(categoryId) => update('categoryId', categoryId)}
+            />
+          )}
 
           {marketplace.hasConditionDiscount ? (
             <div className="field">
