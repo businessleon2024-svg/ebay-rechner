@@ -13,6 +13,7 @@ import type {
   TaxScheme,
 } from '@/lib/fees/types';
 import { parseNumber } from '@/lib/format';
+import { CategorySuggest } from './category-suggest';
 import { EanLookup } from './ean-lookup';
 import { ResultPanel } from './result-panel';
 
@@ -419,6 +420,17 @@ export function Calculator() {
             gibt es keine entsprechende Quelle. Ohne hinterlegte Zugangsdaten
             blendet sich der Block selbst aus.
           */}
+          {/*
+            Steht direkt unter der Auswahlliste, weil es deren Lücke schließt:
+            Dort stehen Hauptkategorien, verkauft werden Unterkategorien.
+          */}
+          {marketplace.id === 'ebay' && (
+            <CategorySuggest
+              gewaehlteKategorie={form.categoryId}
+              aufKategorie={(categoryId) => update('categoryId', categoryId)}
+            />
+          )}
+
           {marketplace.id === 'ebay' && (
             <EanLookup
               gewaehlteKategorie={form.categoryId}

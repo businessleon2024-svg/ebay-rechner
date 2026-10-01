@@ -474,6 +474,71 @@ select.input optgroup {
 }
 
 /* =========================================================
+   KATEGORIEVORSCHLÄGE
+   ========================================================= */
+
+/*
+  Jeder Treffer steht hinter einer farbigen Kante statt in einem eigenen
+  Kasten — er gehört zum Suchfeld darüber, und gestapelte Flächen im Formular
+  trennen nichts, sie machen nur Rauschen.
+*/
+.suggest__treffer {
+  margin-top: 0.7rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border-strong);
+}
+
+.suggest__kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.suggest__name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.suggest__marke {
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: help;
+}
+
+/* Belegt und vermutet müssen sich auf einen Blick unterscheiden. */
+.suggest__marke--belegt {
+  background: var(--accent-quiet);
+  color: var(--accent-text);
+}
+
+.suggest__marke--vermutung {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px dashed var(--border-strong);
+}
+
+.suggest__grund {
+  margin: 0.3rem 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 450;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.suggest__gewaehlt {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--positive);
+}
+
+/* =========================================================
    EAN-ABFRAGE
    ========================================================= */
 
