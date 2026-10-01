@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { kategorienZuGtin, zugang } from '@/lib/ebay-api/client';
 import { checkGtin } from '@/lib/gtin';
 import { EBAY } from '@/lib/fees/marketplaces';
+import { hinterlegterVorfahr, pfadAlsText } from '@/lib/ebay-api/taxonomy';
 
 /**
  * Schlägt zu einer EAN nach, in welche eBay-Kategorien das Produkt
@@ -38,13 +39,37 @@ export async function GET(request: Request) {
   try {
     const befund = await kategorienZuGtin(pruefung.normalized, zugangsdaten);
 
-    // Nur wo eine eBay-Kategorie einer hinterlegten entspricht, lässt sich ein
-    // Satz nennen. Alles andere bleibt bewusst offen, statt zu raten.
+    /*
+      Zuordnung in zwei Schritten, nie über Namensähnlichkeit.
+
+      Zuerst die Blattkategorie selbst — trifft nur, wenn genau sie hinterlegt
+      ist. Sonst über den Kategoriepfad die nächsthöhere hinterlegte Ebene.
+      Genau das löst den Webcam-Fall: Die Unterkategorie kennt der Rechner
+      nicht, die Hauptkategorie darüber schon.
+
+      Mitgeliefert wird außerdem, auf welcher Ebene der Treffer entstand. Eine
+      Hauptkategorie ist eine schwächere Auskunft als ein exakter Treffer, und
+      das soll die Oberfläche unterscheiden können.
+    */
+    const bekannteNummern = new Set(
+      EBAY.categories
+        .map((kategorie) => kategorie.externalId)
+        .filter((id): id is string => id !== undefined),
+    );
+
     const kategorien = befund.kategorien.map((eintrag) => {
-      const hinterlegt = EBAY.categories.find((kategorie) => kategorie.externalId === eintrag.id);
+      const direkt = EBAY.categories.find((kategorie) => kategorie.externalId === eintrag.id);
+      const ueberPfad = direkt
+        ? undefined
+        : hinterlegterVorfahr(eintrag.pfad, bekannteNummern);
+      const hinterlegt =
+        direkt ?? EBAY.categories.find((kategorie) => kategorie.externalId === ueberPfad);
+
       return {
         ...eintrag,
+        pfadText: pfadAlsText(eintrag.pfad),
         hinterlegteKategorie: hinterlegt ? { id: hinterlegt.id, name: hinterlegt.name } : null,
+        treffer: direkt ? 'exakt' : hinterlegt ? 'hauptkategorie' : 'keiner',
       };
     });
 

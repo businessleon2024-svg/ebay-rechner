@@ -16,6 +16,8 @@
  * geprüft werden kann.
  */
 
+import type { Kategoriepfad } from './taxonomy';
+
 /** Was von einem Angebot gebraucht wird. Alles andere wird ignoriert. */
 interface RohesAngebot {
   /**
@@ -36,6 +38,11 @@ export interface KategorieBefund {
   anzahl: number;
   /** Anteil an allen ausgewerteten Angeboten, 0 bis 1. */
   anteil: number;
+  /**
+   * Vollständiger Kategoriepfad, sofern der Kategoriebaum vorlag. Er wird
+   * nachträglich ergänzt, deshalb hier wahlfrei.
+   */
+  pfad?: Kategoriepfad;
 }
 
 export interface GtinBefund {
