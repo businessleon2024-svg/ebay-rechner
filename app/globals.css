@@ -74,7 +74,15 @@
   --radius-sm: 8px;
   --transition: 130ms ease;
   --shell: 1200px;
-  --gutter: clamp(1rem, 4vw, 2.5rem);
+  /*
+    Seitenabstand einschließlich der Gerätezonen. Als installierte App läuft
+    der Inhalt bis an den Rand des Bildschirms — im Querformat ragt bei
+    Geräten mit Aussparung sonst Text unter die Kamera.
+
+    `env()` ist überall dort 0, wo es keine solchen Zonen gibt, auf dem
+    Rechner ändert sich also nichts.
+  */
+  --gutter: calc(clamp(1rem, 4vw, 2.5rem) + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)));
 }
 
 * {
@@ -125,7 +133,12 @@ a:hover {
   gap: 1rem;
   max-width: var(--shell);
   margin: 0 auto;
-  padding: 1.15rem var(--gutter);
+  /*
+    Oben kommt die Höhe der Statusleiste dazu. Als installierte App beginnt
+    der Inhalt am oberen Bildschirmrand, nicht unterhalb der Uhr — ohne
+    diesen Abstand läge das Logo hinter Uhrzeit und Akkustand.
+  */
+  padding: calc(1.15rem + env(safe-area-inset-top, 0px)) var(--gutter) 1.15rem;
 }
 
 .topbar__brand {
@@ -1535,7 +1548,11 @@ select.input optgroup {
 .consent__inner {
   max-width: var(--shell);
   margin: 0 auto;
-  padding: 1.35rem var(--gutter);
+  /*
+    Der Einwilligungsdialog klebt am unteren Rand. Ohne den Abstand lägen
+    seine Schaltflächen unter der Gestenleiste und wären kaum zu treffen.
+  */
+  padding: 1.35rem var(--gutter) calc(1.35rem + env(safe-area-inset-bottom, 0px));
 }
 
 .consent__title {
@@ -1632,7 +1649,8 @@ select.input optgroup {
 .footer {
   max-width: var(--shell);
   margin: 0 auto;
-  padding: 2.25rem var(--gutter) 3.5rem;
+  /* Unten der Streifen für die Gestenleiste, sonst klebt der Text darauf. */
+  padding: 2.25rem var(--gutter) calc(3.5rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border);
   color: var(--text-faint);
   font-size: 0.8rem;
@@ -1701,8 +1719,30 @@ select.input optgroup {
     grid-template-columns: 1fr;
   }
 
+  /*
+    Marke und Navigation passen auf schmalen Geräten nicht nebeneinander:
+    bei 344 px Bildschirmbreite ragte die Kopfzeile 123 px nach rechts hinaus
+    und war dort abgeschnitten. Statt die Schrift immer weiter zu verkleinern
+    rutscht die Navigation in eine zweite Zeile.
+  */
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+
   .topbar__nav {
-    gap: 1rem;
+    gap: 1.1rem;
+    /* Füllt die zweite Zeile, damit der Umschalter rechts außen sitzt. */
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  /*
+    Vergrößert die Trefferfläche der Verweise, ohne sie optisch zu verändern.
+    Reine Textzeilen von 22 px Höhe sind mit dem Daumen schwer zu treffen.
+  */
+  .topbar__nav a {
+    padding: 0.5rem 0;
   }
 }
 
