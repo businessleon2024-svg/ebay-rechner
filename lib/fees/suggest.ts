@@ -38,7 +38,7 @@ interface Regel {
   Abrechnungen, die dem Rechner schon mehrere Fehler nachgewiesen haben.
 */
 const REGELN: readonly Regel[] = [
-  // --- Belegt: die Fälle, an denen sich der Rechner nachweislich verrechnet hat
+  // --- Belegt: an echten Gebührenabrechnungen abgelesen ---
   {
     woerter: ['webcam', 'tastatur', 'keyboard', 'maus', 'mouse', 'mousepad', 'mauspad'],
     categoryId: 'tastaturen-maeuse',
@@ -105,8 +105,62 @@ const REGELN: readonly Regel[] = [
     sicherheit: 'belegt',
     grund: 'Beleuchtung und Küchenausstattung fallen unter Möbel & Wohnen mit 14 % — an mehreren Abrechnungen belegt.',
   },
+  {
+    woerter: ['hülle', 'huelle', 'case', 'schutzhülle', 'schutzhuelle', 'displayschutz'],
+    categoryId: 'handy-zubehoer',
+    sicherheit: 'belegt',
+    grund:
+      'Schutzhüllen zählen zum Zubehör mit 12 %, nicht zum Gerät mit 7 % — an einer Abrechnung über eine Samsung-Hülle vom August 2026 belegt.',
+  },
+  {
+    woerter: ['gaming headset', 'gaming-headset', 'gaming headsets'],
+    categoryId: 'zubehoer-pc-videospiele',
+    sicherheit: 'belegt',
+    grund:
+      'Gaming-Headsets kosten 12 %, gewöhnliche Kopfhörer dagegen 7 % — an zwei Abrechnungen aus Juli 2026 belegt. Vor der Reform im Juli lagen auch Gaming-Headsets noch beim Gerätesatz.',
+  },
+  {
+    woerter: ['kopfhörer', 'kopfhoerer', 'ohrhörer', 'ohrhoerer', 'in-ear', 'earbuds', 'lautsprecher', 'soundbar'],
+    categoryId: 'tv-video-audio',
+    sicherheit: 'belegt',
+    grund:
+      'Kopfhörer und Lautsprecher zählen zu den Geräten mit 7 % — an mehreren Abrechnungen aus Juli und August 2026 belegt. Achtung: Gaming-Headsets werden mit 12 % abgerechnet.',
+  },
+  {
+    woerter: ['videotürklingel', 'videotuerklingel', 'türklingel', 'tuerklingel', 'überwachungskamera', 'ueberwachungskamera', 'außenkamera', 'aussenkamera', 'innenkamera'],
+    categoryId: 'heimwerker',
+    sicherheit: 'belegt',
+    grund:
+      'Sicherheitstechnik wie Videotürklingeln und Überwachungskameras kostet 13 % — an drei Abrechnungen aus Juli und August 2026 belegt, nicht der Gerätesatz von 7 %.',
+  },
+  {
+    woerter: ['laubbläser', 'laubblaeser', 'freischneider', 'rasenmäher', 'rasenmaeher', 'heckenschere', 'vertikutierer'],
+    categoryId: 'garten-terrasse',
+    sicherheit: 'belegt',
+    grund: 'Gartengeräte kosten 13 % — an Akku-Freischneider und Laubbläser belegt.',
+  },
+  {
+    woerter: ['solarmodul', 'solarpanel', 'balkonkraftwerk', 'photovoltaik'],
+    categoryId: 'heimwerker',
+    sicherheit: 'belegt',
+    grund:
+      'Solarmodule kosten 13 % — an einer Abrechnung vom Juli 2026 belegt. Garten & Terrasse hat denselben Satz, die Einordnung ändert hier also nichts.',
+  },
+  {
+    woerter: ['controller', 'joy-con', 'joycon', 'gamepad', 'ladestation für controller'],
+    categoryId: 'zubehoer-pc-videospiele',
+    sicherheit: 'belegt',
+    grund: 'Zubehör zu Konsolen kostet 12 %, die Konsole selbst 7 % — an einer Joy-Con-Halterung belegt.',
+  },
+  {
+    woerter: ['spielzeug', 'lego', 'puppenhaus', 'kugelbahn', 'brettspiel'],
+    categoryId: 'spielzeug',
+    sicherheit: 'belegt',
+    grund:
+      'Spielzeug ist gestaffelt: 12 % bis 990 €, darüber 3 % — an Abrechnungen über LEGO, Hubelino und ein Puppenhaus belegt.',
+  },
 
-  // --- Vermutungen: begründet, aber nicht an einer Abrechnung geprüft
+  // --- Vermutungen: begründet, aber nicht an einer Abrechnung geprüft ---
   {
     woerter: ['reinigungsmittel', 'putzmittel', 'waschmittel', 'spülmittel', 'spuelmittel', 'reiniger für', 'pflegemittel'],
     categoryId: 'moebel-wohnen',
@@ -126,25 +180,6 @@ const REGELN: readonly Regel[] = [
     categoryId: 'kabel-steckverbinder',
     sicherheit: 'vermutung',
     grund: 'Verbindungszubehör fällt üblicherweise unter Kabel & Steckverbinder mit 12 %.',
-  },
-  {
-    woerter: ['hülle', 'huelle', 'case', 'schutzhülle', 'schutzhuelle', 'displayschutz'],
-    categoryId: 'handy-zubehoer',
-    sicherheit: 'vermutung',
-    grund: 'Schutzhüllen zählen zum Zubehör mit 12 %, nicht zum Gerät mit 7 %.',
-  },
-  {
-    woerter: ['kopfhörer', 'kopfhoerer', 'headset', 'lautsprecher', 'soundbar'],
-    categoryId: 'tv-video-audio',
-    sicherheit: 'vermutung',
-    grund:
-      'Lautsprecher und Kopfhörer zählen zu den Geräten mit 7 %. Gaming-Headsets werden dagegen als Zubehör mit 12 % abgerechnet — hier lohnt der Blick auf die Abrechnung.',
-  },
-  {
-    woerter: ['spielzeug', 'lego', 'puppenhaus', 'kugelbahn', 'brettspiel'],
-    categoryId: 'spielzeug',
-    sicherheit: 'vermutung',
-    grund: 'Spielzeug ist gestaffelt: 12 % bis 990 €, darüber 3 %.',
   },
   {
     woerter: ['konsole', 'playstation', 'xbox', 'nintendo switch'],

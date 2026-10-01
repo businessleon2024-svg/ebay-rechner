@@ -86,4 +86,38 @@ describe('schlageKategorienVor', () => {
   it('ist unabhängig von Groß- und Kleinschreibung', () => {
     expect(schlageKategorienVor('WEBCAM')[0].category.id).toBe('tastaturen-maeuse');
   });
+
+  it('trennt Gaming-Headsets von gewöhnlichen Kopfhörern', () => {
+    /*
+      Diese Unterscheidung war zuerst als pauschale Vermutung mit 7 % im Code
+      und wurde von den Abrechnungen widerlegt: Nach der Reform im Juli 2026
+      kosten Gaming-Headsets 12 %, Kopfhörer weiterhin 7 %.
+    */
+    const [gaming] = schlageKategorienVor('Turtle Beach Stealth 600 Gaming Headset');
+    const [kopfhoerer] = schlageKategorienVor('Bose QuietComfort Ultra Bluetooth-Kopfhörer');
+
+    expect(gaming.category.standardPercent).toBe(12);
+    expect(gaming.sicherheit).toBe('belegt');
+    expect(kopfhoerer.category.standardPercent).toBe(7);
+    expect(kopfhoerer.sicherheit).toBe('belegt');
+  });
+
+  it('ordnet Sicherheitstechnik nicht dem Gerätesatz zu', () => {
+    // Ring-Türklingel und Blink-Kameras liefen mit 13 %, nicht mit 7 %.
+    const [klingel] = schlageKategorienVor('Ring Akku-Videotürklingel 2K');
+    expect(klingel.category.standardPercent).toBe(13);
+    expect(klingel.sicherheit).toBe('belegt');
+  });
+
+  it('erkennt Gartengeräte getrennt von Heimwerker-Artikeln', () => {
+    const [garten] = schlageKategorienVor('Ryobi Akku-Laubbläser 18V');
+    expect(garten.category.id).toBe('garten-terrasse');
+    expect(garten.category.standardPercent).toBe(13);
+  });
+
+  it('unterscheidet Konsolenzubehör vom Gerät', () => {
+    const [zubehoer] = schlageKategorienVor('Nintendo Joy-Con 2 Aufladehalterung');
+    expect(zubehoer.category.id).toBe('zubehoer-pc-videospiele');
+    expect(zubehoer.category.standardPercent).toBe(12);
+  });
 });

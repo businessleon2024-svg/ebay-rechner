@@ -9,6 +9,7 @@ import {
 } from '@/lib/fees/describe';
 import { EBAY, KAUFLAND } from '@/lib/fees/marketplaces';
 import {
+  BELOW_STANDARD_SURCHARGE_PERCENT,
   FIXED_FEE_ABOVE_THRESHOLD,
   FIXED_FEE_THRESHOLD_EUR,
   FIXED_FEE_UP_TO_THRESHOLD,
@@ -52,9 +53,13 @@ const FAQ = [
       'Wenn zwei Bedingungen zusammenkommen. Erstens muss der Artikelzustand passen: „Neu: Sonstige“, alle Refurbished-Abstufungen, „Vom Verkäufer generalüberholt“ sowie alle Gebraucht-Abstufungen. Zweitens muss die Kategorie daran teilnehmen — das tun längst nicht alle. In der Tabelle oben steht bei jeder Kategorie, ob ein reduzierter Satz gilt. Kaufland kennt keinen Zustandsrabatt.',
   },
   {
+    frage: 'Was kostet ein unterdurchschnittlicher Servicestatus?',
+    antwort: `Zusätzlich zur regulären Provision ${BELOW_STANDARD_SURCHARGE_PERCENT} % des Transaktionsbetrags. Auf der Abrechnung steht die Position als „Erhöhte Verkaufsprovision bei Servicestatus Unterdurchschnittlich“. Sie wiegt schwerer, als die Zahl vermuten lässt: Bei einer Kamera für 738,99 € standen 39,67 € reguläre Provision und 39,60 € Zuschlag nebeneinander — die Gebühr hat sich damit fast verdoppelt. Anders als die Provision folgt der Zuschlag keiner Staffelung; bei einem Lautsprecher für 638,49 € lag die Provision wegen der Staffel bei 5,74 %, der Zuschlag aber bei vollen 6,00 %. Beides ist an echten Abrechnungen abgelesen. Im Rechner lässt sich der Zuschlag unter „Weitere Kosten & Zielgewinn“ zuschalten.`,
+  },
+  {
     frage: 'Warum weichen meine tatsächlichen Gebühren ab?',
     antwort:
-      'Dafür gibt es mehrere übliche Gründe. Die Tabelle führt Hauptkategorien; einzelne Unterkategorien können abweichende Sätze haben, die die Marktplätze nicht vollständig öffentlich ausweisen. Dazu kommen ein Shop-Abo, laufende Aktionen, Werbekosten, internationale Verkäufe und der Servicestatus des Kontos. Maßgeblich ist immer die tatsächliche Abrechnung.',
+      'Dafür gibt es mehrere übliche Gründe. Die Tabelle führt Hauptkategorien; einzelne Unterkategorien können abweichende Sätze haben, die die Marktplätze nicht vollständig öffentlich ausweisen — ein Streaming-Stick etwa erscheint unter „TV, Video & Audio“ mit 7 %, kostet aber 12 %. Dazu kommen ein Shop-Abo, laufende Aktionen, Werbekosten, internationale Verkäufe und der Servicestatus des Kontos. Maßgeblich ist immer die tatsächliche Abrechnung.',
   },
   {
     frage: 'Sind die genannten Sätze netto oder brutto?',
