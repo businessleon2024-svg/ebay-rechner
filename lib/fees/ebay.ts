@@ -27,6 +27,28 @@ export const FIXED_FEE_UP_TO_THRESHOLD = 0.35;
 export const FIXED_FEE_ABOVE_THRESHOLD = 0.45;
 export const FIXED_FEE_THRESHOLD_EUR = 10;
 
+/**
+ * Zuschlag bei Servicestatus „Unterdurchschnittlich", in Prozent des
+ * Transaktionsbetrags — zusätzlich zur regulären Provision, nicht statt ihr.
+ *
+ * An 34 Abrechnungszeilen aus Februar 2026 abgelesen; 33 davon weisen glatte
+ * 6,00 % aus. Anders als die Provision ist der Zuschlag **nicht gestaffelt**:
+ * Bei einem Lautsprecher für 638,49 € lag die Provision dank Staffel bei
+ * 5,74 %, der Zuschlag aber bei vollen 6,00 %.
+ *
+ * Eine einzige Zeile passt nicht ins Bild — eine Kamera für 738,99 € mit
+ * 39,60 € statt der erwarteten 44,34 €. Das entspräche 6 % auf 660 €, also
+ * auf einen um knapp 79 € kleineren Betrag. Möglich, dass der Zuschlag den
+ * vom Käufer gezahlten Versand auslässt; die Abrechnung weist Artikelpreis
+ * und Versand aber nicht getrennt aus, und ein einzelner Fall trägt keine
+ * Regel. Deshalb hier glatte 6 % auf den Transaktionsbetrag.
+ *
+ * Er wiegt schwer: Bei derselben Kamera standen 39,67 € reguläre Provision
+ * und 39,60 € Zuschlag nebeneinander — der Servicestatus hat die Gebühr dort
+ * fast verdoppelt.
+ */
+export const BELOW_STANDARD_SURCHARGE_PERCENT = 6;
+
 /** Pauschalsatz für die von eBay ausgewiesenen Zustände und Kategorien. */
 export const REDUCED_CONDITION_PERCENT = 5;
 
@@ -75,7 +97,16 @@ const CATEGORIES: readonly FeeCategory[] = [
   { id: 'objektive', externalId: '3323', group: GERAETE, name: 'Objektive', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   { id: 'handys-kommunikation', externalId: '15032', group: GERAETE, name: 'Handys & Kommunikation', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   { id: 'haushaltsgeraete', externalId: '20710', group: GERAETE, name: 'Haushaltsgeräte', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'tv-video-audio', group: GERAETE, name: 'TV, Video & Audio', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  {
+    id: 'tv-video-audio',
+    group: GERAETE,
+    name: 'TV, Video & Audio',
+    standardPercent: 7,
+    reducedPercent: 5,
+    confidence: 'official',
+    caveat:
+      'Gilt für Fernseher, Lautsprecher, Kopfhörer und vergleichbare Geräte. Streaming-Sticks werden trotz derselben Hauptkategorie mit 12 % abgerechnet — dafür gibt es einen eigenen Eintrag.',
+  },
   { id: 'konsolen-pc-videospiele', group: GERAETE, name: 'Konsolen: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   { id: 'ersatzteile-pc-videospiele', externalId: '171833', group: GERAETE, name: 'Ersatzteile & Werkzeuge: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   { id: 'speicherkarten-foto', externalId: '18871', group: GERAETE, name: 'Speicherkarten: Foto & Camcorder', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
@@ -100,6 +131,25 @@ const CATEGORIES: readonly FeeCategory[] = [
   { id: 'zubehoer-tragbare-audio', group: ZUBEHOER, name: 'Zubehör für tragbare Audiogeräte', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
   { id: 'zubehoer-pc-videospiele', group: ZUBEHOER, name: 'Zubehör: PC & Videospiele', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
   { id: 'ersatzteile-tv-video-audio', group: ZUBEHOER, name: 'Ersatzteile & Werkzeuge: TV, Video & Audio', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  /*
+    Dieselbe Falle wie bei Computer-Zubehör: Auf der Abrechnung steht die
+    Hauptkategorie TV, Video & Audio mit 7 %, abgerechnet werden aber 12 %.
+    Zwei unabhängige Produktreihen aus Juli 2026 zeigen es übereinstimmend:
+      09.07.2026  23,40 € × 12,01 % = 2,81 €  (Fire TV Stick)
+      10.07.2026  57,49 € × 12,00 % = 6,90 €  (Waipu-Stick)
+    Zur Abgrenzung: Smarte Lautsprecher mit Bildschirm bleiben bei 7 %,
+    an 45 Verkäufen derselben Abrechnungen belegt.
+  */
+  {
+    id: 'streaming-geraete',
+    group: ZUBEHOER,
+    name: 'Streaming-Geräte (Sticks & Boxen)',
+    standardPercent: 12,
+    reducedPercent: 5,
+    confidence: 'official',
+    caveat:
+      'Streaming-Sticks und -Boxen erscheinen auf der Abrechnung unter TV, Video & Audio, werden aber mit 12 % abgerechnet statt mit 7 %. Smarte Lautsprecher und Displays fallen dagegen unter die 7 %.',
+  },
 
   // --- Weitere reformierte Kategorien ---
   { id: 'business-industrie', group: WEITERE, name: 'Business & Industrie', standardPercent: 14, reducedPercent: 5, confidence: 'official' },
@@ -124,23 +174,50 @@ const CATEGORIES: readonly FeeCategory[] = [
   { id: 'filme-serien', group: UEBRIGE, name: 'Filme & Serien', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   { id: 'musik', group: UEBRIGE, name: 'Musik', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   { id: 'games', group: UEBRIGE, name: 'PC- & Videospiele', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
-  { id: 'sammeln-seltenes', group: UEBRIGE, name: 'Sammeln & Seltenes', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  /*
+    Nicht 12 %, sondern 11 %. Zwei Abrechnungen über Sammelkarten-Boxen
+    stimmen überein, vor wie nach der Reform vom Juli 2026:
+      11.08.2026  815,89 € × 11,00 % = 89,75 €
+      22.08.2026  739,99 € × 11,00 % = 81,40 €
+    Beide liegen unter 990 €, die Staffelgrenze ist damit nicht belegt — nur
+    der Satz darunter. Deshalb bleibt die Staffel eingetragen, der Knick
+    selbst ist aber ungeprüft.
+  */
+  {
+    id: 'sammeln-seltenes',
+    group: UEBRIGE,
+    name: 'Sammeln & Seltenes',
+    standardPercent: 11,
+    reducedPercent: null,
+    tiers: [{ upTo: 990, rate: 0.11 }, { rate: 0.03 }],
+    confidence: 'official',
+    caveat:
+      'Der Satz von 11 % ist an Abrechnungen bis rund 816 € belegt. Ob oberhalb von 990 € tatsächlich 3 % gelten, ist für diese Kategorie nicht nachgewiesen.',
+  },
   // 12 % gestaffelt, abgelesen an einer echten Abrechnung vom 27.09.2026:
   // "Variabler Prozentsatz · Kategorie Spielzeug · Tarif für 0,00 € – 990,00 €
   // · 32,98 € × 12,0 %". Zuvor stand hier 14 % aus einer Sekundärquelle.
   { id: 'spielzeug', group: UEBRIGE, name: 'Spielzeug', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
 
-  // Derselbe Beleg, der für Spielzeug 14 % nannte, hat sich als falsch
-  // erwiesen. Bis eine Abrechnung das klärt, gilt dieser Satz als ungeprüft.
+  /*
+    Hier standen 14 % aus derselben Sekundärquelle, die schon bei Spielzeug
+    falsch lag. Drei Abrechnungen aus Juli und August 2026 widerlegen das
+    übereinstimmend, quer durch die Kategorie:
+      24.07.2026  385,98 € × 12,00 % = 46,32 €  (Gesichtspflege)
+      08.07.2026   44,99 € × 12,00 % =  5,40 €  (Reizstromgerät)
+      30.08.2026   10,49 € × 12,01 % =  1,26 €  (Parfum)
+    Elektrische Geräte für Rasur, Zahn- und Haarpflege gehören nicht hierher;
+    sie werden mit 7 % abgerechnet und stehen oben als eigene Einträge.
+  */
   {
     id: 'beauty-gesundheit',
     group: UEBRIGE,
     name: 'Beauty & Gesundheit',
-    standardPercent: 14,
+    standardPercent: 12,
     reducedPercent: null,
-    confidence: 'unverified',
+    confidence: 'official',
     caveat:
-      'Dieser Satz stammt aus derselben Quelle, die für Spielzeug nachweislich einen falschen Wert nannte. Bitte an einer echten Abrechnung prüfen.',
+      'Elektrische Geräte zur Rasur, Zahn- und Haarpflege fallen nicht unter diesen Satz, sondern werden mit 7 % abgerechnet. Dafür gibt es eigene Einträge in der Gruppe Geräte.',
   },
 
   // Einzige Kategorie, in der ein Shop-Abo die Staffelgrenze verschiebt –
@@ -172,6 +249,7 @@ export const EBAY: Marketplace = {
       ? FIXED_FEE_ABOVE_THRESHOLD
       : FIXED_FEE_UP_TO_THRESHOLD,
   hasConditionDiscount: true,
+  belowStandardSurchargePercent: BELOW_STANDARD_SURCHARGE_PERCENT,
   ratesEffectiveFrom: '2026-07-01',
   note: 'Gebrauchte und generalüberholte Ware kostet in den dafür ausgewiesenen Kategorien nur 5 %.',
 };

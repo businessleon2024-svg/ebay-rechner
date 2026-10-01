@@ -429,7 +429,9 @@ describe('Shop-Abo', () => {
 
 describe('Nicht reformierte Kategorien', () => {
   it('staffelt Medien- und Sammelkategorien ab 990 EUR', () => {
-    for (const categoryId of ['buecher', 'filme-serien', 'musik', 'games', 'sammeln-seltenes']) {
+    // Sammeln & Seltenes fehlt hier bewusst: Die Kategorie hat laut echter
+    // Abrechnung 11 % statt 12 % und wird unten gesondert geprüft.
+    for (const categoryId of ['buecher', 'filme-serien', 'musik', 'games']) {
       const { fees } = calculate({
         ...usedPhone,
         categoryId,
@@ -444,7 +446,21 @@ describe('Nicht reformierte Kategorien', () => {
     }
   });
 
-  it('rechnet Beauty & Gesundheit flach mit 14 %', () => {
+  it('staffelt Sammeln & Seltenes mit dem belegten Satz von 11 %', () => {
+    const { fees } = calculate({
+      ...usedPhone,
+      categoryId: 'sammeln-seltenes',
+      condition: 'new',
+      itemPrice: 1990,
+      buyerShipping: 0,
+    });
+
+    // 990 * 11 % + 1000 * 3 %
+    expect(fees.commissionNet).toBe(138.9);
+    expect(fees.commissionBasis).toBe('tiered');
+  });
+
+  it('rechnet Beauty & Gesundheit flach mit 12 %', () => {
     for (const categoryId of ['beauty-gesundheit']) {
       const { fees } = calculate({
         ...usedPhone,
@@ -454,7 +470,8 @@ describe('Nicht reformierte Kategorien', () => {
         buyerShipping: 0,
       });
 
-      expect(fees.commissionPercent).toBe(14);
+      // Korrigiert von 14 % nach drei echten Abrechnungen aus Juli/August 2026.
+      expect(fees.commissionPercent).toBe(12);
       expect(fees.commissionBasis).toBe('standard');
     }
   });

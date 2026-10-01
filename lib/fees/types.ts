@@ -179,6 +179,11 @@ export interface Marketplace {
    * Steuert, ob die Zustandsauswahl angeboten wird.
    */
   hasConditionDiscount: boolean;
+  /**
+   * Zuschlag auf den Transaktionsbetrag bei unterdurchschnittlichem
+   * Servicestatus, in Prozent. Fehlt, wenn der Marktplatz keinen erhebt.
+   */
+  belowStandardSurchargePercent?: number;
   /** Monatliche Grundgebühr, sofern der Marktplatz eine erhebt. */
   plans?: readonly MarketplacePlan[];
   /** Stand der hinterlegten Sätze, ISO-Datum. */
@@ -250,6 +255,13 @@ export interface FeeCalculationInput {
    * (siehe `FeeCategory.tierWithShop`).
    */
   hasShopSubscription?: boolean;
+  /**
+   * Servicestatus „Unterdurchschnittlich". eBay erhebt dann zusätzlich zur
+   * regulären Provision einen Zuschlag auf denselben Transaktionsbetrag.
+   * Auf der Abrechnung steht er als eigene Position „Erhöhte
+   * Verkaufsprovision bei Servicestatus Unterdurchschnittlich".
+   */
+  belowStandardService?: boolean;
   /** Monatliche Grundgebühr, die anteilig auf diesen Verkauf entfällt. */
   monthlyFee?: MonthlyFeeInput;
 }
@@ -271,6 +283,13 @@ export interface FeeBreakdown {
    */
   appliedTiers?: readonly FeeTier[];
   commissionNet: number;
+  /**
+   * Zuschlag bei unterdurchschnittlichem Servicestatus, 0 wenn keiner anfällt.
+   * Bewusst als eigene Position geführt und nicht in die Provision gerechnet:
+   * eBay weist ihn getrennt aus, und er ist das Einzige an der Rechnung, was
+   * sich durch eigenes Zutun abstellen lässt.
+   */
+  serviceSurchargeNet: number;
   /** Gebühr pro Bestellung zuzüglich etwaiger Gebühr je Artikel. */
   fixedFeeNet: number;
   /** Anteilige monatliche Grundgebühr, 0 wenn keine umgelegt wird. */

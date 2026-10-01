@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { breakEvenSellPrice, calculate, maxPurchasePrice } from '@/lib/fees/calculate';
 import { MARKETPLACES, requireMarketplace } from '@/lib/fees/marketplaces';
+import { BELOW_STANDARD_SURCHARGE_PERCENT } from '@/lib/fees/ebay';
 import type {
   FeeCalculationInput,
   FeeCategory,
@@ -78,6 +79,7 @@ interface FormState {
   monthlyPlanId: string;
   ordersPerMonth: string;
   hasShopSubscription: boolean;
+  belowStandardService: boolean;
   listingFee: string;
   optionsFee: string;
   internationalFee: string;
@@ -104,6 +106,7 @@ const INITIAL_STATE: FormState = {
   monthlyPlanId: 'basic',
   ordersPerMonth: '',
   hasShopSubscription: false,
+  belowStandardService: false,
   listingFee: '',
   optionsFee: '',
   internationalFee: '',
@@ -137,6 +140,7 @@ function toCalculationInput(form: FormState): FeeCalculationInput {
     adRatePercent: parseNumber(form.adRatePercent),
     shopDiscountPercent: parseNumber(form.shopDiscountPercent),
     hasShopSubscription: form.hasShopSubscription,
+    belowStandardService: form.belowStandardService,
     listingFeeNet: parseNumber(form.listingFee),
     optionsFeeNet: parseNumber(form.optionsFee),
     internationalFeeNet: parseNumber(form.internationalFee),
@@ -540,6 +544,24 @@ export function Calculator() {
                       und Nicht-Shop-Verkäufern unterscheidet. Derzeit betrifft das allein Uhren
                       &amp; Schmuck, wo die Staffelgrenze von 990 € auf 500 € sinkt. Ein Shop
                       senkt die Verkaufsprovision nicht allgemein.
+                    </p>
+                  </div>
+
+                  <div className="field">
+                    <label className="checkline">
+                      <input
+                        type="checkbox"
+                        checked={form.belowStandardService}
+                        onChange={(event) => update('belowStandardService', event.target.checked)}
+                      />
+                      Servicestatus &bdquo;Unterdurchschnittlich&ldquo;
+                    </label>
+                    <p className="hint">
+                      Schlägt {BELOW_STANDARD_SURCHARGE_PERCENT} % des Transaktionsbetrags
+                      zusätzlich auf — die Position heißt auf der Abrechnung &bdquo;Erhöhte
+                      Verkaufsprovision bei Servicestatus Unterdurchschnittlich&ldquo;. Sie kann die
+                      Gebühr nahezu verdoppeln und ist die einzige, die sich durch eigenes Zutun
+                      abstellen lässt.
                     </p>
                   </div>
 

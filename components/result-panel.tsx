@@ -342,6 +342,18 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
                   value={negative(fees.fixedFeeNet)}
                 />
               )}
+              {/*
+                Direkt unter der Provision, weil er auf derselben Grundlage
+                liegt und in dieser Größenordnung mitspielt — er gehört nicht
+                zu den Kleinbeträgen weiter unten.
+              */}
+              {fees.serviceSurchargeNet > 0 && (
+                <Row
+                  term="Zuschlag Servicestatus"
+                  note="unterdurchschnittlicher Servicestatus"
+                  value={negative(fees.serviceSurchargeNet)}
+                />
+              )}
               {fees.listingFeeNet > 0 && (
                 <Row term="Angebotsgebühr" value={negative(fees.listingFeeNet)} />
               )}
