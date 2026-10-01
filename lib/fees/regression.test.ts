@@ -50,13 +50,8 @@ describe('calculateTieredFee', () => {
 });
 
 describe('Medien-Staffelung: 12 % bis 990 €, darüber 3 %', () => {
-  const kategorien = [
-    'buecher',
-    'filme-serien',
-    'musik',
-    'games',
-    'sammeln-seltenes',
-  ] as const;
+  // Sammeln & Seltenes gehört nicht mehr dazu: dort sind es belegte 11 %.
+  const kategorien = ['buecher', 'filme-serien', 'musik', 'games'] as const;
 
   it.each(kategorien)('%s: 2.000 € ergibt 149,10 € Provision', (categoryId) => {
     const { fees } = calculate(verkauf({ categoryId, itemPrice: 2000 }));
@@ -70,6 +65,15 @@ describe('Medien-Staffelung: 12 % bis 990 €, darüber 3 %', () => {
 
     expect(fees.commissionNet).toBe(118.8);
     expect(fees.commissionBasis).toBe('standard');
+  });
+
+  it('sammeln-seltenes staffelt mit 11 %: 2.000 € ergibt 139,20 €', () => {
+    // 990 × 11 % + 1.010 × 3 %. Der Satz stammt aus zwei echten Abrechnungen
+    // über Sammelkarten-Boxen vom 11. und 22.08.2026.
+    const { fees } = calculate(verkauf({ categoryId: 'sammeln-seltenes', itemPrice: 2000 }));
+
+    expect(fees.commissionNet).toBe(139.2);
+    expect(fees.commissionBasis).toBe('tiered');
   });
 });
 
@@ -93,11 +97,13 @@ describe('Uhren & Schmuck: Staffelgrenze hängt am Shop-Abo', () => {
 });
 
 describe('Kategorien mit flachem Satz', () => {
-  it('beauty-gesundheit: 1.000 € neu ergibt 140,00 € Provision', () => {
+  it('beauty-gesundheit: 1.000 € neu ergibt 120,00 € Provision', () => {
+    // Hier standen 14 % aus einer Sekundärquelle. Drei echte Abrechnungen aus
+    // Juli und August 2026 weisen übereinstimmend 12 % aus.
     const { fees } = calculate(verkauf({ categoryId: 'beauty-gesundheit', itemPrice: 1000 }));
 
-    expect(fees.commissionNet).toBe(140);
-    expect(fees.commissionPercent).toBe(14);
+    expect(fees.commissionNet).toBe(120);
+    expect(fees.commissionPercent).toBe(12);
     expect(fees.commissionBasis).toBe('standard');
   });
 

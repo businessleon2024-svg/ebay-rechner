@@ -139,6 +139,16 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
   const fixedFeeNet =
     marketplace.orderFeeFor(grossTransactionAmount) + (category.perItemFeeEur ?? 0);
   const adFeeNet = grossTransactionAmount * ((input.adRatePercent ?? 0) / 100);
+  /*
+    Zuschlag bei unterdurchschnittlichem Servicestatus. Er liegt auf derselben
+    Grundlage wie die Provision, nicht auf ihr, und folgt anders als sie
+    keiner Staffel. Herleitung aus echten Abrechnungen steht bei
+    `BELOW_STANDARD_SURCHARGE_PERCENT`.
+  */
+  const serviceSurchargeNet =
+    input.belowStandardService && marketplace.belowStandardSurchargePercent
+      ? grossTransactionAmount * (marketplace.belowStandardSurchargePercent / 100)
+      : 0;
   const shopDiscountNet = commissionNet * ((input.shopDiscountPercent ?? 0) / 100);
 
   // Eine monatliche Grundgebühr gehört anteilig auf den einzelnen Verkauf,
@@ -165,6 +175,7 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
   */
   const positions = {
     commission: round2(commissionNet),
+    serviceSurcharge: round2(serviceSurchargeNet),
     shopDiscount: round2(shopDiscountNet),
     fixedFee: round2(fixedFeeNet),
     adFee: round2(adFeeNet),
@@ -176,7 +187,8 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
   };
 
   const totalFeeNet = round2(
-    positions.commission -
+    positions.commission +
+      positions.serviceSurcharge -
       positions.shopDiscount +
       positions.fixedFee +
       positions.adFee +
@@ -197,6 +209,7 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
     commissionBasis,
     appliedTiers,
     commissionNet: positions.commission,
+    serviceSurchargeNet: positions.serviceSurcharge,
     fixedFeeNet: positions.fixedFee,
     monthlyFeeShareNet: positions.monthlyFeeShare,
     adFeeNet: positions.adFee,
