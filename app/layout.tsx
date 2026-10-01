@@ -36,21 +36,33 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: SITE.name,
-    // Die Statusleiste übernimmt damit die Farbe der Seite statt weiß zu bleiben.
-    statusBarStyle: 'black-translucent',
+    /*
+      Nicht `black-translucent`. Das erzwingt weiße Schrift in der
+      Statusleiste — auf dem hellen Hintergrund dieser Seite wären Uhrzeit und
+      Akkustand damit unsichtbar. `default` überlässt die Schriftfarbe dem
+      System, das sie nach heller oder dunkler Darstellung wählt.
+    */
+    statusBarStyle: 'default',
   },
 };
 
 export const viewport: Viewport = {
   /*
-    Färbt die Statusleiste passend zur Ansicht. Ohne die zweite Zeile bliebe
-    sie im dunklen Modus hell und schnitte oben sichtbar ab.
+    Färbt die Fläche hinter der Statusleiste passend zur Ansicht, damit sie
+    nicht als fremder Streifen über der Seite steht.
   */
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f4f6f5' },
     { media: '(prefers-color-scheme: dark)', color: '#0c100f' },
   ],
-  // Lässt den Inhalt bis in den Bereich um die Kamera-Aussparung laufen.
+  /*
+    Lässt den Inhalt bis an den Bildschirmrand laufen, auch unter Statusleiste
+    und Gestenleiste. Damit dort nichts verdeckt wird, rechnen Kopfzeile,
+    Fußzeile und Einwilligungsdialog in globals.css die Gerätezonen über
+    `env(safe-area-inset-*)` auf ihren Abstand auf. Ohne diese Abstände wäre
+    das Logo hinter der Uhr verschwunden — genau der Fehler, der hier zuerst
+    drin war.
+  */
   viewportFit: 'cover',
 };
 

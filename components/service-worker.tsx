@@ -18,6 +18,26 @@ export function ServiceWorker() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
+    /*
+      In der Entwicklung bleibt er aus. Der Service Worker behandelt alles
+      unter `/_next/static/` als unveränderlich, weil der Dateiname dort im
+      Produktionsbau einen Hash trägt. Beim Entwickeln ändert sich der Inhalt
+      aber unter gleichbleibender Adresse — der Speicher liefert dann endlos
+      den alten Stand aus, und Änderungen am Stylesheet kommen nie an.
+
+      Genau darauf bin ich beim Bauen hereingefallen: Die Kopfzeilen-Korrektur
+      war längst übersetzt und wurde trotzdem nicht angezeigt.
+    */
+    if (process.env.NODE_ENV !== 'production') {
+      navigator.serviceWorker.getRegistrations().then((alle) => {
+        for (const eintrag of alle) void eintrag.unregister();
+      });
+      void caches.keys().then((namen) => {
+        for (const name of namen) if (name.startsWith('gk-')) void caches.delete(name);
+      });
+      return;
+    }
+
     // Erst nach dem Laden anmelden, damit die Anmeldung nicht mit dem
     // Aufbau der Seite um die Leitung konkurriert.
     const anmelden = () => {
