@@ -6,10 +6,31 @@
  * auswirkt.
  */
 
+/**
+ * Adresse, unter der die Seite tatsächlich erreichbar ist.
+ *
+ * Hier stand fest `https://gebuehrenkompass.de` — eine Domain, die einem
+ * Händler gehört und zum Verkauf steht. Dadurch wiesen kanonische Adresse,
+ * Sitemap und robots.txt Suchmaschinen auf eine fremde Verkaufsseite statt
+ * auf diese hier. Bestenfalls wurde die Seite deshalb gar nicht aufgenommen.
+ *
+ * Die Adresse kommt deshalb aus der Umgebung. Steht dort nichts, gilt die
+ * Adresse, unter der die Seite heute wirklich läuft — nie eine erhoffte.
+ * Sobald eine eigene Domain steht, genügt `NEXT_PUBLIC_SITE_URL`; alles
+ * Übrige zieht automatisch nach.
+ *
+ * Bewusst ohne Vercels Systemvariablen: Die sind in Browser-Bausteinen nicht
+ * eingesetzt, und ein Wert, der auf Server und Client auseinanderläuft, wäre
+ * schlimmer als ein fest eingetragener.
+ */
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ebay-rechner-sage.vercel.app')
+  // Ein abschließender Schrägstrich ergäbe sonst Adressen mit doppeltem Trenner.
+  .replace(/\/+$/, '');
+
 export const SITE = {
   name: 'Gebührenkompass',
-  domain: 'gebuehrenkompass.de',
-  url: 'https://gebuehrenkompass.de',
+  domain: new URL(SITE_URL).host,
+  url: SITE_URL,
 } as const;
 
 export const OPERATOR = {
@@ -22,9 +43,9 @@ export const OPERATOR = {
 
   /**
    * Vorläufig eine Gmail-Adresse. Rechtlich genügt das — § 5 DDG verlangt eine
-   * erreichbare Adresse, keine Domain-Adresse. Sobald ein Postfach unter
-   * gebuehrenkompass.de steht, hier tauschen; Impressum und
-   * Datenschutzerklärung ziehen automatisch nach.
+   * erreichbare Adresse, keine Domain-Adresse. Sobald ein Postfach unter der
+   * eigenen Domain steht, hier tauschen; Impressum und Datenschutzerklärung
+   * ziehen automatisch nach.
    */
   email: 'businessleon2024@gmail.com' as string | null,
 } as const;
