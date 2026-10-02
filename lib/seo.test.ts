@@ -38,6 +38,17 @@ describe('kanonische Adressen', () => {
     expect(quelltext(pfad)).toContain('robots: { index: false');
   });
 
+  it('die eigene Adresse ist nicht fest eingetragen, sondern kommt aus der Umgebung', () => {
+    /*
+      Hier stand fest `https://gebuehrenkompass.de` — eine Domain, die einem
+      Händler gehört. Kanonische Adresse, Sitemap und robots.txt wiesen
+      Suchmaschinen damit auf eine fremde Verkaufsseite.
+    */
+    expect(quelltext('lib/site.ts')).toContain('process.env.NEXT_PUBLIC_SITE_URL');
+    // Die alte Adresse darf nur noch in der Begründung vorkommen, nicht als Wert.
+    expect(quelltext('lib/site.ts')).not.toMatch(/url:\s*'https:\/\/gebuehrenkompass\.de'/);
+  });
+
   it('nur das Wurzel-Layout setzt die Startseite als kanonische Adresse', () => {
     expect(quelltext('app/layout.tsx')).toContain("canonical: '/'");
     for (const [pfad] of INDEXIERTE_SEITEN) {
