@@ -36,7 +36,9 @@ export type TaxScheme =
  * Die Unterscheidung ist seit der Gebührenreform zum 01.07.2026 der wichtigste
  * Hebel für Reseller: In den reformierten Kategorien fällt für gebrauchte,
  * generalüberholte und "Neu: Sonstige"-Artikel ein Pauschalsatz von 5 % an
- * statt des regulären Kategoriesatzes von bis zu 14 %.
+ * statt des regulären Kategoriesatzes. Wie hoch der höchstens ausfällt, steht
+ * bewusst nicht hier, sondern ergibt sich aus der Tabelle — `highestRatePercent`
+ * in `lib/fees/range.ts`. Eine Zahl an dieser Stelle war schon einmal veraltet.
  */
 export type ItemCondition =
   | 'new'

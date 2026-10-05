@@ -2,13 +2,23 @@ import Link from 'next/link';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { FREE_FEATURES, PRO_AVAILABLE, PRO_FEATURES, PRO_PRICE_EUR } from '@/lib/plan';
-import { formatCurrency } from '@/lib/format';
+import { EBAY } from '@/lib/fees/marketplaces';
+import { highestRatePercent, lowestReducedPercent } from '@/lib/fees/range';
+import { formatCurrency, formatPercent } from '@/lib/format';
 import { JsonLd, organizationSchema } from '@/lib/structured-data';
+
+/*
+  Aus der Gebührentabelle abgeleitet, nicht abgeschrieben. Hier stand einmal
+  "bis zu 14 %", während Uhren & Schmuck längst mit 16 % hinterlegt war —
+  seit die Sätze an echten Abrechnungen korrigiert wurden. Siehe lib/fees/range.ts.
+*/
+const HOECHSTER_SATZ = formatPercent(highestRatePercent(EBAY), 0);
+const REDUZIERTER_SATZ = formatPercent(lowestReducedPercent(EBAY) ?? 0, 0);
 
 const STEPS = [
   {
     title: 'Marktplatz und Kategorie wählen',
-    body: 'eBay oder Kaufland, dann Kategorie und Artikelzustand. Bei eBay entscheidet der Zustand, ob 5 % oder bis zu 14 % Provision anfallen.',
+    body: `eBay oder Kaufland, dann Kategorie und Artikelzustand. Bei eBay entscheidet der Zustand, ob ${REDUZIERTER_SATZ} oder bis zu ${HOECHSTER_SATZ} Provision anfallen.`,
   },
   {
     title: 'Preise eintragen',
