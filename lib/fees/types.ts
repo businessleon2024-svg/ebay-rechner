@@ -250,6 +250,16 @@ export interface FeeCalculationInput {
   optionsFeeNet?: number;
   internationalFeeNet?: number;
   currencyConversionNet?: number;
+  /**
+   * Region des Käufers, aus der sich die internationale Gebühr ergibt —
+   * Kennung aus `INTERNATIONAL_REGIONS`.
+   *
+   * Ein ausdrücklich eingetragener `internationalFeeNet` hat Vorrang. Beide
+   * zu addieren wäre die naheliegende, aber falsche Wahl: Wer den Betrag von
+   * seiner Abrechnung abtippt *und* die Region stehen lässt, zahlte sonst
+   * doppelt. Der abgetippte Betrag ist der belegte, also gewinnt er.
+   */
+  internationalRegion?: string;
   /** Provisionsrabatt in Prozent, z. B. 10 % für Premium-Shop-Inhaber. */
   shopDiscountPercent?: number;
   /**
