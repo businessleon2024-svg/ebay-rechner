@@ -1,3 +1,4 @@
+import { internationalRatePercent } from './international';
 import { requireMarketplace, resolveCategory } from './marketplaces';
 import { calculateTieredFee, isTiered, tiersFor } from './tiers';
 import {
@@ -160,7 +161,14 @@ export function calculate(input: FeeCalculationInput): CalculationResult {
 
   const listingFeeNet = input.listingFeeNet ?? 0;
   const optionsFeeNet = input.optionsFeeNet ?? 0;
-  const internationalFeeNet = input.internationalFeeNet ?? 0;
+  /*
+    Entweder aus der gewählten Käuferregion gerechnet oder als Betrag von der
+    Abrechnung abgetippt. Nicht beides addiert — siehe `internationalRegion`
+    in den Typen: Der abgetippte Betrag ist der belegte und gewinnt.
+  */
+  const internationalFeeNet =
+    input.internationalFeeNet ??
+    grossTransactionAmount * (internationalRatePercent(input.internationalRegion) / 100);
   const currencyConversionNet = input.currencyConversionNet ?? 0;
 
   /*

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AdSlot } from '@/components/ad-slot';
 import { CalculatorIsland } from '@/components/calculator-island';
+import { EmbedMode } from '@/components/embed-mode';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { JsonLd, calculatorSchema } from '@/lib/structured-data';
@@ -39,6 +40,9 @@ export default function RechnerPage() {
   return (
     <>
       <JsonLd data={calculatorSchema()} />
+      {/* Blendet Kopfzeile, Fußzeile und Erklärtexte aus, wenn die
+          Erweiterung den Rechner mit `?ext=1` in ihr Panel lädt. */}
+      <EmbedMode />
       <SiteHeader />
       <CalculatorIsland />
 

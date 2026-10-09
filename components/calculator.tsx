@@ -5,6 +5,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { breakEvenSellPrice, calculate, maxPurchasePrice } from '@/lib/fees/calculate';
 import { MARKETPLACES, requireMarketplace } from '@/lib/fees/marketplaces';
 import { BELOW_STANDARD_SURCHARGE_PERCENT } from '@/lib/fees/ebay';
+import {
+  DEFAULT_INTERNATIONAL_REGION,
+  INTERNATIONAL_REGIONS,
+} from '@/lib/fees/international';
 import type {
   FeeCalculationInput,
   FeeCategory,
@@ -12,7 +16,7 @@ import type {
   MarketplaceId,
   TaxScheme,
 } from '@/lib/fees/types';
-import { parseNumber } from '@/lib/format';
+import { formatPercent, parseNumber } from '@/lib/format';
 import { CategorySuggest } from './category-suggest';
 import { EanLookup } from './ean-lookup';
 import { ResultPanel } from './result-panel';
@@ -85,6 +89,8 @@ interface FormState {
   optionsFee: string;
   internationalFee: string;
   currencyConversion: string;
+  /** Käuferregion, aus der sich die internationale Gebühr ergibt. */
+  internationalRegion: string;
 }
 
 const INITIAL_STATE: FormState = {
@@ -112,6 +118,7 @@ const INITIAL_STATE: FormState = {
   optionsFee: '',
   internationalFee: '',
   currencyConversion: '',
+  internationalRegion: DEFAULT_INTERNATIONAL_REGION,
 };
 
 function toCalculationInput(form: FormState): FeeCalculationInput {
@@ -144,7 +151,15 @@ function toCalculationInput(form: FormState): FeeCalculationInput {
     belowStandardService: form.belowStandardService,
     listingFeeNet: parseNumber(form.listingFee),
     optionsFeeNet: parseNumber(form.optionsFee),
-    internationalFeeNet: parseNumber(form.internationalFee),
+    /*
+      `undefined` statt 0, wenn das Feld leer ist: Ein ausdrücklich
+      eingetragener Betrag hat Vorrang vor der Region, und eine 0 wäre ein
+      eingetragener Betrag — damit bliebe die Regionsauswahl wirkungslos.
+    */
+    internationalFeeNet: form.internationalFee.trim() === ''
+      ? undefined
+      : parseNumber(form.internationalFee),
+    internationalRegion: form.internationalRegion,
     currencyConversionNet: parseNumber(form.currencyConversion),
     monthlyFee:
       plan && ordersPerMonth > 0
@@ -295,7 +310,19 @@ export function Calculator() {
   const moneyField = (
     id: keyof FormState & string,
     label: string,
-    options: { suffix?: string; step?: string; hint?: string; placeholder?: string } = {},
+    options: {
+      suffix?: string;
+      step?: string;
+      hint?: string;
+      placeholder?: string;
+      /**
+       * Erklärsatz, der auch im Seitenpanel stehen bleibt. Dort werden die
+       * übrigen ausgeblendet, weil sie 29 % der Höhe ausmachen — dieser
+       * nicht: Der vom Käufer gezahlte Versand in der Bemessungsgrundlage zu
+       * vergessen ist der häufigste Rechenfehler überhaupt.
+       */
+      hintImmer?: boolean;
+    } = {},
   ) => (
     <>
       <label htmlFor={id}>{label}</label>
@@ -314,7 +341,9 @@ export function Calculator() {
         />
         <span className="input-suffix">{options.suffix ?? '€'}</span>
       </div>
-      {options.hint && <p className="hint">{options.hint}</p>}
+      {options.hint && (
+        <p className={options.hintImmer ? 'hint hint--immer' : 'hint'}>{options.hint}</p>
+      )}
     </>
   );
 
@@ -470,6 +499,7 @@ export function Calculator() {
           <div className="field">
             {moneyField('buyerShipping', 'Versand, den der Käufer zahlt', {
               hint: 'Zählt zur Bemessungsgrundlage der Provision. Bei Gratisversand 0 eintragen.',
+              hintImmer: true,
             })}
           </div>
 
@@ -581,6 +611,33 @@ export function Calculator() {
                     <div>{moneyField('listingFee', 'Angebotsgebühr')}</div>
                     <div>{moneyField('optionsFee', 'Zusatzoptionen')}</div>
                   </div>
+                  <div className="field">
+                    <label htmlFor="internationalRegion">Wo ist der Käufer registriert?</label>
+                    <div className="input-wrap">
+                      <select
+                        id="internationalRegion"
+                        className="input"
+                        value={form.internationalRegion}
+                        onChange={(event) => update('internationalRegion', event.target.value)}
+                      >
+                        {INTERNATIONAL_REGIONS.map((region) => (
+                          <option key={region.id} value={region.id} title={region.beschreibung}>
+                            {region.name}
+                            {region.percent > 0 ? ` · ${formatPercent(region.percent)}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <p className="hint">
+                      Der Zuschlag liegt auf demselben Betrag wie die Provision, also
+                      einschließlich des vom Käufer gezahlten Versands.{' '}
+                      <strong>Diese Sätze sind nicht an echten Abrechnungen geprüft</strong> — in
+                      497 ausgewerteten Bestellungen kam kein internationaler Verkauf vor. Steht
+                      der Betrag auf deiner Abrechnung, trag ihn unten ein; dann gilt er statt des
+                      Satzes.
+                    </p>
+                  </div>
+
                   <div className="field field-row">
                     <div>{moneyField('internationalFee', 'Internationale Gebühr')}</div>
                     <div>{moneyField('currencyConversion', 'Währungsumrechnung')}</div>
