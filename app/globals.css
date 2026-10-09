@@ -1875,18 +1875,53 @@ select.input optgroup {
   für die Sätze der Unterkategorien — wer die Möglichkeit nicht sieht, meldet
   auch nichts, und dann gibt es die Datengrundlage nie.
 */
+/*
+  Deutlich hervorgehoben, nicht nur leicht getönt.
+
+  Das ist die einzige Quelle für die Sätze der Unterkategorien — die
+  Marktplätze veröffentlichen sie nicht. Wer die Möglichkeit übersieht,
+  meldet nichts, und dann entsteht die Datengrundlage nie. Ein dezenter
+  Kasten unter dem Ergebnis wird übersehen; dieser hier soll auffallen.
+*/
 .report {
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
+  /* Trägt die Aufmerksamkeit auch dann, wenn die Fläche kaum sichtbar ist. */
+  border-left-width: 4px;
   border-radius: 10px;
   background: var(--accent-quiet);
+  box-shadow: var(--shadow);
+  margin-top: 1.5rem;
   padding-top: 0;
 }
 
 .report > summary {
   align-items: flex-start;
   gap: 0.6rem;
-  padding: 0.9rem 1rem;
-  font-size: 0.9rem;
+  padding: 1rem 1.1rem;
+  font-size: 0.95rem;
+}
+
+.report__prompt-lead {
+  /* Fragezeichen vor der Frage — findet das Auge schneller als Fließtext. */
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.report__prompt-lead::before {
+  content: '!';
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.8em;
+  font-weight: 700;
+  /* Mit der Grundlinie des Textes daneben bündig halten. */
+  transform: translateY(0.08em);
 }
 
 /* Das Dreieck an der ersten Zeile ausrichten, nicht am ganzen Block. */
@@ -1895,8 +1930,7 @@ select.input optgroup {
 }
 
 .report__prompt-lead {
-  display: block;
-  font-weight: 650;
+  font-weight: 700;
   color: var(--text);
 }
 
