@@ -34,8 +34,6 @@ interface ReportForm {
   exactCategory: string;
   productName: string;
   ean: string;
-  itemNumber: string;
-  orderNumber: string;
   note: string;
 }
 
@@ -46,8 +44,6 @@ const EMPTY: ReportForm = {
   exactCategory: '',
   productName: '',
   ean: '',
-  itemNumber: '',
-  orderNumber: '',
   note: '',
 };
 
@@ -77,8 +73,6 @@ function buildMail(result: CalculationResult, form: ReportForm): string {
     // Normalisiert, damit „4-251192-110466" und „4251192110466" in der
     // Sammlung später nicht als zwei verschiedene Artikel erscheinen.
     line('ean', normalizeGtin(form.ean)),
-    line('artikelnummer', form.itemNumber.trim()),
-    line('bestellnummer', form.orderNumber.trim()),
     line('anmerkung', form.note.trim().replace(/\n+/g, ' ')),
   ].filter((entry): entry is string => entry !== null);
 
@@ -142,8 +136,7 @@ export function ReportRate({ result }: { result: CalculationResult }) {
   const hatKennung =
     form.exactCategory.trim() !== '' ||
     form.productName.trim() !== '' ||
-    eanPruefung.status === 'gueltig' ||
-    form.itemNumber.trim() !== '';
+    eanPruefung.status === 'gueltig';
   const verwertbar = hatWert && hatKennung;
 
   const betreff = `Gebührenmeldung: ${marketplace.name} · ${result.category.name}`;
@@ -254,22 +247,18 @@ export function ReportRate({ result }: { result: CalculationResult }) {
         <h3 className="report__heading">Schritt 2 — Um welchen Artikel ging es?</h3>
         <p className="hint hint--standalone">
           Ohne Artikelkennung lässt sich später nicht mehr nachvollziehen, welche Unterkategorie
-          gemeint war. Eine Angabe genügt — die Artikelnummer ist am eindeutigsten.
+          gemeint war. Eine Angabe genügt — die EAN ist am eindeutigsten, weil sie denselben
+          Artikel über alle Meldungen hinweg zusammenführt.
         </p>
 
         <div className="field">{feld('productName', 'Produktname', { placeholder: 'Logitech MX Brio Webcam' })}</div>
 
-        <div className="field field-row">
+        <div className="field">
           {feld('ean', 'EAN / GTIN', {
             placeholder: '4251192110466',
             inputMode: 'numeric',
             hint: eanHinweis,
           })}
-          {feld('itemNumber', 'Artikelnummer', { placeholder: '820175879319' })}
-        </div>
-
-        <div className="field field-row">
-          {feld('orderNumber', 'Bestellnummer (freiwillig)', { placeholder: '11-15218-13403' })}
         </div>
 
         <div className="field">
