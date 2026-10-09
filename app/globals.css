@@ -8,6 +8,23 @@
 
 :root[data-theme='light'] {
   --bg: #f4f6f5;
+  /*
+    Verlauf statt einer glatten Fläche. Er gibt den Glaskarten etwas zum
+    Durchscheinen — ohne ihn wirkt `backdrop-filter` wie eine einfarbige
+    Tönung, weil nichts dahinter liegt, das sich verwischen ließe.
+  */
+  --app-bg: linear-gradient(150deg, #f7faf9 0%, #eef4f2 32%, #e9f0f2 64%, #f3f6f5 100%);
+
+  /*
+    Glas in der hellen Ansicht muss anders gemischt werden als in der dunklen.
+    Weiß auf hellem Grund ergibt kaum Unterschied, deshalb trägt hier die
+    Kontur den Kasten und die Fläche bleibt fast klar.
+  */
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-hover: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(16, 26, 23, 0.09);
+  --glass-border-hover: rgba(16, 26, 23, 0.16);
+  --glass-blur: blur(20px);
   --surface: #ffffff;
   --surface-2: #f4f6f7;
   --surface-3: #eaeef0;
@@ -39,6 +56,19 @@
 
 :root[data-theme='dark'] {
   --bg: #0c100f;
+  /*
+    Nach dem Vorbild des Marktplatz-Rechners, aber in unserer Farbfamilie:
+    dort läuft der Verlauf ins Blauviolette, hier bleibt er bei Tiefgrün, weil
+    Logo, App-Symbol und `theme_color` im Manifest grün sind. Ein blauer
+    Hintergrund unter einem grünen Symbol sähe nach zwei Programmen aus.
+  */
+  --app-bg: linear-gradient(150deg, #080d0c 0%, #0b1513 30%, #112220 62%, #0a1110 100%);
+
+  --glass-bg: rgba(255, 255, 255, 0.045);
+  --glass-bg-hover: rgba(255, 255, 255, 0.065);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-border-hover: rgba(255, 255, 255, 0.14);
+  --glass-blur: blur(20px);
   --surface: #151b19;
   --surface-2: #1c2422;
   --surface-3: #242e2b;
@@ -95,7 +125,14 @@ html, body {
 }
 
 body {
+  /*
+    `--bg` bleibt als Rückfall stehen: Lädt der Verlauf nicht oder kennt ein
+    Browser ihn nicht, steht immer noch eine Farbe hinter dem Text statt der
+    weißen Standardfläche, auf der heller Text unsichtbar wäre.
+  */
   background: var(--bg);
+  background-image: var(--app-bg);
+  background-attachment: fixed;
   color: var(--text);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 15px;
@@ -286,12 +323,34 @@ a:hover {
 }
 
 /* Eine Ebene mit Substanz – keine Flächen darin stapeln. */
+/*
+  Glaskarte. Übernommen aus dem Marktplatz-Rechner, dort `.glass-card`.
+
+  Zwei Abweichungen vom Vorbild, beide bewusst:
+
+  1. `backdrop-filter` steht hinter einer Abfrage. Fehlt die Unterstützung,
+     greift die deckende `--surface`-Fläche aus der Regel davor — sonst stünde
+     Text auf einer durchsichtigen Karte vor dem Verlauf.
+  2. Der Kasten behält einen Schatten. Reines Glas ohne Schatten verliert auf
+     hellem Grund seine Kante; im Vorbild fällt das nicht auf, weil es dort
+     nur die dunkle Ansicht gibt.
+*/
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.75rem;
   box-shadow: var(--shadow);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .panel {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
 }
 
 .form-panel {
