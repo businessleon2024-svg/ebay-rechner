@@ -1,0 +1,103 @@
+/*
+  Nur die Hülle. Das eigentliche Aussehen kommt aus der Webanwendung im
+  Rahmen — deshalb steht hier kein zweites Gestaltungssystem, das mit dem
+  ersten auseinanderlaufen könnte.
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/*
+  Feste Maße. Chrome bemisst das Popup am Dokument und deckelt es bei
+  800 × 600 einschließlich Rahmen — knapp darunter bleiben, sonst erscheinen
+  Rollbalken um den eingebetteten Rechner herum.
+*/
+html,
+body {
+  width: 780px;
+  height: 580px;
+  overflow: hidden;
+  /*
+    Der Verlauf des Kompasses, damit die Ladezeit nicht weiß aufblitzt. Hält
+    auch die Lücke zu, falls der Rahmen einen Lidschlag später kommt.
+  */
+  background: linear-gradient(150deg, #080d0c 0%, #0b1513 30%, #112220 62%, #0a1110 100%);
+  color: #e7ecea;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+.versteckt {
+  display: none !important;
+}
+
+.laden,
+.fehler {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.kreisel {
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #4cbe92;
+  border-radius: 50%;
+  animation: drehen 0.8s linear infinite;
+}
+
+/*
+  Wer Bewegung im Betriebssystem abgestellt hat, bekommt keinen sich
+  drehenden Ring, sondern einen ruhig pulsierenden Punkt.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .kreisel {
+    animation: atmen 1.6s ease-in-out infinite;
+    border-top-color: rgba(255, 255, 255, 0.15);
+    background: #4cbe92;
+  }
+}
+
+.fehler p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c3ccc9;
+}
+
+.fehler a {
+  color: #4cbe92;
+  font-size: 13px;
+}
+
+#rahmen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@keyframes drehen {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes atmen {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}

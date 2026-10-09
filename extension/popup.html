@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gebührenkompass</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div id="laden" class="laden">
+      <div class="kreisel" role="status" aria-label="Rechner wird geladen"></div>
+    </div>
+
+    <!--
+      Die Webanwendung selbst, im Rahmen. Dadurch sind Gestaltung und
+      Gebührensätze immer aktuell, ohne dass die Erweiterung neu
+      veröffentlicht werden muss — bei Gebührensätzen ist das kein Komfort,
+      sondern Voraussetzung: Eine Erweiterung mit veraltetem Satz rechnet
+      Leuten still Verluste schön.
+    -->
+    <iframe id="rahmen" class="versteckt" title="Gebührenkompass"></iframe>
+
+    <div id="fehler" class="fehler versteckt">
+      <p id="fehlertext"></p>
+      <a id="imBrowser" href="#" target="_blank" rel="noopener noreferrer">Im Browser öffnen</a>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

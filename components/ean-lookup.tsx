@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { checkGtin } from '@/lib/gtin';
+import { eanAusAdresse } from '@/lib/start-params';
 
 /**
  * Nachschlagen der eBay-Kategorie über die EAN.
@@ -55,7 +56,14 @@ export function EanLookup({
   gewaehlteKategorie: string;
   aufKategorie: (categoryId: string) => void;
 }) {
-  const [eingabe, setEingabe] = useState('');
+  /*
+    Vorbelegt aus der Adresszeile, falls die Erweiterung eine EAN mitgegeben
+    hat. Als träger Anfangswert, nicht als Effekt: Der Wert steht beim ersten
+    Zeichnen fest und ändert sich danach nur noch durch Tippen. Ein Effekt
+    würde ihn nach dem ersten Bild nachschieben und dabei eine bereits
+    begonnene Eingabe überschreiben.
+  */
+  const [eingabe, setEingabe] = useState(eanAusAdresse);
   /*
     Das Ergebnis wird zusammen mit der EAN festgehalten, zu der es gehört.
     Dadurch gilt es beim Weitertippen von selbst nicht mehr, statt es in
