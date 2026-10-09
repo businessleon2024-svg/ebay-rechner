@@ -454,17 +454,47 @@ a:hover {
   pointer-events: none;
 }
 
+/*
+  Auswahlfelder.
+
+  Der Pfeil war ein Hintergrundbild auf dem `<select>` selbst. Das ist auf
+  iOS die unzuverlässigste Variante: Safari zeichnet dort unter Umständen
+  seinen eigenen Pfeil darüber, und man sieht zwei — einen scharfen und einen
+  verwaschenen. Dazu kam, dass das Bild als unmaskiertes SVG in einer
+  data-URI steckte, mit rohen `<` und `>`; manche Browser lesen das nicht.
+
+  Jetzt zeichnet ein eigenes Element den Pfeil, über dem Feld statt in ihm.
+  `pointer-events: none` sorgt dafür, dass ein Klick darauf trotzdem das
+  Auswahlfeld öffnet.
+*/
 select.input {
   cursor: pointer;
-  padding-right: 2.2rem;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23828e95' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 0.8rem center;
-  background-size: 15px;
+  padding-right: 2.4rem;
+  /*
+    Ohne das zeichnet iOS Safari trotz `appearance: none` noch einen eigenen
+    Hintergrund mit Pfeil. Die beiden Zeilen zusammen sind nötig — `none`
+    allein reicht dort nicht.
+  */
+  background-image: none;
+  text-overflow: ellipsis;
 }
 
-:root[data-theme='dark'] select.input {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236d7b77' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+/*
+  Nur bei Auswahlfeldern. `.input-wrap` umschließt auch Geldfelder, die
+  rechts ihr „€" tragen — dort wäre ein Pfeil falsch.
+*/
+.input-wrap:has(select)::after {
+  content: '';
+  position: absolute;
+  right: 0.85rem;
+  width: 10px;
+  height: 10px;
+  /* Zwei Kanten eines Quadrats, um 45° gedreht: ein Haken nach unten. */
+  border-right: 2px solid var(--text-faint);
+  border-bottom: 2px solid var(--text-faint);
+  border-radius: 1px;
+  transform: translateY(-25%) rotate(45deg);
+  pointer-events: none;
 }
 
 select.input option,
