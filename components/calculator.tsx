@@ -310,7 +310,19 @@ export function Calculator() {
   const moneyField = (
     id: keyof FormState & string,
     label: string,
-    options: { suffix?: string; step?: string; hint?: string; placeholder?: string } = {},
+    options: {
+      suffix?: string;
+      step?: string;
+      hint?: string;
+      placeholder?: string;
+      /**
+       * Erklärsatz, der auch im Seitenpanel stehen bleibt. Dort werden die
+       * übrigen ausgeblendet, weil sie 29 % der Höhe ausmachen — dieser
+       * nicht: Der vom Käufer gezahlte Versand in der Bemessungsgrundlage zu
+       * vergessen ist der häufigste Rechenfehler überhaupt.
+       */
+      hintImmer?: boolean;
+    } = {},
   ) => (
     <>
       <label htmlFor={id}>{label}</label>
@@ -329,7 +341,9 @@ export function Calculator() {
         />
         <span className="input-suffix">{options.suffix ?? '€'}</span>
       </div>
-      {options.hint && <p className="hint">{options.hint}</p>}
+      {options.hint && (
+        <p className={options.hintImmer ? 'hint hint--immer' : 'hint'}>{options.hint}</p>
+      )}
     </>
   );
 
@@ -485,6 +499,7 @@ export function Calculator() {
           <div className="field">
             {moneyField('buyerShipping', 'Versand, den der Käufer zahlt', {
               hint: 'Zählt zur Bemessungsgrundlage der Provision. Bei Gratisversand 0 eintragen.',
+              hintImmer: true,
             })}
           </div>
 

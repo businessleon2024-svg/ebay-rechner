@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gebührenkompass</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <!--
+      Hinweisleiste über dem Rechner. Sie erscheint, wenn auf der gerade
+      offenen Seite eine andere Artikelnummer steht als die geladene.
+
+      Bewusst mit Schaltfläche statt selbsttätig: Der Rechner lädt dabei neu.
+      Wer beim Weiterklicken ungefragt seine halb eingegebenen Preise verliert,
+      macht das kein zweites Mal.
+    -->
+    <div id="angebot" class="angebot versteckt">
+      <span class="angebot__text">
+        Auf dieser Seite: <strong id="angebotGtin"></strong>
+      </span>
+      <button id="uebernehmen" type="button" class="angebot__knopf">Übernehmen</button>
+      <button id="verwerfen" type="button" class="angebot__weg" aria-label="Hinweis schließen">
+        ×
+      </button>
+    </div>
+
+    <div id="laden" class="laden">
+      <div class="kreisel" role="status" aria-label="Rechner wird geladen"></div>
+    </div>
+
+    <iframe id="rahmen" class="versteckt" title="Gebührenkompass"></iframe>
+
+    <div id="fehler" class="fehler versteckt">
+      <p id="fehlertext"></p>
+      <a id="imBrowser" href="#" target="_blank" rel="noopener noreferrer">Im Browser öffnen</a>
+    </div>
+
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

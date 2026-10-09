@@ -1,7 +1,7 @@
 # Gebührenkompass — Browser-Erweiterung
 
-Lädt den Rechner ins Popup und gibt ihm die Artikelnummer der Seite mit, auf
-der du gerade stehst.
+Öffnet den Rechner im **Seitenpanel** von Chrome — rechts neben der Seite,
+auf der du gerade bist. Das Panel bleibt offen, während du weiterklickst.
 
 ## Einbauen
 
@@ -9,6 +9,7 @@ der du gerade stehst.
 2. Oben rechts **Entwicklermodus** einschalten
 3. **Entpackte Erweiterung laden** → diesen Ordner (`extension/`) wählen
 4. Im Puzzle-Symbol der Symbolleiste den Kompass anheften
+5. Auf das Symbol klicken — das Panel öffnet sich rechts
 
 Zum Aktualisieren: auf der Seite `chrome://extensions` beim Kompass auf das
 Neuladen-Symbol. Das ist nur für die Hülle nötig — Gestaltung und
@@ -27,15 +28,41 @@ einzelne von ihnen aktualisiert hat.
 ## Berechtigungen
 
 ```
-activeTab   Lesen der Seite, nur solange das Popup offen ist
+sidePanel   Das Panel überhaupt öffnen dürfen
+tabs        Adresse des aktiven Tabs sehen
+activeTab   Lesen nach einem Klick aufs Symbol
 scripting   Einspielen von gtin-lesen.js in genau diesen Tab
 ```
 
-Bewusst **kein** `host_permissions`. Damit kann die Erweiterung nicht im
-Hintergrund mitlesen, und Chrome zeigt beim Einbauen keine Warnung über
-„Daten auf allen Websites lesen" — die schreckt zu Recht ab.
+`tabs` kommt gegenüber einem Popup dazu und ist der Preis dafür, dass das
+Panel offen bleibt: `activeTab` gilt nur unmittelbar nach einem Klick aufs
+Symbol, das Panel liest aber auch, während man weitersurft.
+
+Bewusst **kein** `host_permissions`. Damit kann die Erweiterung keine
+Seiteninhalte im Hintergrund abgreifen, und Chrome zeigt beim Einbauen keine
+Warnung über „Daten auf allen Websites lesen" — die schreckt zu Recht ab.
 
 Kein `storage`, kein Konto, keine Anmeldung. Es wird nichts gespeichert.
+
+## Warum beim Seitenwechsel nicht automatisch neu geladen wird
+
+Findet das Panel auf der neuen Seite eine andere Artikelnummer, erscheint
+oben eine Leiste mit einer Schaltfläche — es lädt **nicht** von selbst.
+
+Das Neuladen verwirft, was gerade eingetippt wurde. Wer beim Stöbern seine
+halb eingegebenen Preise verliert, benutzt die Erweiterung kein zweites Mal.
+Wird die Leiste weggeklickt, kommt dieselbe Nummer nicht noch einmal.
+
+## Panelbetrieb der Webanwendung
+
+Das Panel ruft `/rechner?ext=1` auf. Daraufhin blendet die Seite Kopfzeile,
+Fußzeile, Erklärabschnitte und Werbefläche aus — im Panel steht das alles nur
+zwischen dem Nutzer und dem Ergebnis.
+
+Gemessen bei 400 px Breite: 4879 px Dokumenthöhe ohne, 3675 px mit. Davon
+entfielen allein 1151 px auf Erklärsätze unter den Feldern; die sind im Panel
+bis auf einen ausgeblendet. Der eine ist der zum Käuferversand in der
+Bemessungsgrundlage — der häufigste Rechenfehler überhaupt.
 
 ## Wie die Artikelnummer gefunden wird
 

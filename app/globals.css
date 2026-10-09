@@ -2073,3 +2073,46 @@ select.input optgroup {
     padding-top: 1.5rem;
   }
 }
+
+/* =========================================================
+   Eingebetteter Betrieb — Rechner im Seitenpanel der Erweiterung
+
+   Gesetzt von `components/embed-mode.tsx`, wenn die Adresse `?ext=1` trägt.
+   Im Panel ist alles überflüssig, was die Seite zu einer Seite macht: Es
+   steht nur zwischen dem Nutzer und dem Ergebnis. Bei 400 px Breite war das
+   Dokument 4879 px hoch — sechs Bildschirme Scrollen.
+
+   Versteckt statt gar nicht geladen: Der Unterschied sind wenige Kilobyte
+   Text, und es hält die Seite im Netz und im Panel bei derselben Adresse.
+   ========================================================= */
+
+:root[data-embed='1'] .topbar,
+:root[data-embed='1'] footer,
+/* Erklärabschnitte und Werbefläche — im Panel liest die niemand. */
+:root[data-embed='1'] main ~ .section,
+:root[data-embed='1'] .layout--single {
+  display: none;
+}
+
+/* Der gewonnene Platz gehört dem Rechner, nicht dem Rand. */
+:root[data-embed='1'] .layout {
+  padding-bottom: 1rem;
+}
+
+:root[data-embed='1'] body {
+  /* Im Panel scrollt der Rahmen, nicht das Dokument darin. */
+  min-height: 0;
+}
+
+/*
+  Erklärsätze machen bei 400 px Breite 29 % der Dokumenthöhe aus (1151 von
+  4028 px). Im Panel ist das der Unterschied zwischen "Ergebnis in Sichtweite"
+  und "fünfmal scrollen".
+
+  Ausgenommen `.hint--immer`: Dass der vom Käufer gezahlte Versand in die
+  Bemessungsgrundlage zählt, ist der häufigste Rechenfehler überhaupt. Diesen
+  Satz wegzulassen würde Platz sparen und Geld kosten.
+*/
+:root[data-embed='1'] .hint:not(.hint--immer) {
+  display: none;
+}

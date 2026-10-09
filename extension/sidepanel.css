@@ -1,0 +1,160 @@
+/*
+  Nur die Hülle. Das Aussehen kommt aus der Webanwendung im Rahmen — hier
+  steht bewusst kein zweites Gestaltungssystem, das mit dem ersten
+  auseinanderlaufen könnte.
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/*
+  Anders als das Popup hat das Seitenpanel keine feste Breite: Chrome lässt
+  den Nutzer daran ziehen. Deshalb `100%` statt fester Maße — der Rechner
+  darunter ist für schmale Fenster ohnehin eingerichtet.
+*/
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(150deg, #080d0c 0%, #0b1513 30%, #112220 62%, #0a1110 100%);
+  color: #e7ecea;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+.versteckt {
+  display: none !important;
+}
+
+/* ---------- Hinweisleiste ---------- */
+
+.angebot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  background: rgba(76, 190, 146, 0.12);
+  border-bottom: 1px solid rgba(76, 190, 146, 0.25);
+  font-size: 12px;
+  /* Darf nicht schrumpfen, sonst drückt der Rahmen sie beim Laden zusammen. */
+  flex: none;
+}
+
+.angebot__text {
+  flex: 1;
+  min-width: 0;
+  color: #c3ccc9;
+  /* Lange Nummern brechen die Leiste sonst auf zwei Zeilen. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.angebot__text strong {
+  color: #e7ecea;
+  font-variant-numeric: tabular-nums;
+}
+
+.angebot__knopf {
+  flex: none;
+  padding: 0.3rem 0.6rem;
+  border: none;
+  border-radius: 7px;
+  background: #2f9e6e;
+  color: #04150e;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.angebot__knopf:hover {
+  background: #38b47f;
+}
+
+.angebot__weg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #9aa8a3;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.angebot__weg:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e7ecea;
+}
+
+/* ---------- Rahmen, Laden, Fehler ---------- */
+
+#rahmen {
+  flex: 1;
+  width: 100%;
+  border: none;
+}
+
+.laden,
+.fehler {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.kreisel {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #4cbe92;
+  border-radius: 50%;
+  animation: drehen 0.8s linear infinite;
+}
+
+/* Wer Bewegung abgestellt hat, bekommt einen ruhig pulsierenden Punkt. */
+@media (prefers-reduced-motion: reduce) {
+  .kreisel {
+    animation: atmen 1.6s ease-in-out infinite;
+    border-top-color: rgba(255, 255, 255, 0.15);
+    background: #4cbe92;
+  }
+}
+
+.fehler p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #c3ccc9;
+}
+
+.fehler a {
+  color: #4cbe92;
+  font-size: 13px;
+}
+
+@keyframes drehen {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes atmen {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}

@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Gebührenkompass",
-  "version": "1.0",
-  "description": "Gebühren, Gewinn und Marge für eBay und Kaufland — direkt von der Produktseite aus.",
+  "version": "1.1",
+  "description": "Gebühren, Gewinn und Marge für eBay und Kaufland — offen neben der Produktseite.",
+  "minimum_chrome_version": "114",
   "action": {
-    "default_popup": "popup.html",
+    "default_title": "Gebührenkompass öffnen",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
@@ -16,5 +17,11 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["activeTab", "scripting"]
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["activeTab", "scripting", "sidePanel", "tabs"]
 }
