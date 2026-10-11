@@ -959,7 +959,16 @@ select.input optgroup {
   font-variant-numeric: tabular-nums;
 }
 
-.kpi__value--accent { color: var(--accent-text); }
+/*
+  Der maximale Einkaufspreis trug die Markenfarbe. Das ging gut, solange die
+  grün war — bei Kaufland stand die Zahl plötzlich rot da und las sich wie
+  eine Warnung, obwohl sie nur ein Zielwert ist.
+
+  Farbe bedeutet in diesem Ergebnis Vorzeichen, nicht Marke. Diese Zahl hat
+  kein Vorzeichen, also bleibt sie neutral; hervorgehoben wird sie über das
+  Gewicht. Das Urteil darüber trägt das Signal.
+*/
+.kpi__value--accent { color: var(--text); }
 .kpi__value--negative { color: var(--negative); }
 
 .kpi__hint {
@@ -2179,4 +2188,107 @@ select.input optgroup {
 */
 :root[data-embed='1'] .hint:not(.hint--immer) {
   display: none;
+}
+
+/* =========================================================
+   MARKENFARBE JE MARKTPLATZ
+
+   eBay grün, Kaufland rot. Man soll am Bild sehen, wofür gerechnet wird,
+   ohne den Reiter zu lesen.
+
+   Umgefärbt wird nur der **Markenakzent** — Reiter, Schaltflächen, Verweise.
+   `--positive` und `--negative` bleiben unberührt, und das ist der Punkt:
+   Gewinn muss grün und Verlust rot bleiben, sonst läse sich ein Gewinn bei
+   Kaufland wie ein Verlust. Markenfarbe und Vorzeichenfarbe sind zwei
+   verschiedene Dinge, die hier zufällig dieselben Töne benutzen.
+   ========================================================= */
+
+:root[data-theme='light'] .calc-shell[data-marketplace='kaufland'] {
+  /*
+    Kauflands Rot, etwas dunkler als das Original. Das Markenrot hat auf Weiß
+    zu wenig Kontrast für Text, und der Akzent trägt hier auch Beschriftungen.
+  */
+  --accent: #b4252b;
+  --accent-hover: #951c22;
+  --accent-text: #a81f25;
+  --accent-quiet: rgba(180, 37, 43, 0.07);
+  --on-accent: #ffffff;
+}
+
+:root[data-theme='dark'] .calc-shell[data-marketplace='kaufland'] {
+  --accent: #d4484e;
+  --accent-hover: #e05d63;
+  --accent-text: #f08e92;
+  --accent-quiet: rgba(212, 72, 78, 0.14);
+  --on-accent: #1a0608;
+}
+
+/*
+  Der aktive Reiter trägt die Farbe seines Marktplatzes. Ohne das bliebe der
+  Umschalter neutral, und genau dort erwartet man den Hinweis zuerst.
+*/
+.tab.is-active {
+  box-shadow: inset 0 -2px 0 var(--accent);
+  color: var(--accent-text);
+}
+
+/* =========================================================
+   URTEIL
+
+   Steht vor allen Zahlen und sagt in Worten, woran man ist. Eine Zahl muss
+   man lesen und einordnen — „Verlustgeschäft" erkennt man im Vorbeigehen.
+
+   Die Farbe kommt aus `--positive`/`--negative`, nicht aus dem Markenakzent:
+   Ein Gewinn bei Kaufland muss grün bleiben, auch wenn die Marke rot ist.
+   ========================================================= */
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  margin: 0 0 1.1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-md);
+  /* Linke Kante als Träger: in der dunklen Ansicht ist die Fläche kaum zu sehen. */
+  border-left: 4px solid currentColor;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.verdict__detail {
+  font-size: 0.86rem;
+  font-weight: 500;
+  /* Erbt die Farbe nicht: Der Zusatz ist Beleg, nicht Urteil. */
+  color: var(--text-muted);
+}
+
+.verdict--good {
+  color: var(--positive);
+  background: color-mix(in srgb, var(--positive) 8%, transparent);
+}
+
+.verdict--loss {
+  color: var(--negative);
+  background: color-mix(in srgb, var(--negative) 8%, transparent);
+}
+
+/*
+  Weder gut noch schlecht: Unter 10 % Marge frisst eine einzige Rücksendung
+  den Gewinn. Das ist kein Fehler, aber es soll auffallen.
+*/
+.verdict--thin {
+  color: var(--caution);
+  background: color-mix(in srgb, var(--caution) 10%, transparent);
+}
+
+/*
+  Der Beleghinweis steht jetzt unter dem Urteil statt darüber. Dort braucht
+  er Abstand nach oben und darf leiser auftreten — er schränkt die Antwort
+  ein, er ist nicht die Antwort.
+*/
+.notice--after {
+  margin-top: 1rem;
+  font-size: 0.84rem;
 }

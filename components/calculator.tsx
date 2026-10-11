@@ -371,7 +371,13 @@ export function Calculator() {
   };
 
   return (
-    <div className="calc-shell">
+    /*
+      Der Marktplatz steht am Element, nicht in der Klasse: Daran hängt die
+      Markenfarbe in globals.css. Grün für eBay, Rot für Kaufland — man sieht
+      beim Blick aufs Bild, wofür gerade gerechnet wird, ohne den Reiter zu
+      lesen.
+    */
+    <div className="calc-shell" data-marketplace={form.marketplaceId}>
       <div className="tabs" role="tablist" aria-label="Marktplatz">
         {MARKETPLACES.map((option) => (
           <button
