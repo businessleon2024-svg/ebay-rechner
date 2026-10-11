@@ -45,6 +45,26 @@
   --negative: #a83027;
   --caution: #8a6410;
 
+  /*
+    Bedeutungsfarben der Kennzahlen. Jede Zahl im Ergebnis bekommt die Farbe
+    ihrer Aussage, nicht die der Marke:
+
+      Gewinn            grün    --positive
+      Verlust           rot     --negative
+      Break-even        gelb    --caution   (die Schwelle, an der es kippt)
+      Max. Einkaufspreis blau   --limit     (eine Grenze, kein Vorzeichen)
+      Gebühr            braun   --chart-fee (gleiche Farbe wie im Balken)
+
+    Blau für die Obergrenze, weil sie weder gut noch schlecht ist: Sie sagt
+    „bis hierhin", nicht „gut" oder „schlecht". Grün wäre eine Empfehlung,
+    rot eine Warnung — beides wäre gelogen.
+  */
+  --limit: #2b5f99;
+
+  /* Marktplätze. Nur für die Reiter, nicht für Schrift oder Schaltflächen. */
+  --ebay: #10714e;
+  --kaufland: #b4252b;
+
   --shadow: 0 1px 2px rgba(16, 26, 23, 0.04), 0 2px 6px rgba(16, 26, 23, 0.05);
   --shadow-lift: 0 2px 4px rgba(16, 26, 23, 0.05), 0 8px 20px rgba(16, 26, 23, 0.07);
 
@@ -88,6 +108,12 @@
   --positive: #4cbe92;
   --negative: #e0736f;
   --caution: #d2a154;
+
+  /* Siehe die Erläuterung in der hellen Ansicht. */
+  --limit: #6ba3dd;
+
+  --ebay: #4cbe92;
+  --kaufland: #e8686e;
 
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-lift: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -303,6 +329,25 @@ a:hover {
   color: var(--text);
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+/*
+  Der aktive Reiter trägt die Farbe seines Marktplatzes — eBay grün,
+  Kaufland rot. Die Farbe sitzt hier und nur hier: Sie beantwortet die Frage
+  „wofür rechne ich gerade?", und das ist genau die Frage, die der Reiter
+  stellt. Logo, Verweise und Schaltflächen bleiben davon unberührt.
+
+  Die inaktiven Reiter bleiben grau. Beide gleichzeitig farbig wäre eine
+  Auswahl, die keine ist.
+*/
+.tab[data-marketplace='ebay'].is-active {
+  color: var(--ebay);
+  box-shadow: var(--shadow), inset 0 -2px 0 var(--ebay);
+}
+
+.tab[data-marketplace='kaufland'].is-active {
+  color: var(--kaufland);
+  box-shadow: var(--shadow), inset 0 -2px 0 var(--kaufland);
 }
 
 .tab:focus-visible {
@@ -960,15 +1005,22 @@ select.input optgroup {
 }
 
 /*
-  Der maximale Einkaufspreis trug die Markenfarbe. Das ging gut, solange die
-  grün war — bei Kaufland stand die Zahl plötzlich rot da und las sich wie
-  eine Warnung, obwohl sie nur ein Zielwert ist.
+  Jede Kennzahl trägt die Farbe ihrer Aussage. Die Tokens und die Begründung
+  stehen oben bei `--limit`.
 
-  Farbe bedeutet in diesem Ergebnis Vorzeichen, nicht Marke. Diese Zahl hat
-  kein Vorzeichen, also bleibt sie neutral; hervorgehoben wird sie über das
-  Gewicht. Das Urteil darüber trägt das Signal.
+  Der maximale Einkaufspreis trug vorher die Markenfarbe. Das ging gut,
+  solange die grün war — bei Kaufland stand die Zahl rot da und las sich wie
+  eine Warnung, obwohl sie nur eine Grenze ist. Jetzt blau: weder Lob noch
+  Warnung, sondern „bis hierhin".
 */
-.kpi__value--accent { color: var(--text); }
+.kpi__value--limit { color: var(--limit); }
+
+/* Gelb: die Schwelle, an der der Verkauf kippt. */
+.kpi__value--breakeven { color: var(--caution); }
+
+/* Dieselbe Farbe wie der Gebührenabschnitt im Balken darunter. */
+.kpi__value--fee { color: var(--chart-fee); }
+
 .kpi__value--negative { color: var(--negative); }
 
 .kpi__hint {

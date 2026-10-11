@@ -239,7 +239,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
       <div className="kpi-grid">
         <div className="kpi">
           <span className="kpi__label">Max. Einkaufspreis</span>
-          <span className="kpi__value kpi__value--accent">
+          <span className="kpi__value kpi__value--limit">
             {isEmpty ? '–' : formatCurrency(maxPurchase)}
           </span>
           <span className="kpi__hint">
@@ -250,7 +250,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
         </div>
         <div className="kpi">
           <span className="kpi__label">Break-even</span>
-          <span className="kpi__value">
+          <span className="kpi__value kpi__value--breakeven">
             {isEmpty || !Number.isFinite(breakEven) ? '–' : formatCurrency(breakEven)}
           </span>
           <span className="kpi__hint">Verkaufspreis ohne Gewinn</span>
@@ -260,7 +260,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
             {marketplace.name}-Gebühr
             <span className="kpi__tag">{PRECISION_LABEL[precision]}</span>
           </span>
-          <span className="kpi__value">
+          <span className="kpi__value kpi__value--fee">
             {isEmpty ? '–' : formatCurrency(fees.totalFeeGross)}
           </span>
           <span className="kpi__hint">

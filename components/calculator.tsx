@@ -396,6 +396,8 @@ export function Calculator() {
             type="button"
             role="tab"
             aria-selected={option.id === form.marketplaceId}
+            /* Trägt im aktiven Zustand die Farbe seines Marktplatzes. */
+            data-marketplace={option.id}
             className={`tab${option.id === form.marketplaceId ? ' is-active' : ''}`}
             onClick={() => selectMarketplace(option.id)}
           >
