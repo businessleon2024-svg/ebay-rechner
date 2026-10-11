@@ -223,6 +223,23 @@ export function Calculator() {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
+  /*
+    Der gewählte Marktplatz am Wurzelelement. Daran hängt in globals.css der
+    Hintergrundverlauf — grün bei eBay, rot bei Kaufland.
+
+    Es muss `<html>` sein, nicht der Rechner selbst: Der Verlauf liegt auf
+    `body` und soll die ganze Seite einfärben, nicht einen Kasten darin.
+
+    Beim Verlassen wieder entfernen, sonst bliebe das Rot auf der
+    Gebührenübersicht stehen, nachdem man bei Kaufland gerechnet hat.
+  */
+  useEffect(() => {
+    document.documentElement.dataset.marketplace = form.marketplaceId;
+    return () => {
+      delete document.documentElement.dataset.marketplace;
+    };
+  }, [form.marketplaceId]);
+
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
 
@@ -371,13 +388,7 @@ export function Calculator() {
   };
 
   return (
-    /*
-      Der Marktplatz steht am Element, nicht in der Klasse: Daran hängt die
-      Markenfarbe in globals.css. Grün für eBay, Rot für Kaufland — man sieht
-      beim Blick aufs Bild, wofür gerade gerechnet wird, ohne den Reiter zu
-      lesen.
-    */
-    <div className="calc-shell" data-marketplace={form.marketplaceId}>
+    <div className="calc-shell">
       <div className="tabs" role="tablist" aria-label="Marktplatz">
         {MARKETPLACES.map((option) => (
           <button
