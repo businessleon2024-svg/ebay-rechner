@@ -69,8 +69,23 @@
   --brand: #10714e;
   --on-brand: #ffffff;
 
-  --ebay: #10714e;
-  --kaufland: #b4252b;
+  /*
+    Marktplatzfarben, an den echten Marken orientiert.
+
+    eBay führt vier Farben — Rot, Blau, Gelb, Grün. Als Flächenfarbe taugt
+    davon nur das Blau; die vier zusammen sind das Erkennungszeichen und
+    laufen hier als schmaler Streifen über dem Rechner. Kaufland ist ein
+    einziges, kräftiges Rot.
+
+    Nur die Farben, nicht die Zeichen: Logos der Marktplätze tauchen nirgends
+    auf. Farben zur Kennzeichnung sind beschreibender Gebrauch, ein fremdes
+    Logo wäre etwas anderes.
+  */
+  --ebay: #0064d2;
+  --ebay-rot: #e53238;
+  --ebay-gelb: #f5af02;
+  --ebay-gruen: #86b817;
+  --kaufland: #e10915;
 
   --shadow: 0 1px 2px rgba(16, 26, 23, 0.04), 0 2px 6px rgba(16, 26, 23, 0.05);
   --shadow-lift: 0 2px 4px rgba(16, 26, 23, 0.05), 0 8px 20px rgba(16, 26, 23, 0.07);
@@ -122,8 +137,12 @@
   --brand: #2f9e6e;
   --on-brand: #04150e;
 
-  --ebay: #4cbe92;
-  --kaufland: #e8686e;
+  /* Aufgehellt, damit sie auf dunklem Grund tragen. Siehe helle Ansicht. */
+  --ebay: #4d94f0;
+  --ebay-rot: #f05a5f;
+  --ebay-gelb: #ffc53d;
+  --ebay-gruen: #a3d535;
+  --kaufland: #f4565f;
 
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-lift: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -2283,28 +2302,72 @@ select.input optgroup {
    der Verlauf die ganze Seite statt eines Kastens darin.
    ========================================================= */
 
+/* ---------- eBay: Blau als Fläche, die vier Farben als Streifen ---------- */
+
+:root[data-theme='light'][data-marketplace='ebay'] {
+  --app-bg: linear-gradient(150deg, #f6f9fd 0%, #eaf1fa 32%, #e6eef8 64%, #f4f8fc 100%);
+
+  --accent: #0064d2;
+  --accent-hover: #0052ab;
+  --accent-text: #0059ba;
+  --accent-quiet: rgba(0, 100, 210, 0.07);
+  --on-accent: #ffffff;
+
+  --streifen: linear-gradient(
+    90deg,
+    var(--ebay-rot) 0 25%,
+    var(--ebay) 25% 50%,
+    var(--ebay-gelb) 50% 75%,
+    var(--ebay-gruen) 75% 100%
+  );
+}
+
+:root[data-theme='dark'][data-marketplace='ebay'] {
+  --app-bg: linear-gradient(150deg, #070b12 0%, #0b1320 30%, #111f33 62%, #090f18 100%);
+
+  --accent: #2f7fe0;
+  --accent-hover: #4d94f0;
+  --accent-text: #6ba9f5;
+  --accent-quiet: rgba(77, 148, 240, 0.14);
+  --on-accent: #04101f;
+
+  --streifen: linear-gradient(
+    90deg,
+    var(--ebay-rot) 0 25%,
+    var(--ebay) 25% 50%,
+    var(--ebay-gelb) 50% 75%,
+    var(--ebay-gruen) 75% 100%
+  );
+}
+
+/* ---------- Kaufland: ein kräftiges Rot ---------- */
+
 :root[data-theme='light'][data-marketplace='kaufland'] {
-  --app-bg: linear-gradient(150deg, #fdf8f8 0%, #f8eded 32%, #f6e9e9 64%, #fbf5f5 100%);
+  --app-bg: linear-gradient(150deg, #fef7f7 0%, #fceaea 32%, #fbe4e5 64%, #fdf3f3 100%);
 
   /*
-    Kauflands Rot, etwas dunkler als das Markenrot. Das Original hat auf Weiß
-    zu wenig Kontrast für Text, und der Akzent trägt hier auch Verweise.
+    Etwas dunkler als Kauflands #e10915: Das Original hat auf Weiß zu wenig
+    Kontrast für Text, und der Akzent trägt hier auch Verweise.
   */
-  --accent: #b4252b;
-  --accent-hover: #951c22;
-  --accent-text: #a81f25;
-  --accent-quiet: rgba(180, 37, 43, 0.07);
+  --accent: #c20a14;
+  --accent-hover: #9d0810;
+  --accent-text: #b5070f;
+  --accent-quiet: rgba(225, 9, 21, 0.07);
   --on-accent: #ffffff;
+
+  --streifen: linear-gradient(90deg, #e10915 0%, #ff3b45 100%);
 }
 
 :root[data-theme='dark'][data-marketplace='kaufland'] {
-  --app-bg: linear-gradient(150deg, #100809 0%, #1a0d0e 30%, #271416 62%, #130a0b 100%);
+  --app-bg: linear-gradient(150deg, #140708 0%, #210b0d 30%, #311215 62%, #180809 100%);
 
-  --accent: #d4484e;
-  --accent-hover: #e05d63;
-  --accent-text: #f08e92;
-  --accent-quiet: rgba(212, 72, 78, 0.14);
-  --on-accent: #1a0608;
+  --accent: #e03740;
+  --accent-hover: #f0525b;
+  --accent-text: #ff8086;
+  --accent-quiet: rgba(224, 55, 64, 0.16);
+  --on-accent: #1a0305;
+
+  --streifen: linear-gradient(90deg, #e10915 0%, #ff5b63 100%);
 }
 
 /* =========================================================
@@ -2366,4 +2429,79 @@ select.input optgroup {
 .notice--after {
   margin-top: 1rem;
   font-size: 0.84rem;
+}
+
+/* =========================================================
+   ERKENNUNGSSTREIFEN
+
+   Schmaler Farbbalken über dem Rechner. Bei eBay die vier Markenfarben, bei
+   Kaufland das Rot im Verlauf. Er kostet 4 Pixel Höhe und beantwortet beim
+   ersten Blick, wo man ist — noch bevor man den Reiter gelesen hat.
+   ========================================================= */
+
+.streifen {
+  height: 4px;
+  margin-bottom: 1.1rem;
+  border-radius: 99px;
+  background: var(--streifen, var(--accent));
+}
+
+/* =========================================================
+   URTEIL, laut
+
+   Vorher ein getönter Kasten mit farbiger Kante — korrekt, aber leise. Das
+   Ergebnis ist der Grund, warum jemand die Seite öffnet; es darf auftreten
+   wie eine Antwort und nicht wie eine Fußnote.
+
+   Jetzt volle Fläche in der Farbe der Aussage, Text darauf in der
+   Gegenfarbe. Die Bedeutung bleibt dieselbe wie vorher: grün Gewinn, rot
+   Verlust, gelb dünne Marge. Nur lauter.
+   ========================================================= */
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.7rem;
+  margin: 0 0 1.25rem;
+  padding: 0.95rem 1.15rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+  box-shadow: var(--shadow-lift);
+}
+
+.verdict__detail {
+  font-size: 0.9rem;
+  font-weight: 600;
+  /*
+    Nicht `--text-muted`: Auf der farbigen Fläche wäre das ein grauer Fleck.
+    Die eigene Farbe leicht durchscheinend lassen bindet den Zusatz an die
+    Überschrift, statt ihn danebenzustellen.
+  */
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.verdict--good {
+  background: linear-gradient(135deg, #0f7a53 0%, #16a06c 100%);
+}
+
+.verdict--loss {
+  background: linear-gradient(135deg, #a52b22 0%, #c9443a 100%);
+}
+
+/*
+  Gelb trägt keine weiße Schrift — der Kontrast reicht nicht. Deshalb hier
+  dunkler Text auf hellem Grund, als einzige Ausnahme.
+*/
+.verdict--thin {
+  background: linear-gradient(135deg, #d9a21f 0%, #efc04a 100%);
+  color: #2b1f03;
+}
+
+.verdict--thin .verdict__detail {
+  color: rgba(43, 31, 3, 0.75);
 }

@@ -389,6 +389,13 @@ export function Calculator() {
 
   return (
     <div className="calc-shell">
+      {/*
+        Erkennungsstreifen in den Farben des Marktplatzes — bei eBay die
+        vier, bei Kaufland das Rot. Reine Dekoration, deshalb aus der
+        Vorlesereihenfolge genommen.
+      */}
+      <div className="streifen" aria-hidden="true" />
+
       <div className="tabs" role="tablist" aria-label="Marktplatz">
         {MARKETPLACES.map((option) => (
           <button
