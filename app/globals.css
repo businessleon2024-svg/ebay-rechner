@@ -61,7 +61,14 @@
   */
   --limit: #2b5f99;
 
-  /* Marktplätze. Nur für die Reiter, nicht für Schrift oder Schaltflächen. */
+  /*
+    Die eigene Marke. Fest, unabhängig vom Marktplatz — das Logo färbt sich
+    nicht mit. `--accent` dagegen wechselt und trägt alles Bedienbare:
+    Schaltflächen, Verweise, Reiter, Fokusrahmen.
+  */
+  --brand: #10714e;
+  --on-brand: #ffffff;
+
   --ebay: #10714e;
   --kaufland: #b4252b;
 
@@ -111,6 +118,9 @@
 
   /* Siehe die Erläuterung in der hellen Ansicht. */
   --limit: #6ba3dd;
+
+  --brand: #2f9e6e;
+  --on-brand: #04150e;
 
   --ebay: #4cbe92;
   --kaufland: #e8686e;
@@ -271,8 +281,14 @@ a:hover {
   width: 34px;
   height: 34px;
   border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--on-accent);
+  /*
+    Das Logo trägt `--brand`, nicht `--accent`. Der Akzent wechselt mit dem
+    Marktplatz; die eigene Marke tut das nicht. Ein Kompass, der bei Kaufland
+    rot wird, ist nicht mehr dieselbe Marke — und das App-Symbol und die
+    `theme_color` im Manifest sind ohnehin fest grün.
+  */
+  background: var(--brand);
+  color: var(--on-brand);
   flex-shrink: 0;
 }
 
@@ -2243,20 +2259,25 @@ select.input optgroup {
 }
 
 /* =========================================================
-   MARKTPLATZ AM HINTERGRUND
+   ERSCHEINUNGSBILD JE MARKTPLATZ
 
-   eBay grün, Kaufland rot — aber **nur im Hintergrund**. Schrift, Verweise
-   und Schaltflächen bleiben in allen Marktplätzen gleich.
+   Jeder Marktplatz bekommt sein eigenes Bild: eBay grün, Kaufland rot. Der
+   Wechsel erfasst den Hintergrundverlauf **und** den Akzent — also alles
+   Bedienbare: Schaltflächen, Verweise, Reiter, Fokusrahmen.
 
-   Der erste Versuch färbte den Akzent um, also Reiter, Verweise und
-   Schaltflächen. Das machte die Oberfläche unruhig: Bei jedem Wechsel
-   sprang ein halbes Dutzend Elemente um, und der Text trug plötzlich eine
-   Bedeutung, die er nicht hat. Der Hintergrund trägt dieselbe Auskunft, ohne
-   sich in den Vordergrund zu drängen — man nimmt ihn wahr, ohne hinzusehen.
+   Drei Dinge bleiben bewusst außen vor, und das ist der ganze Trick:
 
-   `--positive` und `--negative` bleiben ohnehin unberührt: Gewinn grün,
-   Verlust rot, auch bei Kaufland. Hintergrundfarbe und Vorzeichenfarbe sind
-   zwei verschiedene Dinge, die nur zufällig dieselben Töne benutzen.
+   **Das Logo** trägt `--brand` und bleibt grün. Ein Kompass, der bei
+   Kaufland rot wird, ist nicht mehr dieselbe Marke; App-Symbol und
+   `theme_color` im Manifest sind ohnehin fest.
+
+   **Die Vorzeichenfarben** `--positive` und `--negative` bleiben unberührt.
+   Gewinn grün, Verlust rot — auch bei Kaufland. Sonst läse sich ein Gewinn
+   dort wie ein Verlust. Markenfarbe und Vorzeichenfarbe sind zwei Dinge, die
+   nur zufällig dieselben Töne benutzen.
+
+   **Die Kennzahlenfarben** `--caution` (Break-even) und `--limit`
+   (Obergrenze) ebenso. Sie beschreiben die Zahl, nicht den Marktplatz.
 
    Gesetzt wird das Merkmal an `<html>`, nicht am Rechner — nur so erfasst
    der Verlauf die ganze Seite statt eines Kastens darin.
@@ -2264,10 +2285,26 @@ select.input optgroup {
 
 :root[data-theme='light'][data-marketplace='kaufland'] {
   --app-bg: linear-gradient(150deg, #fdf8f8 0%, #f8eded 32%, #f6e9e9 64%, #fbf5f5 100%);
+
+  /*
+    Kauflands Rot, etwas dunkler als das Markenrot. Das Original hat auf Weiß
+    zu wenig Kontrast für Text, und der Akzent trägt hier auch Verweise.
+  */
+  --accent: #b4252b;
+  --accent-hover: #951c22;
+  --accent-text: #a81f25;
+  --accent-quiet: rgba(180, 37, 43, 0.07);
+  --on-accent: #ffffff;
 }
 
 :root[data-theme='dark'][data-marketplace='kaufland'] {
   --app-bg: linear-gradient(150deg, #100809 0%, #1a0d0e 30%, #271416 62%, #130a0b 100%);
+
+  --accent: #d4484e;
+  --accent-hover: #e05d63;
+  --accent-text: #f08e92;
+  --accent-quiet: rgba(212, 72, 78, 0.14);
+  --on-accent: #1a0608;
 }
 
 /* =========================================================
