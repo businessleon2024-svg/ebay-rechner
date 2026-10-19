@@ -12,7 +12,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: SITE.url, lastModified, changeFrequency: 'monthly', priority: 1 },
     { url: `${SITE.url}/rechner`, lastModified, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${SITE.url}/versand`, lastModified, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${SITE.url}/gebuehren`, lastModified, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE.url}/erweiterung`, lastModified, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE.url}/support`, lastModified, changeFrequency: 'yearly', priority: 0.4 },
   ];
 }

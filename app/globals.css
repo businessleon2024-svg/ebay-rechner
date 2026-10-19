@@ -901,6 +901,13 @@ select.input optgroup {
   transition: background var(--transition), border-color var(--transition), color var(--transition);
   flex: 1;
   white-space: nowrap;
+  /*
+    Schaltflächen sind oft Verweise (`<a class="btn">`). Ohne diese Zeile
+    unterstreicht der Browser sie wie jeden anderen Verweis — ein Knopf mit
+    unterstrichener Beschriftung sieht nach Versehen aus. Die Grundregel für
+    `a` weiter oben setzt nur Farbe und Abstand, nicht die Linie selbst.
+  */
+  text-decoration: none;
 }
 
 .btn--primary {
@@ -1916,7 +1923,13 @@ select.input optgroup {
   }
 
   .topbar__nav {
-    gap: 1.1rem;
+    /*
+      Mit fünf Einträgen reichte die Zeile bei 439 px Breite exakt bis an den
+      Rand — ohne Luft und mit dem Umschalter am Anschlag. Deshalb darf sie
+      jetzt selbst umbrechen, und der Abstand ist kleiner.
+    */
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
     /* Füllt die zweite Zeile, damit der Umschalter rechts außen sitzt. */
     flex: 1 1 100%;
     justify-content: space-between;
