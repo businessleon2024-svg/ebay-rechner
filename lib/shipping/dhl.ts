@@ -7,6 +7,10 @@
  * ausgewertet über alle Positionen „DHL PAKET (GK) … kg“. Nicht aus einer
  * Preisliste und nicht aus dem Gedächtnis.
  *
+ * Nachrechnen und fortschreiben lässt sich das mit
+ * `scripts/dhl-rechnungen-auswerten.py` — Rechnungen als Argumente übergeben.
+ * Ohne dieses Skript wäre die Herkunft eine bloße Behauptung.
+ *
  * Dabei zeigte sich ein Preiswechsel zum Jahreswechsel: Bis Dezember 2025
  * kostete die 1-kg-Stufe 5,05 €, seit Januar 2026 kostet sie 5,00 €; die
  * 10-kg-Stufe fiel von 8,70 € auf 8,65 €. Hinterlegt ist der aktuelle Stand.
