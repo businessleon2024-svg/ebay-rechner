@@ -1,122 +1,159 @@
 import { describe, expect, it } from 'vitest';
-import { DHL_PRODUKTE, guenstigstesProdukt, passtIn, preisFuer } from './dhl';
+import {
+  ENERGIE_ANTEIL,
+  GEWICHTSSTUFEN,
+  MAUT_ZUSCHLAG,
+  basispreisFuer,
+  istUebergross,
+  stufeFuer,
+  versandkosten,
+} from './dhl';
 
-const produkt = (id: string) => {
-  const gefunden = DHL_PRODUKTE.find((p) => p.id === id);
-  if (!gefunden) throw new Error(`Produkt ${id} fehlt`);
-  return gefunden;
-};
-
-describe('passtIn', () => {
-  it('nimmt ein Paket an, das in alle Maße passt', () => {
-    expect(passtIn(produkt('paeckchen-s'), { laenge: 30, breite: 20, hoehe: 8 }, 1)).toBe(true);
-  });
-
-  it('lehnt ab, wenn eine Kante zu lang ist', () => {
-    expect(passtIn(produkt('paeckchen-s'), { laenge: 40, breite: 20, hoehe: 8 }, 1)).toBe(false);
-  });
-
-  it('lehnt ab, wenn das Gewicht nicht reicht', () => {
-    expect(passtIn(produkt('paeckchen-s'), { laenge: 30, breite: 20, hoehe: 8 }, 3)).toBe(false);
+describe('stufeFuer', () => {
+  it('ordnet jedes Gewicht der richtigen Stufe zu', () => {
+    expect(stufeFuer(0.4)?.id).toBe('bis-1');
+    expect(stufeFuer(2)?.id).toBe('bis-3');
+    expect(stufeFuer(4.2)?.id).toBe('bis-5');
+    expect(stufeFuer(9)?.id).toBe('bis-10');
+    expect(stufeFuer(18)?.id).toBe('bis-20');
+    expect(stufeFuer(30)?.id).toBe('bis-31-5');
   });
 
   /*
-    Der Fehler, der solchen Rechnern am häufigsten unterläuft: Kanten der
-    Reihe nach vergleichen. Ein Karton von 8 × 20 × 30 cm ist derselbe wie
-    30 × 20 × 8 — man darf ihn drehen. Wer stur Länge gegen Länge prüft,
-    lehnt Pakete ab, die tatsächlich passen.
+    Die Grenze gehört zur Stufe, nicht zur nächsten. Ein Paket von genau
+    1,00 kg kostet die 1-kg-Stufe — so steht es auch auf den Rechnungen.
   */
-  it('darf das Paket drehen', () => {
-    const quer = { laenge: 8, breite: 20, hoehe: 30 };
-    const laengs = { laenge: 30, breite: 20, hoehe: 8 };
+  it('zählt das Grenzgewicht noch zur kleineren Stufe', () => {
+    expect(stufeFuer(1)?.id).toBe('bis-1');
+    expect(stufeFuer(1.01)?.id).toBe('bis-3');
+    expect(stufeFuer(31.5)?.id).toBe('bis-31-5');
+  });
 
-    expect(passtIn(produkt('paeckchen-s'), quer, 1)).toBe(
-      passtIn(produkt('paeckchen-s'), laengs, 1),
-    );
-    expect(passtIn(produkt('paeckchen-s'), quer, 1)).toBe(true);
+  it('gibt null über 31,5 kg und bei 0 zurück', () => {
+    expect(stufeFuer(31.6)).toBeNull();
+    expect(stufeFuer(0)).toBeNull();
+    expect(stufeFuer(-1)).toBeNull();
+  });
+});
+
+describe('Preise gegen die Rechnungen', () => {
+  /*
+    Die sechs Grundpreise, wie sie seit Januar 2026 auf den Rechnungen
+    stehen. Ändert jemand einen Wert in der Tabelle, ohne eine neue
+    Abrechnung zu haben, fällt es hier auf.
+  */
+  it.each([
+    ['bis-1', 5.0],
+    ['bis-3', 5.55],
+    ['bis-5', 6.6],
+    ['bis-10', 8.65],
+    ['bis-20', 13.55],
+    ['bis-31-5', 16.3],
+  ])('%s kostet %s € netto', (id, erwartet) => {
+    expect(GEWICHTSSTUFEN.find((s) => s.id === id)?.basispreis).toBe(erwartet);
+  });
+
+  /*
+    Der Energiezuschlag steht auf den Rechnungen als 1,25 % ausgewiesen. Hier
+    gegen die tatsächlich abgerechneten Centbeträge gehalten — alle sechs
+    Stufen müssen auf den Cent stimmen, sonst ist entweder der Satz oder die
+    Rundung falsch.
+  */
+  it.each([
+    [5.0, 0.06],
+    [5.55, 0.07],
+    [6.6, 0.08],
+    [8.65, 0.11],
+    [13.55, 0.17],
+    [16.3, 0.2],
+  ])('Energiezuschlag auf %s € ergibt %s €', (basis, erwartet) => {
+    expect(Math.round(basis * ENERGIE_ANTEIL * 100) / 100).toBe(erwartet);
+  });
+
+  it('der Maut- und CO2-Zuschlag ist ein fester Betrag', () => {
+    expect(MAUT_ZUSCHLAG).toBe(0.19);
+  });
+});
+
+describe('versandkosten', () => {
+  it('summiert Grundpreis und beide Zuschläge', () => {
+    const k = versandkosten(0.8);
+
+    expect(k?.basispreis).toBe(5.0);
+    expect(k?.mautZuschlag).toBe(0.19);
+    expect(k?.energieZuschlag).toBe(0.06);
+    expect(k?.gesamt).toBe(5.25);
+  });
+
+  it('rechnet die schwerste Stufe korrekt', () => {
+    const k = versandkosten(25);
+
+    expect(k?.stufe.id).toBe('bis-31-5');
+    expect(k?.gesamt).toBe(16.69); // 16,30 + 0,19 + 0,20
+  });
+
+  it('gibt null über 31,5 kg zurück', () => {
+    expect(versandkosten(35)).toBeNull();
+  });
+
+  /*
+    Der Energiezuschlag ist prozentual. Wer einen eigenen Grundpreis
+    hinterlegt, muss ihn auch darauf berechnet bekommen — sonst stünde ein
+    Zuschlag auf einem Preis, den dieser Kunde gar nicht zahlt.
+  */
+  it('rechnet den Energiezuschlag auf dem eigenen Preis', () => {
+    const k = versandkosten(0.8, { 'bis-1': 4.0 });
+
+    expect(k?.basispreis).toBe(4.0);
+    expect(k?.energieZuschlag).toBe(0.05); // 1,25 % von 4,00
+    expect(k?.gesamt).toBe(4.24);
+  });
+
+  /*
+    0 € ist ein zulässiger eigener Preis, etwa bei Pauschalvertrag. `??`
+    statt `||`, sonst fiele die Null auf den hinterlegten Preis zurück.
+  */
+  it('akzeptiert 0 € als eigenen Grundpreis', () => {
+    expect(basispreisFuer(GEWICHTSSTUFEN[0], { 'bis-1': 0 })).toBe(0);
+  });
+});
+
+describe('istUebergross', () => {
+  it('lässt ein Paket innerhalb der Maße durch', () => {
+    expect(istUebergross({ laenge: 100, breite: 50, hoehe: 40 })).toBe(false);
+  });
+
+  it('meldet eine zu lange Kante', () => {
+    expect(istUebergross({ laenge: 130, breite: 30, hoehe: 20 })).toBe(true);
   });
 
   it('lässt die Grenzmaße selbst noch zu', () => {
-    expect(passtIn(produkt('paeckchen-s'), { laenge: 35, breite: 25, hoehe: 10 }, 2)).toBe(true);
-  });
-
-  it('lehnt einen Millimeter darüber ab', () => {
-    expect(passtIn(produkt('paeckchen-s'), { laenge: 35.1, breite: 25, hoehe: 10 }, 2)).toBe(false);
-  });
-});
-
-describe('guenstigstesProdukt', () => {
-  it('findet das kleinste passende Produkt', () => {
-    const p = guenstigstesProdukt({ laenge: 30, breite: 20, hoehe: 8 }, 1);
-
-    expect(p?.id).toBe('paeckchen-s');
-  });
-
-  it('steigt auf, wenn das Gewicht nicht mehr reicht', () => {
-    const p = guenstigstesProdukt({ laenge: 50, breite: 30, hoehe: 15 }, 4);
-
-    expect(p?.id).toBe('paket-5');
+    expect(istUebergross({ laenge: 120, breite: 60, hoehe: 60 })).toBe(false);
   });
 
   /*
-    `null` heißt „so nicht versendbar", nicht „kostenlos". Die Oberfläche
-    muss das als eigenen Fall zeigen; als 0 € gelesen wäre es eine
-    Gewinnrechnung ohne Porto.
+    Derselbe Karton, anders eingetippt. Wer die Kanten der Reihe nach
+    vergleicht, meldet hier Übergröße, wo keine ist.
   */
-  it('gibt null zurück, wenn nichts passt', () => {
-    expect(guenstigstesProdukt({ laenge: 200, breite: 60, hoehe: 60 }, 5)).toBeNull();
-    expect(guenstigstesProdukt({ laenge: 30, breite: 20, hoehe: 10 }, 40)).toBeNull();
-  });
-
-  /*
-    Mit eigenen Vertragspreisen kann ein größeres Produkt billiger sein. Dann
-    muss es gewinnen — sonst wäre „günstigstes" eine Behauptung, die der
-    Rechner selbst widerlegt.
-  */
-  it('folgt den eigenen Preisen, nicht der Größe', () => {
-    const eigene = { 'paeckchen-s': 4.5, 'paeckchen-m': 2.0 };
-    const p = guenstigstesProdukt({ laenge: 30, breite: 20, hoehe: 8 }, 1, eigene);
-
-    expect(p?.id).toBe('paeckchen-m');
-  });
-
-  it('bleibt beim kleineren, wenn beide gleich kosten', () => {
-    const eigene = { 'paeckchen-s': 3.0, 'paeckchen-m': 3.0 };
-    const p = guenstigstesProdukt({ laenge: 30, breite: 20, hoehe: 8 }, 1, eigene);
-
-    expect(p?.id).toBe('paeckchen-s');
+  it('darf das Paket drehen', () => {
+    expect(istUebergross({ laenge: 20, breite: 60, hoehe: 110 })).toBe(false);
+    expect(istUebergross({ laenge: 40, breite: 50, hoehe: 100 })).toBe(false);
   });
 });
 
-describe('preisFuer', () => {
-  it('nimmt den Vorgabepreis, wenn kein eigener hinterlegt ist', () => {
-    expect(preisFuer(produkt('paeckchen-s'))).toBe(produkt('paeckchen-s').vorgabePreis);
-  });
-
-  it('lässt den eigenen Preis gewinnen', () => {
-    expect(preisFuer(produkt('paeckchen-s'), { 'paeckchen-s': 2.5 })).toBe(2.5);
-  });
-
-  /*
-    0 € ist ein zulässiger eigener Preis — etwa bei Abholung oder
-    Pauschalvertrag. `??` statt `||`, sonst fiele die 0 auf den Vorgabewert
-    zurück und der Rechner berechnete Porto, das nicht anfällt.
-  */
-  it('akzeptiert 0 € als eigenen Preis', () => {
-    expect(preisFuer(produkt('paeckchen-s'), { 'paeckchen-s': 0 })).toBe(0);
-  });
-});
-
-describe('Produktliste', () => {
-  it('ist nach Kapazität aufsteigend sortiert', () => {
-    const gewichte = DHL_PRODUKTE.map((p) => p.maxGewicht);
-
+describe('Stufenliste', () => {
+  it('ist aufsteigend nach Gewicht sortiert', () => {
+    const gewichte = GEWICHTSSTUFEN.map((s) => s.bisKg);
     expect(gewichte).toEqual([...gewichte].sort((a, b) => a - b));
   });
 
-  it('hat eindeutige Kennungen', () => {
-    const ids = DHL_PRODUKTE.map((p) => p.id);
+  it('wird mit dem Gewicht nicht billiger', () => {
+    const preise = GEWICHTSSTUFEN.map((s) => s.basispreis);
+    expect(preise).toEqual([...preise].sort((a, b) => a - b));
+  });
 
+  it('hat eindeutige Kennungen', () => {
+    const ids = GEWICHTSSTUFEN.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 });

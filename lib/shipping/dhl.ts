@@ -1,154 +1,150 @@
 /**
- * DHL-Versandprodukte für den Paketversand innerhalb Deutschlands.
+ * DHL Paket für Geschäftskunden, Versand innerhalb Deutschlands.
  *
- * ## Warum hier zwei verschiedene Arten von Wissen stehen
+ * ## Woher die Zahlen stammen
  *
- * **Maße und Gewichte sind hart.** Ob ein Karton von 40 × 30 × 20 cm in ein
- * Päckchen M passt, ist eine Frage der Geometrie und ändert sich nicht.
- * Diese Angaben sind belastbar.
+ * Aus **345 echten DHL-Rechnungen** von September 2025 bis Oktober 2026,
+ * ausgewertet über alle Positionen „DHL PAKET (GK) … kg“. Nicht aus einer
+ * Preisliste und nicht aus dem Gedächtnis.
  *
- * **Die Preise sind es nicht.** Sie ändern sich jährlich, unterscheiden sich
- * zwischen Filiale und Online-Frankierung, und vor allem: Wer als
- * Geschäftskunde einen Vertrag hat, zahlt ganz andere Beträge — oft die
- * Hälfte. Ein Reseller mit Vertrag, dem wir Privatkundenpreise vorrechnen,
- * bekommt eine Marge angezeigt, die es nicht gibt.
+ * Dabei zeigte sich ein Preiswechsel zum Jahreswechsel: Bis Dezember 2025
+ * kostete die 1-kg-Stufe 5,05 €, seit Januar 2026 kostet sie 5,00 €; die
+ * 10-kg-Stufe fiel von 8,70 € auf 8,65 €. Hinterlegt ist der aktuelle Stand.
  *
- * Deshalb sind die hinterlegten Preise nur Vorgabewerte, ausdrücklich als
- * ungeprüft gekennzeichnet, und die Oberfläche lässt jeden seine eigenen
- * eintragen. Das ist keine Bequemlichkeit, sondern der einzige Weg, bei dem
- * die Zahl am Ende stimmt.
+ * ## Was hier anders ist als beim Privatkunden
  *
- * Dasselbe Prinzip wie bei den Marktplatzgebühren: lieber sichtbar unsicher
- * als unsichtbar falsch.
+ * **Es zählt nur das Gewicht.** Päckchen S/M und die Unterscheidung nach
+ * Kartongröße gibt es im Geschäftskundentarif nicht. Die Maße spielen erst
+ * eine Rolle, wenn das Paket die Grenze zur Übergröße reißt — 120 × 60 × 60 cm.
+ *
+ * ## Grenzen dieser Angaben
+ *
+ * Es sind **die Preise eines einzelnen Vertrags**. Bei höherer Menge
+ * verhandelt DHL andere Staffeln, und andere Anbieter rechnen ohnehin
+ * anders. Das ist eine Orientierung, keine Zusage — wer genau rechnen will,
+ * trägt seine eigenen Preise ein.
  */
 
-export interface Paketmass {
-  /** Längste Kante in cm. */
-  laenge: number;
-  breite: number;
-  hoehe: number;
+export interface Gewichtsstufe {
+  id: string;
+  /** Höchstgewicht dieser Stufe in kg, einschließlich. */
+  bisKg: number;
+  /** Grundpreis in EUR, netto. */
+  basispreis: number;
 }
 
-export interface Versandprodukt {
-  id: string;
-  name: string;
-  /** Höchstgewicht in kg. */
-  maxGewicht: number;
-  /** Höchstmaße in cm, längste Kante zuerst. */
-  maxMass: Paketmass;
-  /**
-   * Vorgabepreis in EUR, brutto. **Ungeprüft** — siehe Dateikopf. Dient als
-   * Startwert, bis der Nutzer seinen eigenen einträgt.
-   */
-  vorgabePreis: number;
-}
+/** Zeitraum, aus dem die hinterlegten Preise stammen. */
+export const PREISSTAND = 'Januar 2026';
+
+/** Anzahl der ausgewerteten Rechnungen — für die Herkunftsangabe in der UI. */
+export const BELEGE = 345;
 
 /**
- * Stand der hinterlegten Vorgabepreise. Wird in der Oberfläche genannt,
- * damit jeder sieht, wie alt die Zahl ist, mit der gerechnet wird.
+ * Höchstmaße, bis zu denen der normale Tarif gilt. Darüber berechnet DHL
+ * einen Übergrößen-Zuschlag, dessen Höhe in den ausgewerteten Rechnungen
+ * nicht vorkommt — deshalb wird er hier nicht beziffert, sondern nur
+ * gemeldet.
  */
-export const PREISSTAND = '2026-01';
+export const MAX_MASS = { laenge: 120, breite: 60, hoehe: 60 } as const;
 
 /*
-  Aufsteigend nach Kapazität sortiert. `guenstigstesProdukt` verlässt sich
-  darauf und nimmt das erste passende — das ist dann zugleich das kleinste
-  und (bei DHL durchgängig) das billigste.
+  Aufsteigend. `stufeFuer` nimmt die erste passende — das ist dann zugleich
+  die günstigste, weil der Preis mit dem Gewicht steigt.
 */
-export const DHL_PRODUKTE: readonly Versandprodukt[] = [
-  {
-    id: 'paeckchen-s',
-    name: 'Päckchen S',
-    maxGewicht: 2,
-    maxMass: { laenge: 35, breite: 25, hoehe: 10 },
-    vorgabePreis: 3.99,
-  },
-  {
-    id: 'paeckchen-m',
-    name: 'Päckchen M',
-    maxGewicht: 2,
-    maxMass: { laenge: 60, breite: 30, hoehe: 15 },
-    vorgabePreis: 4.79,
-  },
-  {
-    id: 'paket-2',
-    name: 'Paket bis 2 kg',
-    maxGewicht: 2,
-    maxMass: { laenge: 60, breite: 30, hoehe: 15 },
-    vorgabePreis: 5.49,
-  },
-  {
-    id: 'paket-5',
-    name: 'Paket bis 5 kg',
-    maxGewicht: 5,
-    maxMass: { laenge: 120, breite: 60, hoehe: 60 },
-    vorgabePreis: 6.99,
-  },
-  {
-    id: 'paket-10',
-    name: 'Paket bis 10 kg',
-    maxGewicht: 10,
-    maxMass: { laenge: 120, breite: 60, hoehe: 60 },
-    vorgabePreis: 10.49,
-  },
-  {
-    id: 'paket-31',
-    name: 'Paket bis 31,5 kg',
-    maxGewicht: 31.5,
-    maxMass: { laenge: 120, breite: 60, hoehe: 60 },
-    vorgabePreis: 18.99,
-  },
+export const GEWICHTSSTUFEN: readonly Gewichtsstufe[] = [
+  { id: 'bis-1', bisKg: 1, basispreis: 5.0 },
+  { id: 'bis-3', bisKg: 3, basispreis: 5.55 },
+  { id: 'bis-5', bisKg: 5, basispreis: 6.6 },
+  { id: 'bis-10', bisKg: 10, basispreis: 8.65 },
+  { id: 'bis-20', bisKg: 20, basispreis: 13.55 },
+  { id: 'bis-31-5', bisKg: 31.5, basispreis: 16.3 },
 ];
 
 /**
- * Passt das Paket in das Produkt?
+ * Maut- und CO2-Zuschlag je Sendung, in EUR.
  *
- * Die Kanten werden **sortiert** verglichen, nicht der Reihe nach. Ein
- * Karton von 10 × 25 × 35 cm ist derselbe Karton wie 35 × 25 × 10 — man darf
- * ihn drehen. Wer stellvertretend Länge gegen Länge prüft, lehnt Pakete ab,
- * die tatsächlich passen; das ist der häufigste Fehler in solchen Rechnern.
+ * In 222 Rechnungspositionen ausnahmslos 0,19 € — kein einziger abweichender
+ * Wert. Fester Betrag, nicht prozentual.
  */
-export function passtIn(produkt: Versandprodukt, mass: Paketmass, gewichtKg: number): boolean {
-  if (gewichtKg > produkt.maxGewicht) return false;
+export const MAUT_ZUSCHLAG = 0.19;
 
-  const paket = [mass.laenge, mass.breite, mass.hoehe].sort((a, b) => b - a);
-  const grenze = [produkt.maxMass.laenge, produkt.maxMass.breite, produkt.maxMass.hoehe].sort(
-    (a, b) => b - a,
-  );
+/**
+ * Energiezuschlag als Anteil des Grundpreises.
+ *
+ * Die Rechnungen weisen ihn als „Energiezuschlag DHL Paket (GK) 1,25 %“ aus.
+ * Gegengerechnet: 5,00 → 0,06 · 5,55 → 0,07 · 6,60 → 0,08 · 8,65 → 0,11 ·
+ * 13,55 → 0,17 · 16,30 → 0,20. Alle sechs Stufen stimmen auf den Cent.
+ */
+export const ENERGIE_ANTEIL = 0.0125;
 
-  return paket.every((kante, i) => kante <= grenze[i]);
+export interface Versandkosten {
+  stufe: Gewichtsstufe;
+  basispreis: number;
+  mautZuschlag: number;
+  energieZuschlag: number;
+  /** Summe aus Grundpreis und beiden Zuschlägen, netto. */
+  gesamt: number;
+}
+
+function aufCent(betrag: number): number {
+  return Math.round(betrag * 100) / 100;
 }
 
 /**
- * Günstigstes Produkt, in das das Paket passt — oder `null`, wenn keines
- * passt.
+ * Gewichtsstufe für ein Gewicht — oder `null` über 31,5 kg.
  *
- * `null` heißt nicht „kostenlos", sondern „so nicht versendbar". Die
- * Oberfläche muss das als eigenen Fall behandeln und nicht als 0 €.
+ * `null` heißt „nicht als Paket versendbar", nicht „kostenlos". Die
+ * Oberfläche muss das als eigenen Fall zeigen.
  */
-export function guenstigstesProdukt(
-  mass: Paketmass,
-  gewichtKg: number,
-  preise: Readonly<Record<string, number>> = {},
-): Versandprodukt | null {
-  const passende = DHL_PRODUKTE.filter((p) => passtIn(p, mass, gewichtKg));
-  if (passende.length === 0) return null;
-
-  const preisVon = (p: Versandprodukt) => preise[p.id] ?? p.vorgabePreis;
-
-  /*
-    Nach Preis, nicht nach Reihenfolge: Mit eigenen Vertragspreisen kann ein
-    größeres Produkt billiger sein als ein kleineres. Bei Gleichstand gewinnt
-    das zuerst Gelistete, also das kleinere.
-  */
-  return passende.reduce((guenstigstes, kandidat) =>
-    preisVon(kandidat) < preisVon(guenstigstes) ? kandidat : guenstigstes,
-  );
+export function stufeFuer(gewichtKg: number): Gewichtsstufe | null {
+  if (gewichtKg <= 0) return null;
+  return GEWICHTSSTUFEN.find((s) => gewichtKg <= s.bisKg) ?? null;
 }
 
-/** Preis eines Produkts unter Berücksichtigung eigener Preise. */
-export function preisFuer(
-  produkt: Versandprodukt,
-  preise: Readonly<Record<string, number>> = {},
+/**
+ * Sprengt das Paket die Maße für den normalen Tarif?
+ *
+ * Die Kanten werden **sortiert** verglichen, nicht der Reihe nach: Ein
+ * Karton von 20 × 60 × 110 cm ist derselbe wie 110 × 60 × 20 — man darf ihn
+ * drehen. Wer stur Länge gegen Länge prüft, meldet Übergröße, wo keine ist.
+ */
+export function istUebergross(mass: { laenge: number; breite: number; hoehe: number }): boolean {
+  const paket = [mass.laenge, mass.breite, mass.hoehe].sort((a, b) => b - a);
+  const grenze = [MAX_MASS.laenge, MAX_MASS.breite, MAX_MASS.hoehe].sort((a, b) => b - a);
+  return paket.some((kante, i) => kante > grenze[i]);
+}
+
+/**
+ * Vollständige Versandkosten für ein Gewicht.
+ *
+ * `eigenePreise` überschreibt den Grundpreis je Stufe — die Zuschläge
+ * rechnen dann auf dem eigenen Preis weiter, denn der Energiezuschlag ist
+ * prozentual.
+ */
+export function versandkosten(
+  gewichtKg: number,
+  eigenePreise: Readonly<Record<string, number>> = {},
+): Versandkosten | null {
+  const stufe = stufeFuer(gewichtKg);
+  if (!stufe) return null;
+
+  const basispreis = eigenePreise[stufe.id] ?? stufe.basispreis;
+  const mautZuschlag = MAUT_ZUSCHLAG;
+  const energieZuschlag = aufCent(basispreis * ENERGIE_ANTEIL);
+
+  return {
+    stufe,
+    basispreis,
+    mautZuschlag,
+    energieZuschlag,
+    gesamt: aufCent(basispreis + mautZuschlag + energieZuschlag),
+  };
+}
+
+/** Grundpreis einer Stufe unter Berücksichtigung eigener Preise. */
+export function basispreisFuer(
+  stufe: Gewichtsstufe,
+  eigenePreise: Readonly<Record<string, number>> = {},
 ): number {
-  return preise[produkt.id] ?? produkt.vorgabePreis;
+  return eigenePreise[stufe.id] ?? stufe.basispreis;
 }

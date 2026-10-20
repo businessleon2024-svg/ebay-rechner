@@ -3,34 +3,39 @@ import Link from 'next/link';
 import { ShippingIsland } from '@/components/shipping-island';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
-import { PREISSTAND } from '@/lib/shipping/dhl';
+import { BELEGE, PREISSTAND } from '@/lib/shipping/dhl';
 
 export const metadata: Metadata = {
-  title: 'Versandkosten-Rechner für DHL-Pakete',
+  title: 'DHL-Versandkosten für Geschäftskunden berechnen',
   description:
-    'Welches DHL-Paket passt und was kostet es? Maße und Gewicht eintragen, günstigstes Produkt finden — mit eigenen Vertragspreisen.',
+    'Was kostet ein DHL-Paket im Geschäftskundentarif? Gewicht eintragen, Preis mit Maut- und Energiezuschlag sehen — abgelesen aus echten Rechnungen.',
   alternates: { canonical: '/versand' },
 };
 
 const FRAGEN = [
   {
-    frage: 'Warum sind die Preise nicht verbindlich?',
-    antwort: `Sie ändern sich jährlich, unterscheiden sich zwischen Filiale und Online-Frankierung, und wer als Geschäftskunde einen Vertrag hat, zahlt oft deutlich weniger. Die hinterlegten Werte (Stand ${PREISSTAND}) sind Startwerte, keine Zusage. Trag unter „Eigene Preise hinterlegen" deine echten ein — sie bleiben in deinem Browser.`,
+    frage: 'Woher stammen diese Preise?',
+    antwort: `Aus ${BELEGE} echten DHL-Rechnungen von September 2025 bis Oktober 2026 — nicht aus einer Preisliste und nicht geschätzt. Jede Position „DHL PAKET (GK) … kg“ wurde ausgewertet und durch die Stückzahl geteilt. Dabei fiel auch ein Preiswechsel zum Jahreswechsel auf: Die 1-kg-Stufe kostete bis Dezember 2025 noch 5,05 €, seit Januar 2026 sind es 5,00 €. Hinterlegt ist der aktuelle Stand (${PREISSTAND}).`,
   },
   {
-    frage: 'Welche Maße muss ich nehmen?',
+    frage: 'Gelten die Preise auch für mich?',
     antwort:
-      'Die Außenmaße des fertig gepackten Kartons, nicht die des Artikels. Polstermaterial und Kartonwand zählen mit. In welcher Reihenfolge du die drei Kanten einträgst, spielt keine Rolle — der Rechner darf das Paket drehen.',
+      'Das sind die Konditionen eines einzelnen Geschäftskundenvertrags. Bei höherer Menge verhandelt DHL andere Staffeln, und andere Anbieter rechnen ohnehin anders. Nimm die Zahlen als Orientierung, nicht als Zusage — und trag unter „Eigene Vertragspreise hinterlegen“ deine echten ein, wenn du genau rechnen willst.',
   },
   {
-    frage: 'Warum ist Päckchen manchmal teurer als Paket?',
+    frage: 'Warum frage ich nicht nach Päckchen S oder M?',
     antwort:
-      'Mit eigenen Vertragspreisen kann ein größeres Produkt günstiger sein als ein kleineres. Deshalb sucht der Rechner nicht das kleinste passende Produkt, sondern das billigste — und zeigt darunter alle an, damit du es nachvollziehen kannst.',
+      'Weil es die im Geschäftskundentarif nicht gibt. Dort zählt allein das Gewicht; ob der Karton klein oder groß ist, ändert am Preis nichts. Erst wenn eine Kante über 120 × 60 × 60 cm hinausgeht, kommt ein Übergrößen-Zuschlag dazu.',
   },
   {
-    frage: 'Was ist mit Sperrgut und Auslandsversand?',
+    frage: 'Welche Zuschläge sind enthalten?',
     antwort:
-      'Beides ist nicht abgebildet. Sperrgutzuschläge hängen an Form und Gewicht, Auslandspreise an der Zone. Beides kommt dazu, wenn es belastbare Zahlen dafür gibt — geraten wird hier nichts.',
+      'Der Maut- und CO2-Zuschlag (fest 0,19 € je Sendung) und der Energiezuschlag (1,25 % vom Grundpreis). Beide stehen auf jeder Rechnung und sind eingerechnet. Nicht enthalten: der Peakzuschlag im November und Dezember (0,19–0,50 € je Sendung), das Codierentgelt bei unleserlicher Adresse (0,49 €) und der Übergrößen-Zuschlag — der kommt in den ausgewerteten Rechnungen nicht vor, deshalb wird er hier nicht beziffert.',
+  },
+  {
+    frage: 'Netto oder brutto?',
+    antwort:
+      'Alle Beträge sind netto, so wie sie auf der Rechnung stehen. Als Regelbesteuerter ist das der richtige Wert für deine Kalkulation, weil die Umsatzsteuer als Vorsteuer zurückkommt. Als Kleinunternehmer rechne 19 % dazu.',
   },
 ];
 
@@ -41,10 +46,10 @@ export default function VersandPage() {
 
       <main>
         <section className="hero hero--compact">
-          <h1 className="hero__title">Welches DHL-Paket passt — und was kostet es?</h1>
+          <h1 className="hero__title">Was kostet dein DHL-Paket wirklich?</h1>
           <p className="hero__subtitle">
-            Maße und Gewicht eintragen, das günstigste Produkt steht daneben. Mit deinen eigenen
-            Vertragspreisen, falls du welche hast.
+            Gewicht eintragen, fertig. Inklusive Maut- und Energiezuschlag — abgelesen aus{' '}
+            {BELEGE} echten Geschäftskunden-Rechnungen, nicht geschätzt.
           </p>
         </section>
 
