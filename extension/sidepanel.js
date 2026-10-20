@@ -14,7 +14,7 @@
 */
 
 /* Eine einzige Stelle für die Adresse. Nach dem Domainumzug hier ändern. */
-const APP_URL = 'https://ebay-rechner-sage.vercel.app';
+const APP_URL = 'https://gebuehren-kompass.de';
 
 const laden = document.getElementById('laden');
 const rahmen = document.getElementById('rahmen');

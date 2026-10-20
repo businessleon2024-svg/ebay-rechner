@@ -23,7 +23,7 @@
  * eingesetzt, und ein Wert, der auf Server und Client auseinanderläuft, wäre
  * schlimmer als ein fest eingetragener.
  */
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ebay-rechner-sage.vercel.app')
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gebuehren-kompass.de')
   // Ein abschließender Schrägstrich ergäbe sonst Adressen mit doppeltem Trenner.
   .replace(/\/+$/, '');
 

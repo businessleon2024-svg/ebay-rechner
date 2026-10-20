@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gebührenkompass",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Gebühren, Gewinn und Marge für eBay und Kaufland — offen neben der Produktseite.",
   "minimum_chrome_version": "114",
   "action": {
