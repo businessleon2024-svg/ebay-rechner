@@ -91,7 +91,7 @@ Befund — Bestellnummern und Telefonnummern haben dieselbe Länge.
 Eine Zeile in `popup.js`:
 
 ```js
-const APP_URL = 'https://ebay-rechner-sage.vercel.app';
+const APP_URL = 'https://gebuehren-kompass.de';
 ```
 
 ## Was noch nicht wirkt

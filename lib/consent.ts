@@ -12,7 +12,12 @@
  * dann automatisch.
  */
 
-export const CONSENT_VERSION = 1;
+// v2 (2026-10-19): Google Analytics als erster echter `analytics`-Dienst
+// eingetragen. Eine v1-Entscheidung galt einer leeren Diensteliste — "Alle
+// akzeptieren" hat damals nichts freigegeben. Die Versionserhöhung erzwingt
+// eine neue, informierte Einwilligung, statt eine alte Zustimmung zu nichts
+// stillschweigend auf einen jetzt echten Dienst auszudehnen.
+export const CONSENT_VERSION = 2;
 export const CONSENT_KEY = 'gebuehrenkompass.consent.v1';
 
 export type ConsentCategory = 'ads' | 'analytics';
@@ -26,9 +31,15 @@ export interface ConsentService {
 }
 
 /**
- * Dienste, die eine Einwilligung erfordern. Derzeit bewusst leer.
+ * Dienste, die eine Einwilligung erfordern.
  */
-export const CONSENT_REQUIRING_SERVICES: readonly ConsentService[] = [];
+export const CONSENT_REQUIRING_SERVICES: readonly ConsentService[] = [
+  {
+    category: 'analytics',
+    name: 'Google Analytics',
+    purpose: 'Seitenaufrufe und Verweildauer, um zu sehen, wie der Rechner genutzt wird.',
+  },
+];
 
 export const CATEGORY_LABEL: Record<ConsentCategory, string> = {
   ads: 'Werbung',

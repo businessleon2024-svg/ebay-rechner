@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ConsentBanner } from '@/components/consent-banner';
+import { GoogleAnalytics } from '@/components/google-analytics';
 import { ServiceWorker } from '@/components/service-worker';
 import { THEME_INIT_SCRIPT } from '@/components/theme-toggle';
 import { SITE } from '@/lib/site';
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <ConsentBanner />
+        <GoogleAnalytics />
         <ServiceWorker />
       </body>
     </html>
