@@ -18,7 +18,9 @@ const ROOT = join(import.meta.dirname, '..');
 /** Seiten, die indexiert werden sollen, mit ihrer erwarteten kanonischen Adresse. */
 const INDEXIERTE_SEITEN = [
   ['app/rechner/page.tsx', '/rechner'],
+  ['app/versand/page.tsx', '/versand'],
   ['app/gebuehren/page.tsx', '/gebuehren'],
+  ['app/erweiterung/page.tsx', '/erweiterung'],
   ['app/support/page.tsx', '/support'],
 ] as const;
 

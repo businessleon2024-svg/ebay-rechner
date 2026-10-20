@@ -45,6 +45,48 @@
   --negative: #a83027;
   --caution: #8a6410;
 
+  /*
+    Bedeutungsfarben der Kennzahlen. Jede Zahl im Ergebnis bekommt die Farbe
+    ihrer Aussage, nicht die der Marke:
+
+      Gewinn            grün    --positive
+      Verlust           rot     --negative
+      Break-even        gelb    --caution   (die Schwelle, an der es kippt)
+      Max. Einkaufspreis blau   --limit     (eine Grenze, kein Vorzeichen)
+      Gebühr            braun   --chart-fee (gleiche Farbe wie im Balken)
+
+    Blau für die Obergrenze, weil sie weder gut noch schlecht ist: Sie sagt
+    „bis hierhin", nicht „gut" oder „schlecht". Grün wäre eine Empfehlung,
+    rot eine Warnung — beides wäre gelogen.
+  */
+  --limit: #2b5f99;
+
+  /*
+    Die eigene Marke. Fest, unabhängig vom Marktplatz — das Logo färbt sich
+    nicht mit. `--accent` dagegen wechselt und trägt alles Bedienbare:
+    Schaltflächen, Verweise, Reiter, Fokusrahmen.
+  */
+  --brand: #10714e;
+  --on-brand: #ffffff;
+
+  /*
+    Marktplatzfarben, an den echten Marken orientiert.
+
+    eBay führt vier Farben — Rot, Blau, Gelb, Grün. Als Flächenfarbe taugt
+    davon nur das Blau; die vier zusammen sind das Erkennungszeichen und
+    laufen hier als schmaler Streifen über dem Rechner. Kaufland ist ein
+    einziges, kräftiges Rot.
+
+    Nur die Farben, nicht die Zeichen: Logos der Marktplätze tauchen nirgends
+    auf. Farben zur Kennzeichnung sind beschreibender Gebrauch, ein fremdes
+    Logo wäre etwas anderes.
+  */
+  --ebay: #0064d2;
+  --ebay-rot: #e53238;
+  --ebay-gelb: #f5af02;
+  --ebay-gruen: #86b817;
+  --kaufland: #e10915;
+
   --shadow: 0 1px 2px rgba(16, 26, 23, 0.04), 0 2px 6px rgba(16, 26, 23, 0.05);
   --shadow-lift: 0 2px 4px rgba(16, 26, 23, 0.05), 0 8px 20px rgba(16, 26, 23, 0.07);
 
@@ -88,6 +130,19 @@
   --positive: #4cbe92;
   --negative: #e0736f;
   --caution: #d2a154;
+
+  /* Siehe die Erläuterung in der hellen Ansicht. */
+  --limit: #6ba3dd;
+
+  --brand: #2f9e6e;
+  --on-brand: #04150e;
+
+  /* Aufgehellt, damit sie auf dunklem Grund tragen. Siehe helle Ansicht. */
+  --ebay: #4d94f0;
+  --ebay-rot: #f05a5f;
+  --ebay-gelb: #ffc53d;
+  --ebay-gruen: #a3d535;
+  --kaufland: #f4565f;
 
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-lift: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -245,8 +300,14 @@ a:hover {
   width: 34px;
   height: 34px;
   border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--on-accent);
+  /*
+    Das Logo trägt `--brand`, nicht `--accent`. Der Akzent wechselt mit dem
+    Marktplatz; die eigene Marke tut das nicht. Ein Kompass, der bei Kaufland
+    rot wird, ist nicht mehr dieselbe Marke — und das App-Symbol und die
+    `theme_color` im Manifest sind ohnehin fest grün.
+  */
+  background: var(--brand);
+  color: var(--on-brand);
   flex-shrink: 0;
 }
 
@@ -303,6 +364,25 @@ a:hover {
   color: var(--text);
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+/*
+  Der aktive Reiter trägt die Farbe seines Marktplatzes — eBay grün,
+  Kaufland rot. Die Farbe sitzt hier und nur hier: Sie beantwortet die Frage
+  „wofür rechne ich gerade?", und das ist genau die Frage, die der Reiter
+  stellt. Logo, Verweise und Schaltflächen bleiben davon unberührt.
+
+  Die inaktiven Reiter bleiben grau. Beide gleichzeitig farbig wäre eine
+  Auswahl, die keine ist.
+*/
+.tab[data-marketplace='ebay'].is-active {
+  color: var(--ebay);
+  box-shadow: var(--shadow), inset 0 -2px 0 var(--ebay);
+}
+
+.tab[data-marketplace='kaufland'].is-active {
+  color: var(--kaufland);
+  box-shadow: var(--shadow), inset 0 -2px 0 var(--kaufland);
 }
 
 .tab:focus-visible {
@@ -454,17 +534,47 @@ a:hover {
   pointer-events: none;
 }
 
+/*
+  Auswahlfelder.
+
+  Der Pfeil war ein Hintergrundbild auf dem `<select>` selbst. Das ist auf
+  iOS die unzuverlässigste Variante: Safari zeichnet dort unter Umständen
+  seinen eigenen Pfeil darüber, und man sieht zwei — einen scharfen und einen
+  verwaschenen. Dazu kam, dass das Bild als unmaskiertes SVG in einer
+  data-URI steckte, mit rohen `<` und `>`; manche Browser lesen das nicht.
+
+  Jetzt zeichnet ein eigenes Element den Pfeil, über dem Feld statt in ihm.
+  `pointer-events: none` sorgt dafür, dass ein Klick darauf trotzdem das
+  Auswahlfeld öffnet.
+*/
 select.input {
   cursor: pointer;
-  padding-right: 2.2rem;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23828e95' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 0.8rem center;
-  background-size: 15px;
+  padding-right: 2.4rem;
+  /*
+    Ohne das zeichnet iOS Safari trotz `appearance: none` noch einen eigenen
+    Hintergrund mit Pfeil. Die beiden Zeilen zusammen sind nötig — `none`
+    allein reicht dort nicht.
+  */
+  background-image: none;
+  text-overflow: ellipsis;
 }
 
-:root[data-theme='dark'] select.input {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236d7b77' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+/*
+  Nur bei Auswahlfeldern. `.input-wrap` umschließt auch Geldfelder, die
+  rechts ihr „€" tragen — dort wäre ein Pfeil falsch.
+*/
+.input-wrap:has(select)::after {
+  content: '';
+  position: absolute;
+  right: 0.85rem;
+  width: 10px;
+  height: 10px;
+  /* Zwei Kanten eines Quadrats, um 45° gedreht: ein Haken nach unten. */
+  border-right: 2px solid var(--text-faint);
+  border-bottom: 2px solid var(--text-faint);
+  border-radius: 1px;
+  transform: translateY(-25%) rotate(45deg);
+  pointer-events: none;
 }
 
 select.input option,
@@ -791,6 +901,13 @@ select.input optgroup {
   transition: background var(--transition), border-color var(--transition), color var(--transition);
   flex: 1;
   white-space: nowrap;
+  /*
+    Schaltflächen sind oft Verweise (`<a class="btn">`). Ohne diese Zeile
+    unterstreicht der Browser sie wie jeden anderen Verweis — ein Knopf mit
+    unterstrichener Beschriftung sieht nach Versehen aus. Die Grundregel für
+    `a` weiter oben setzt nur Farbe und Abstand, nicht die Linie selbst.
+  */
+  text-decoration: none;
 }
 
 .btn--primary {
@@ -929,7 +1046,23 @@ select.input optgroup {
   font-variant-numeric: tabular-nums;
 }
 
-.kpi__value--accent { color: var(--accent-text); }
+/*
+  Jede Kennzahl trägt die Farbe ihrer Aussage. Die Tokens und die Begründung
+  stehen oben bei `--limit`.
+
+  Der maximale Einkaufspreis trug vorher die Markenfarbe. Das ging gut,
+  solange die grün war — bei Kaufland stand die Zahl rot da und las sich wie
+  eine Warnung, obwohl sie nur eine Grenze ist. Jetzt blau: weder Lob noch
+  Warnung, sondern „bis hierhin".
+*/
+.kpi__value--limit { color: var(--limit); }
+
+/* Gelb: die Schwelle, an der der Verkauf kippt. */
+.kpi__value--breakeven { color: var(--caution); }
+
+/* Dieselbe Farbe wie der Gebührenabschnitt im Balken darunter. */
+.kpi__value--fee { color: var(--chart-fee); }
+
 .kpi__value--negative { color: var(--negative); }
 
 .kpi__hint {
@@ -1790,7 +1923,13 @@ select.input optgroup {
   }
 
   .topbar__nav {
-    gap: 1.1rem;
+    /*
+      Mit fünf Einträgen reichte die Zeile bei 439 px Breite exakt bis an den
+      Rand — ohne Luft und mit dem Umschalter am Anschlag. Deshalb darf sie
+      jetzt selbst umbrechen, und der Abstand ist kleiner.
+    */
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
     /* Füllt die zweite Zeile, damit der Umschalter rechts außen sitzt. */
     flex: 1 1 100%;
     justify-content: space-between;
@@ -1845,18 +1984,53 @@ select.input optgroup {
   für die Sätze der Unterkategorien — wer die Möglichkeit nicht sieht, meldet
   auch nichts, und dann gibt es die Datengrundlage nie.
 */
+/*
+  Deutlich hervorgehoben, nicht nur leicht getönt.
+
+  Das ist die einzige Quelle für die Sätze der Unterkategorien — die
+  Marktplätze veröffentlichen sie nicht. Wer die Möglichkeit übersieht,
+  meldet nichts, und dann entsteht die Datengrundlage nie. Ein dezenter
+  Kasten unter dem Ergebnis wird übersehen; dieser hier soll auffallen.
+*/
 .report {
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
+  /* Trägt die Aufmerksamkeit auch dann, wenn die Fläche kaum sichtbar ist. */
+  border-left-width: 4px;
   border-radius: 10px;
   background: var(--accent-quiet);
+  box-shadow: var(--shadow);
+  margin-top: 1.5rem;
   padding-top: 0;
 }
 
 .report > summary {
   align-items: flex-start;
   gap: 0.6rem;
-  padding: 0.9rem 1rem;
-  font-size: 0.9rem;
+  padding: 1rem 1.1rem;
+  font-size: 0.95rem;
+}
+
+.report__prompt-lead {
+  /* Fragezeichen vor der Frage — findet das Auge schneller als Fließtext. */
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.report__prompt-lead::before {
+  content: '!';
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.8em;
+  font-weight: 700;
+  /* Mit der Grundlinie des Textes daneben bündig halten. */
+  transform: translateY(0.08em);
 }
 
 /* Das Dreieck an der ersten Zeile ausrichten, nicht am ganzen Block. */
@@ -1865,8 +2039,7 @@ select.input optgroup {
 }
 
 .report__prompt-lead {
-  display: block;
-  font-weight: 650;
+  font-weight: 700;
   color: var(--text);
 }
 
@@ -2115,4 +2288,233 @@ select.input optgroup {
 */
 :root[data-embed='1'] .hint:not(.hint--immer) {
   display: none;
+}
+
+/* =========================================================
+   ERSCHEINUNGSBILD JE MARKTPLATZ
+
+   Jeder Marktplatz bekommt sein eigenes Bild: eBay grün, Kaufland rot. Der
+   Wechsel erfasst den Hintergrundverlauf **und** den Akzent — also alles
+   Bedienbare: Schaltflächen, Verweise, Reiter, Fokusrahmen.
+
+   Drei Dinge bleiben bewusst außen vor, und das ist der ganze Trick:
+
+   **Das Logo** trägt `--brand` und bleibt grün. Ein Kompass, der bei
+   Kaufland rot wird, ist nicht mehr dieselbe Marke; App-Symbol und
+   `theme_color` im Manifest sind ohnehin fest.
+
+   **Die Vorzeichenfarben** `--positive` und `--negative` bleiben unberührt.
+   Gewinn grün, Verlust rot — auch bei Kaufland. Sonst läse sich ein Gewinn
+   dort wie ein Verlust. Markenfarbe und Vorzeichenfarbe sind zwei Dinge, die
+   nur zufällig dieselben Töne benutzen.
+
+   **Die Kennzahlenfarben** `--caution` (Break-even) und `--limit`
+   (Obergrenze) ebenso. Sie beschreiben die Zahl, nicht den Marktplatz.
+
+   Gesetzt wird das Merkmal an `<html>`, nicht am Rechner — nur so erfasst
+   der Verlauf die ganze Seite statt eines Kastens darin.
+   ========================================================= */
+
+/* ---------- eBay: Blau als Fläche, die vier Farben als Streifen ---------- */
+
+:root[data-theme='light'][data-marketplace='ebay'] {
+  --app-bg: linear-gradient(150deg, #f6f9fd 0%, #eaf1fa 32%, #e6eef8 64%, #f4f8fc 100%);
+
+  --accent: #0064d2;
+  --accent-hover: #0052ab;
+  --accent-text: #0059ba;
+  --accent-quiet: rgba(0, 100, 210, 0.07);
+  --on-accent: #ffffff;
+
+  --streifen: linear-gradient(
+    90deg,
+    var(--ebay-rot) 0 25%,
+    var(--ebay) 25% 50%,
+    var(--ebay-gelb) 50% 75%,
+    var(--ebay-gruen) 75% 100%
+  );
+}
+
+:root[data-theme='dark'][data-marketplace='ebay'] {
+  --app-bg: linear-gradient(150deg, #070b12 0%, #0b1320 30%, #111f33 62%, #090f18 100%);
+
+  --accent: #2f7fe0;
+  --accent-hover: #4d94f0;
+  --accent-text: #6ba9f5;
+  --accent-quiet: rgba(77, 148, 240, 0.14);
+  --on-accent: #04101f;
+
+  --streifen: linear-gradient(
+    90deg,
+    var(--ebay-rot) 0 25%,
+    var(--ebay) 25% 50%,
+    var(--ebay-gelb) 50% 75%,
+    var(--ebay-gruen) 75% 100%
+  );
+}
+
+/* ---------- Kaufland: ein kräftiges Rot ---------- */
+
+:root[data-theme='light'][data-marketplace='kaufland'] {
+  --app-bg: linear-gradient(150deg, #fef7f7 0%, #fceaea 32%, #fbe4e5 64%, #fdf3f3 100%);
+
+  /*
+    Etwas dunkler als Kauflands #e10915: Das Original hat auf Weiß zu wenig
+    Kontrast für Text, und der Akzent trägt hier auch Verweise.
+  */
+  --accent: #c20a14;
+  --accent-hover: #9d0810;
+  --accent-text: #b5070f;
+  --accent-quiet: rgba(225, 9, 21, 0.07);
+  --on-accent: #ffffff;
+
+  --streifen: linear-gradient(90deg, #e10915 0%, #ff3b45 100%);
+}
+
+:root[data-theme='dark'][data-marketplace='kaufland'] {
+  --app-bg: linear-gradient(150deg, #140708 0%, #210b0d 30%, #311215 62%, #180809 100%);
+
+  --accent: #e03740;
+  --accent-hover: #f0525b;
+  --accent-text: #ff8086;
+  --accent-quiet: rgba(224, 55, 64, 0.16);
+  --on-accent: #1a0305;
+
+  --streifen: linear-gradient(90deg, #e10915 0%, #ff5b63 100%);
+}
+
+/* =========================================================
+   URTEIL
+
+   Steht vor allen Zahlen und sagt in Worten, woran man ist. Eine Zahl muss
+   man lesen und einordnen — „Verlustgeschäft" erkennt man im Vorbeigehen.
+
+   Die Farbe kommt aus `--positive`/`--negative`, nicht aus dem Markenakzent:
+   Ein Gewinn bei Kaufland muss grün bleiben, auch wenn die Marke rot ist.
+   ========================================================= */
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  margin: 0 0 1.1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-md);
+  /* Linke Kante als Träger: in der dunklen Ansicht ist die Fläche kaum zu sehen. */
+  border-left: 4px solid currentColor;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.verdict__detail {
+  font-size: 0.86rem;
+  font-weight: 500;
+  /* Erbt die Farbe nicht: Der Zusatz ist Beleg, nicht Urteil. */
+  color: var(--text-muted);
+}
+
+.verdict--good {
+  color: var(--positive);
+  background: color-mix(in srgb, var(--positive) 8%, transparent);
+}
+
+.verdict--loss {
+  color: var(--negative);
+  background: color-mix(in srgb, var(--negative) 8%, transparent);
+}
+
+/*
+  Weder gut noch schlecht: Unter 10 % Marge frisst eine einzige Rücksendung
+  den Gewinn. Das ist kein Fehler, aber es soll auffallen.
+*/
+.verdict--thin {
+  color: var(--caution);
+  background: color-mix(in srgb, var(--caution) 10%, transparent);
+}
+
+/*
+  Der Beleghinweis steht jetzt unter dem Urteil statt darüber. Dort braucht
+  er Abstand nach oben und darf leiser auftreten — er schränkt die Antwort
+  ein, er ist nicht die Antwort.
+*/
+.notice--after {
+  margin-top: 1rem;
+  font-size: 0.84rem;
+}
+
+/* =========================================================
+   ERKENNUNGSSTREIFEN
+
+   Schmaler Farbbalken über dem Rechner. Bei eBay die vier Markenfarben, bei
+   Kaufland das Rot im Verlauf. Er kostet 4 Pixel Höhe und beantwortet beim
+   ersten Blick, wo man ist — noch bevor man den Reiter gelesen hat.
+   ========================================================= */
+
+.streifen {
+  height: 4px;
+  margin-bottom: 1.1rem;
+  border-radius: 99px;
+  background: var(--streifen, var(--accent));
+}
+
+/* =========================================================
+   URTEIL, laut
+
+   Vorher ein getönter Kasten mit farbiger Kante — korrekt, aber leise. Das
+   Ergebnis ist der Grund, warum jemand die Seite öffnet; es darf auftreten
+   wie eine Antwort und nicht wie eine Fußnote.
+
+   Jetzt volle Fläche in der Farbe der Aussage, Text darauf in der
+   Gegenfarbe. Die Bedeutung bleibt dieselbe wie vorher: grün Gewinn, rot
+   Verlust, gelb dünne Marge. Nur lauter.
+   ========================================================= */
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.7rem;
+  margin: 0 0 1.25rem;
+  padding: 0.95rem 1.15rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+  box-shadow: var(--shadow-lift);
+}
+
+.verdict__detail {
+  font-size: 0.9rem;
+  font-weight: 600;
+  /*
+    Nicht `--text-muted`: Auf der farbigen Fläche wäre das ein grauer Fleck.
+    Die eigene Farbe leicht durchscheinend lassen bindet den Zusatz an die
+    Überschrift, statt ihn danebenzustellen.
+  */
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.verdict--good {
+  background: linear-gradient(135deg, #0f7a53 0%, #16a06c 100%);
+}
+
+.verdict--loss {
+  background: linear-gradient(135deg, #a52b22 0%, #c9443a 100%);
+}
+
+/*
+  Gelb trägt keine weiße Schrift — der Kontrast reicht nicht. Deshalb hier
+  dunkler Text auf hellem Grund, als einzige Ausnahme.
+*/
+.verdict--thin {
+  background: linear-gradient(135deg, #d9a21f 0%, #efc04a 100%);
+  color: #2b1f03;
+}
+
+.verdict--thin .verdict__detail {
+  color: rgba(43, 31, 3, 0.75);
 }

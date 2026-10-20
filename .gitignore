@@ -40,3 +40,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 !.env.example
+
+# iCloud-Dubletten.
+#
+# Das Projekt liegt in einem iCloud-synchronisierten Ordner. Bei einem
+# Konflikt legt iCloud eine Kopie mit " 2" im Namen an — "lib/format 2.ts"
+# neben "lib/format.ts". Die brechen den Typcheck mit doppelten
+# Deklarationen und sind mehrfach versehentlich mitcommittet worden.
+#
+# Wenn eine solche Datei auftaucht: löschen, nicht umbenennen. Das Original
+# daneben ist der gültige Stand.
+* 2
+* 2.*

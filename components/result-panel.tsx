@@ -145,8 +145,41 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
         Ergebnis
       </h2>
 
+      {/*
+        Das Urteil in Worten, vor allen Zahlen.
+
+        Eine Zahl muss man lesen und einordnen; „Verlust" erkennt man im
+        Vorbeigehen. Genau das war die Lücke: Der Gewinn stand groß da, aber
+        ob er gut ist, musste man selbst entscheiden. Die Schwellen sind
+        bewusst grob — der Rechner gibt keine Kaufempfehlung, er sagt nur,
+        in welcher Gegend man sich bewegt.
+      */}
+      {!isEmpty && (
+        <p className={`verdict verdict--${isLoss ? 'loss' : profit.marginPercent < 10 ? 'thin' : 'good'}`}>
+          {isLoss
+            ? 'Verlustgeschäft'
+            : profit.marginPercent < 10
+              ? 'Dünne Marge'
+              : 'Lohnt sich'}
+          <span className="verdict__detail">
+            {isLoss
+              ? `Du zahlst ${formatCurrency(Math.abs(profit.profit))} drauf`
+              : `${formatCurrency(profit.profit)} bleiben bei ${formatPercent(profit.marginPercent)} Marge`}
+          </span>
+        </p>
+      )}
+
+      {/*
+        Beide Hinweise stehen **nach** dem Urteil, nicht davor.
+
+        Sie gehören dazu — aber sie schränken die Antwort ein, und eine
+        Einschränkung vor der Antwort zu lesen stellt die Reihenfolge auf den
+        Kopf. Vorher stand bei fast jeder Kategorie „Geschätzter Satz" als
+        Erstes im Ergebnis; eine Warnung, die immer da ist, liest irgendwann
+        niemand mehr.
+      */}
       {precisionNote && (
-        <div className="notice">
+        <div className="notice notice--after">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="9" />
             <path d="M12 8v5" />
@@ -159,7 +192,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
       )}
 
       {confidenceNote && (
-        <div className="notice">
+        <div className="notice notice--after">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="9" />
             <path d="M12 8v5" />
@@ -206,7 +239,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
       <div className="kpi-grid">
         <div className="kpi">
           <span className="kpi__label">Max. Einkaufspreis</span>
-          <span className="kpi__value kpi__value--accent">
+          <span className="kpi__value kpi__value--limit">
             {isEmpty ? '–' : formatCurrency(maxPurchase)}
           </span>
           <span className="kpi__hint">
@@ -217,7 +250,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
         </div>
         <div className="kpi">
           <span className="kpi__label">Break-even</span>
-          <span className="kpi__value">
+          <span className="kpi__value kpi__value--breakeven">
             {isEmpty || !Number.isFinite(breakEven) ? '–' : formatCurrency(breakEven)}
           </span>
           <span className="kpi__hint">Verkaufspreis ohne Gewinn</span>
@@ -227,7 +260,7 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
             {marketplace.name}-Gebühr
             <span className="kpi__tag">{PRECISION_LABEL[precision]}</span>
           </span>
-          <span className="kpi__value">
+          <span className="kpi__value kpi__value--fee">
             {isEmpty ? '–' : formatCurrency(fees.totalFeeGross)}
           </span>
           <span className="kpi__hint">
@@ -269,7 +302,17 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
         Bewusst durchgängig auf Nettobasis: Erlös ohne Umsatzsteuer, Gebühren
         ohne Vorsteuer. Sonst stünden Brutto- und Nettobeträge nebeneinander
         und die Rechnung wäre zwar richtig, aber nicht mehr nachvollziehbar.
+
+        Steht hinter dem Aufklapper, nicht davor. Im Ergebnis standen vorher
+        elf Zahlen gleichwertig nebeneinander — Gewinn, Auszahlung, drei
+        Kennzahlen, fünf Balkenabschnitte, fünf Zeilen Rechnung. Wo alles
+        gleich wichtig aussieht, sieht man nichts. Die Frage „lohnt sich
+        das?" beantworten Gewinn und Marge; der Weg dorthin ist Beleg, nicht
+        Antwort, und gehört eine Ebene tiefer.
       */}
+      <details className="advanced">
+        <summary>Rechnung im Überblick</summary>
+        <div className="advanced__body">
       <div className="ledger">
         <div className="ledger__list">
           <Row
@@ -308,6 +351,8 @@ export function ResultPanel({ result, maxPurchase, breakEven, targetProfit }: Re
           <Row term="Gewinn" value={formatCurrency(profit.profit)} total />
         </div>
       </div>
+        </div>
+      </details>
 
       <details className="advanced">
         <summary>Gebühren und Umsatzsteuer im Detail</summary>
