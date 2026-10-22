@@ -86,17 +86,13 @@ Befund — Bestellnummern und Telefonnummern haben dieselbe Länge.
 > `lib/gtin.ts` nicht importieren kann. `gtin-lesen.test.ts` hält beide
 > Fassungen gegeneinander, damit sie nicht auseinanderlaufen.
 
-## Wo die Adresse steht
+## Nach dem Domainumzug
 
-Eine Zeile in `sidepanel.js`:
+Eine Zeile in `popup.js`:
 
 ```js
 const APP_URL = 'https://gebuehren-kompass.de';
 ```
-
-Ändert sie sich, muss auch `"version"` im `manifest.json` hoch und das ZIP
-unter `public/` neu gepackt werden — sonst behalten bereits installierte
-Erweiterungen still die alte Adresse.
 
 ## Was noch nicht wirkt
 
