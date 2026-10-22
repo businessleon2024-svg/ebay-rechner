@@ -70,6 +70,29 @@ const ZUBEHOER = 'Zubehör';
 const WEITERE = 'Weitere Kategorien';
 const UEBRIGE = 'Übrige Kategorien';
 
+/*
+  Oberkategorien, wie sie beim Einstellen auf eBay heißen.
+
+  Sie fassen nach Sache zusammen, nicht nach Gebührenhöhe. In jedem dieser
+  sechs Bereiche liegen Einträge mit **verschiedenen** Sätzen nebeneinander —
+  und genau das ist der Zweck: Ein Rechner unter „Computer, Tablets &
+  Netzwerk" kostet 7 %, eine Tastatur in derselben Oberkategorie 12 %. Wer
+  nur die Oberkategorie wählt, soll sehen, dass es darunter weitergeht.
+
+  Als Konstanten, damit ein Tippfehler auffällt. Als freier Text würde aus
+  „Foto & Camcorder" versehentlich ein siebter Bereich mit einem einzigen
+  Eintrag, ohne dass es jemandem auffällt.
+
+  Einträge ohne `bereich` stehen für sich — Sport, Baby, Möbel und die
+  übrigen zwei Dutzend haben nur einen Satz und brauchen keine Unterauswahl.
+*/
+const B_COMPUTER = 'Computer, Tablets & Netzwerk';
+const B_FOTO = 'Foto & Camcorder';
+const B_HANDY = 'Handys & Kommunikation';
+const B_TV = 'TV, Video & Audio';
+const B_GAMES = 'PC- & Videospiele';
+const B_BEAUTY = 'Beauty & Gesundheit';
+
 const CATEGORIES: readonly FeeCategory[] = [
   // --- Geräte: einheitlich 7 %, ausgewiesene Zustände 5 % ---
   /*
@@ -81,7 +104,7 @@ const CATEGORIES: readonly FeeCategory[] = [
     deshalb eine der Zubehör-Kategorien wählen, nicht diese hier.
   */
   {
-    id: 'computer-tablets-netzwerk',
+    id: 'computer-tablets-netzwerk', bereich: B_COMPUTER,
     externalId: '58058',
     group: GERAETE,
     name: 'Computer, Tablets & Netzwerk (Geräte)',
@@ -91,14 +114,14 @@ const CATEGORIES: readonly FeeCategory[] = [
     caveat:
       'Gilt für Geräte wie Rechner, Notebooks, Tablets oder Arbeitsspeicher. Zubehör wird trotz derselben Bezeichnung auf der Abrechnung mit 12 % abgerechnet — für Webcams, Tastaturen, Kabel oder Notebook-Zubehör bitte die passende Zubehör-Kategorie wählen.',
   },
-  { id: 'drucker', externalId: '1245', group: GERAETE, name: 'Drucker', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'scanner', group: GERAETE, name: 'Scanner', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'foto-camcorder', externalId: '625', group: GERAETE, name: 'Foto & Camcorder', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'objektive', externalId: '3323', group: GERAETE, name: 'Objektive', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'handys-kommunikation', externalId: '15032', group: GERAETE, name: 'Handys & Kommunikation', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'drucker', bereich: B_COMPUTER, externalId: '1245', group: GERAETE, name: 'Drucker', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'scanner', bereich: B_COMPUTER, group: GERAETE, name: 'Scanner', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'foto-camcorder', bereich: B_FOTO, externalId: '625', group: GERAETE, name: 'Foto & Camcorder', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'objektive', bereich: B_FOTO, externalId: '3323', group: GERAETE, name: 'Objektive', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'handys-kommunikation', bereich: B_HANDY, externalId: '15032', group: GERAETE, name: 'Handys & Kommunikation', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   { id: 'haushaltsgeraete', externalId: '20710', group: GERAETE, name: 'Haushaltsgeräte', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
   {
-    id: 'tv-video-audio',
+    id: 'tv-video-audio', bereich: B_TV,
     group: GERAETE,
     name: 'TV, Video & Audio',
     standardPercent: 7,
@@ -107,30 +130,30 @@ const CATEGORIES: readonly FeeCategory[] = [
     caveat:
       'Gilt für Fernseher, Lautsprecher, Kopfhörer und vergleichbare Geräte. Streaming-Sticks werden trotz derselben Hauptkategorie mit 12 % abgerechnet — dafür gibt es einen eigenen Eintrag.',
   },
-  { id: 'konsolen-pc-videospiele', group: GERAETE, name: 'Konsolen: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'ersatzteile-pc-videospiele', externalId: '171833', group: GERAETE, name: 'Ersatzteile & Werkzeuge: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'speicherkarten-foto', externalId: '18871', group: GERAETE, name: 'Speicherkarten: Foto & Camcorder', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'speicherkarten-handys', externalId: '96991', group: GERAETE, name: 'Speicherkarten: Handys & Kommunikation', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'speicherkarten-pc-videospiele', group: GERAETE, name: 'Speicherkarten: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'elektro-enthaarung-rasur', group: GERAETE, name: 'Elektrische Geräte: Enthaarung & Rasur', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'elektro-mund-zahnpflege', group: GERAETE, name: 'Elektrische Mund- & Zahnpflege', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
-  { id: 'elektro-haarstyling', group: GERAETE, name: 'Elektrische Haarstyling-Geräte', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'konsolen-pc-videospiele', bereich: B_GAMES, group: GERAETE, name: 'Konsolen: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'ersatzteile-pc-videospiele', bereich: B_GAMES, externalId: '171833', group: GERAETE, name: 'Ersatzteile & Werkzeuge: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'speicherkarten-foto', bereich: B_FOTO, externalId: '18871', group: GERAETE, name: 'Speicherkarten: Foto & Camcorder', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'speicherkarten-handys', bereich: B_HANDY, externalId: '96991', group: GERAETE, name: 'Speicherkarten: Handys & Kommunikation', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'speicherkarten-pc-videospiele', bereich: B_GAMES, group: GERAETE, name: 'Speicherkarten: PC & Videospiele', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'elektro-enthaarung-rasur', bereich: B_BEAUTY, group: GERAETE, name: 'Elektrische Geräte: Enthaarung & Rasur', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'elektro-mund-zahnpflege', bereich: B_BEAUTY, group: GERAETE, name: 'Elektrische Mund- & Zahnpflege', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
+  { id: 'elektro-haarstyling', bereich: B_BEAUTY, group: GERAETE, name: 'Elektrische Haarstyling-Geräte', standardPercent: 7, reducedPercent: 5, confidence: 'official' },
 
   // --- Zubehör: einheitlich 12 %, ausgewiesene Zustände 5 % ---
-  { id: 'drucker-scanner-zubehoer', group: ZUBEHOER, name: 'Drucker, Scanner & Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'handy-zubehoer', group: ZUBEHOER, name: 'Handy-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'notebook-desktop-zubehoer', group: ZUBEHOER, name: 'Notebook- & Desktop-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'tablet-ebook-zubehoer', group: ZUBEHOER, name: 'Tablet- & eBook-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'tastaturen-maeuse', group: ZUBEHOER, name: 'Tastaturen, Mäuse & Pointing', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'kabel-steckverbinder', group: ZUBEHOER, name: 'Kabel & Steckverbinder', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'drucker-scanner-zubehoer', bereich: B_COMPUTER, group: ZUBEHOER, name: 'Drucker, Scanner & Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'handy-zubehoer', bereich: B_HANDY, group: ZUBEHOER, name: 'Handy-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'notebook-desktop-zubehoer', bereich: B_COMPUTER, group: ZUBEHOER, name: 'Notebook- & Desktop-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'tablet-ebook-zubehoer', bereich: B_COMPUTER, group: ZUBEHOER, name: 'Tablet- & eBook-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'tastaturen-maeuse', bereich: B_COMPUTER, group: ZUBEHOER, name: 'Tastaturen, Mäuse & Pointing', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'kabel-steckverbinder', bereich: B_COMPUTER, group: ZUBEHOER, name: 'Kabel & Steckverbinder', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
   { id: 'haushaltsbatterien-strom', group: ZUBEHOER, name: 'Haushaltsbatterien & Strom', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'kameras-drohnen-fotozubehoer', group: ZUBEHOER, name: 'Kameras, Drohnen & Fotozubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'objektive-filter', group: ZUBEHOER, name: 'Objektive & Filter', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'stative-zubehoer', group: ZUBEHOER, name: 'Stative & Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'tv-heim-audio-zubehoer', group: ZUBEHOER, name: 'TV- & Heim-Audio-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'zubehoer-tragbare-audio', group: ZUBEHOER, name: 'Zubehör für tragbare Audiogeräte', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'zubehoer-pc-videospiele', group: ZUBEHOER, name: 'Zubehör: PC & Videospiele', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
-  { id: 'ersatzteile-tv-video-audio', group: ZUBEHOER, name: 'Ersatzteile & Werkzeuge: TV, Video & Audio', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'kameras-drohnen-fotozubehoer', bereich: B_FOTO, group: ZUBEHOER, name: 'Kameras, Drohnen & Fotozubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'objektive-filter', bereich: B_FOTO, group: ZUBEHOER, name: 'Objektive & Filter', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'stative-zubehoer', bereich: B_FOTO, group: ZUBEHOER, name: 'Stative & Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'tv-heim-audio-zubehoer', bereich: B_TV, group: ZUBEHOER, name: 'TV- & Heim-Audio-Zubehör', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'zubehoer-tragbare-audio', bereich: B_TV, group: ZUBEHOER, name: 'Zubehör für tragbare Audiogeräte', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'zubehoer-pc-videospiele', bereich: B_GAMES, group: ZUBEHOER, name: 'Zubehör: PC & Videospiele', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
+  { id: 'ersatzteile-tv-video-audio', bereich: B_TV, group: ZUBEHOER, name: 'Ersatzteile & Werkzeuge: TV, Video & Audio', standardPercent: 12, reducedPercent: 5, confidence: 'official' },
   /*
     Dieselbe Falle wie bei Computer-Zubehör: Auf der Abrechnung steht die
     Hauptkategorie TV, Video & Audio mit 7 %, abgerechnet werden aber 12 %.
@@ -141,7 +164,7 @@ const CATEGORIES: readonly FeeCategory[] = [
     an 45 Verkäufen derselben Abrechnungen belegt.
   */
   {
-    id: 'streaming-geraete',
+    id: 'streaming-geraete', bereich: B_TV,
     group: ZUBEHOER,
     name: 'Streaming-Geräte (Sticks & Boxen)',
     standardPercent: 12,
@@ -173,7 +196,7 @@ const CATEGORIES: readonly FeeCategory[] = [
   { id: 'buecher', group: UEBRIGE, name: 'Bücher & Zeitschriften', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   { id: 'filme-serien', group: UEBRIGE, name: 'Filme & Serien', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   { id: 'musik', group: UEBRIGE, name: 'Musik', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
-  { id: 'games', group: UEBRIGE, name: 'PC- & Videospiele', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
+  { id: 'games', bereich: B_GAMES, group: UEBRIGE, name: 'PC- & Videospiele', standardPercent: 12, reducedPercent: null, tiers: LEGACY_TIERS, confidence: 'official' },
   /*
     Nicht 12 %, sondern 11 %. Zwei Abrechnungen über Sammelkarten-Boxen
     stimmen überein, vor wie nach der Reform vom Juli 2026:
@@ -210,7 +233,7 @@ const CATEGORIES: readonly FeeCategory[] = [
     sie werden mit 7 % abgerechnet und stehen oben als eigene Einträge.
   */
   {
-    id: 'beauty-gesundheit',
+    id: 'beauty-gesundheit', bereich: B_BEAUTY,
     group: UEBRIGE,
     name: 'Beauty & Gesundheit',
     standardPercent: 12,

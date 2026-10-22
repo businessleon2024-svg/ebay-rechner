@@ -124,6 +124,20 @@ export interface FeeCategory {
   externalId?: string;
   /** Überschrift, unter der die Kategorie in der Auswahlliste einsortiert wird. */
   group?: string;
+  /**
+   * Oberkategorie des Marktplatzes, unter der dieser Eintrag beim Einstellen
+   * zu finden ist — etwa „Computer, Tablets & Netzwerk“.
+   *
+   * Ohne Angabe steht der Eintrag für sich: Dann ist sein eigener Name die
+   * Oberkategorie und es gibt keine Unterauswahl.
+   *
+   * Der Unterschied zu `group`: `group` fasst nach **Gebührenhöhe**
+   * zusammen (Geräte 7 %, Zubehör 12 %) — das ist die Sicht der
+   * Gebührentabelle. `bereich` fasst nach **Sache** zusammen, also so, wie
+   * der Verkäufer sein Produkt sucht. Wer eine Tastatur verkauft, sucht
+   * unter „Computer", nicht unter „Zubehör".
+   */
+  bereich?: string;
   /** Regulärer Satz in Prozent (Neuware). */
   standardPercent: number;
   /**

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { breakEvenSellPrice, calculate, maxPurchasePrice } from '@/lib/fees/calculate';
 import { MARKETPLACES, requireMarketplace } from '@/lib/fees/marketplaces';
+import { bereichFuerKategorie, bereicheVon, ersteKategorieIn } from '@/lib/fees/bereiche';
 import { BELOW_STANDARD_SURCHARGE_PERCENT } from '@/lib/fees/ebay';
 import {
   DEFAULT_INTERNATIONAL_REGION,
@@ -11,7 +12,6 @@ import {
 } from '@/lib/fees/international';
 import type {
   FeeCalculationInput,
-  FeeCategory,
   ItemCondition,
   MarketplaceId,
   TaxScheme,
@@ -246,18 +246,24 @@ export function Calculator() {
   const marketplace = requireMarketplace(form.marketplaceId);
   const selectedCategory = marketplace.categories.find((c) => c.id === form.categoryId);
 
-  // Bei rund 45 Kategorien je Marktplatz ist eine flache Liste nicht mehr
-  // überschaubar. Reihenfolge der Gruppen folgt dem ersten Auftreten.
-  const groupedCategories = useMemo(() => {
-    const groups = new Map<string, FeeCategory[]>();
-    for (const category of marketplace.categories) {
-      const key = category.group ?? 'Kategorien';
-      const existing = groups.get(key);
-      if (existing) existing.push(category);
-      else groups.set(key, [category]);
-    }
-    return [...groups.entries()];
-  }, [marketplace]);
+  /*
+    Oberkategorien nach Sache. Löst die frühere Gruppierung nach
+    Gebührenhöhe ab: „Geräte 7 % / Zubehör 12 %" ist die Sicht der
+    Abrechnung, nicht die eines Verkäufers. Wer eine Tastatur einstellt,
+    sucht unter „Computer".
+  */
+  const bereiche = useMemo(() => bereicheVon(marketplace), [marketplace]);
+
+  /*
+    Aus der gewählten Kategorie abgeleitet, nicht zusätzlich gespeichert. Ein
+    eigener Zustand für die Oberkategorie könnte mit der Kategorie
+    auseinanderlaufen — etwa wenn die EAN-Abfrage die Kategorie wechselt oder
+    ein alter Wert aus dem Speicher kommt.
+  */
+  const gewaehlterBereich = useMemo(
+    () => bereichFuerKategorie(marketplace, form.categoryId),
+    [marketplace, form.categoryId],
+  );
 
   /**
    * Besteuerungsform wechseln und die davon abhängigen Schalter mitziehen.
@@ -440,26 +446,71 @@ export function Calculator() {
             </p>
           </div>
 
+          {/*
+            Zwei Ebenen statt einer Liste mit 54 Einträgen: erst die
+            Oberkategorie, dann — nur wo es etwas zu wählen gibt — der
+            genaue Eintrag.
+
+            Das zweite Feld erscheint nicht immer. Zwei Drittel der
+            Oberkategorien haben nur einen Satz; dort wäre es eine
+            Klickhürde ohne Inhalt.
+          */}
           <div className="field">
-            <label htmlFor="categorySelect">Kategorie</label>
+            <label htmlFor="bereichSelect">Kategorie</label>
             <div className="input-wrap">
               <select
-                id="categorySelect"
+                id="bereichSelect"
                 className="input"
-                value={form.categoryId}
-                onChange={(event) => update('categoryId', event.target.value)}
+                value={gewaehlterBereich?.name ?? ''}
+                onChange={(event) => {
+                  const bereich = bereiche.find((b) => b.name === event.target.value);
+                  if (bereich) update('categoryId', ersteKategorieIn(bereich).id);
+                }}
               >
-                {groupedCategories.map(([group, categories]) => (
-                  <optgroup key={group} label={group}>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name} · {category.standardPercent} %
-                      </option>
-                    ))}
-                  </optgroup>
+                {bereiche.map((bereich) => (
+                  <option key={bereich.name} value={bereich.name}>
+                    {bereich.name}
+                    {bereich.kategorien.length === 1 && ` · ${bereich.kategorien[0].standardPercent} %`}
+                  </option>
                 ))}
               </select>
             </div>
+          </div>
+
+          {gewaehlterBereich && gewaehlterBereich.kategorien.length > 1 && (
+            <div className="field">
+              <label htmlFor="categorySelect">Genauer — was genau verkaufst du?</label>
+              <div className="input-wrap">
+                <select
+                  id="categorySelect"
+                  className="input"
+                  value={form.categoryId}
+                  onChange={(event) => update('categoryId', event.target.value)}
+                >
+                  {gewaehlterBereich.kategorien.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name} · {category.standardPercent} %
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/*
+                Der Hinweis erscheint nur, wo unter einer Oberkategorie
+                tatsächlich verschiedene Sätze liegen. Genau dort verrechnet
+                man sich — eine Webcam kostet 12 %, der Rechner daneben 7 %.
+              */}
+              {gewaehlterBereich.uneinheitlich && (
+                <p className="hint hint--immer">
+                  In dieser Oberkategorie gelten <strong>verschiedene Sätze</strong> — von{' '}
+                  {Math.min(...gewaehlterBereich.kategorien.map((k) => k.standardPercent))} % bis{' '}
+                  {Math.max(...gewaehlterBereich.kategorien.map((k) => k.standardPercent))} %. Auf
+                  der Abrechnung steht trotzdem oft derselbe Kategoriename.
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="field">
             <p className="hint">
               Hinterlegt sind die Hauptkategorien. <strong>Unterkategorien können abweichende
               Sätze haben</strong> — {marketplace.name} veröffentlicht sie nicht vollständig. Im
