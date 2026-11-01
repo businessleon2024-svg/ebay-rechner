@@ -85,6 +85,36 @@ describe('versandkosten', () => {
     expect(k?.gesamt).toBe(5.25);
   });
 
+  /*
+    Bezahlt wird brutto, kalkuliert wird netto. Beide Zahlen müssen stimmen
+    und zusammenpassen — eine Brutto-Angabe, die sich nicht aus Netto plus
+    Steuer ergibt, wäre schlimmer als gar keine.
+  */
+  it('weist Umsatzsteuer und Bruttobetrag aus', () => {
+    const k = versandkosten(0.8);
+
+    expect(k?.gesamt).toBe(5.25);
+    expect(k?.ust).toBe(1.0); // 19 % von 5,25 = 0,9975 → 1,00
+    expect(k?.gesamtBrutto).toBe(6.25);
+  });
+
+  it('hält Netto plus Steuer gleich Brutto, über alle Stufen', () => {
+    for (const stufe of GEWICHTSSTUFEN) {
+      const k = versandkosten(stufe.bisKg);
+
+      expect(k).not.toBeNull();
+      expect(k!.gesamtBrutto).toBeCloseTo(k!.gesamt + k!.ust, 2);
+    }
+  });
+
+  it('rechnet die Steuer auch auf einen eigenen Grundpreis', () => {
+    const k = versandkosten(0.8, { 'bis-1': 4.0 });
+
+    expect(k?.gesamt).toBe(4.24);
+    expect(k?.ust).toBe(0.81); // 19 % von 4,24 = 0,8056 → 0,81
+    expect(k?.gesamtBrutto).toBe(5.05);
+  });
+
   it('rechnet die schwerste Stufe korrekt', () => {
     const k = versandkosten(25);
 

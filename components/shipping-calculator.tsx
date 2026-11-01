@@ -192,10 +192,17 @@ export function ShippingCalculator() {
           </p>
         ) : (
           <>
+            {/*
+              Brutto groß, netto daneben. Bezahlt wird der Bruttobetrag —
+              das ist die Zahl, die vom Konto geht. Netto ist die, mit der
+              ein Regelbesteuerter kalkuliert, weil die Umsatzsteuer als
+              Vorsteuer zurückkommt. Beide gehören hin, aber nur eine groß.
+            */}
             <p className="verdict verdict--good">
-              {formatCurrency(kosten.gesamt)}
+              {formatCurrency(kosten.gesamtBrutto)}
               <span className="verdict__detail">
-                netto · Stufe {stufenName(kosten.stufe.bisKg)}
+                brutto · {formatCurrency(kosten.gesamt)} netto · Stufe{' '}
+                {stufenName(kosten.stufe.bisKg)}
                 {eigenePreise[kosten.stufe.id] !== undefined && ' · dein Preis'}
               </span>
             </p>
@@ -239,9 +246,20 @@ export function ShippingCalculator() {
                   </span>
                   <span className="ledger__value">{formatCurrency(kosten.energieZuschlag)}</span>
                 </div>
-                <div className="ledger__row ledger__row--total">
+                <div className="ledger__row">
                   <span className="ledger__term">Gesamt netto</span>
                   <span className="ledger__value">{formatCurrency(kosten.gesamt)}</span>
+                </div>
+                <div className="ledger__row">
+                  <span className="ledger__term">
+                    Umsatzsteuer
+                    <span className="ledger__note">19 %, als Vorsteuer abziehbar</span>
+                  </span>
+                  <span className="ledger__value">{formatCurrency(kosten.ust)}</span>
+                </div>
+                <div className="ledger__row ledger__row--total">
+                  <span className="ledger__term">Gesamt brutto</span>
+                  <span className="ledger__value">{formatCurrency(kosten.gesamtBrutto)}</span>
                 </div>
               </div>
             </div>
@@ -252,7 +270,7 @@ export function ShippingCalculator() {
                   <tr>
                     <th scope="col">Stufe</th>
                     <th scope="col">Grundpreis</th>
-                    <th scope="col">Mit Zuschlägen</th>
+                    <th scope="col">Brutto</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -268,8 +286,8 @@ export function ShippingCalculator() {
                         <td data-label="Grundpreis" className={dieseStufe ? undefined : 'is-muted'}>
                           {formatCurrency(basispreisFuer(s, eigenePreise))}
                         </td>
-                        <td data-label="Mit Zuschlägen" className={dieseStufe ? undefined : 'is-muted'}>
-                          {gesamt ? formatCurrency(gesamt.gesamt) : '—'}
+                        <td data-label="Brutto" className={dieseStufe ? undefined : 'is-muted'}>
+                          {gesamt ? formatCurrency(gesamt.gesamtBrutto) : '—'}
                         </td>
                       </tr>
                     );

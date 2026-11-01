@@ -81,6 +81,9 @@ export const MAUT_ZUSCHLAG = 0.19;
  */
 export const ENERGIE_ANTEIL = 0.0125;
 
+/** Deutscher Regelsteuersatz — DHL weist auf Grundpreis und Zuschläge 19 % USt aus (siehe echte Rechnungen, Positionskennzeichen „C1 — voller Steuersatz“). */
+export const UST_SATZ = 0.19;
+
 export interface Versandkosten {
   stufe: Gewichtsstufe;
   basispreis: number;
@@ -88,6 +91,10 @@ export interface Versandkosten {
   energieZuschlag: number;
   /** Summe aus Grundpreis und beiden Zuschlägen, netto. */
   gesamt: number;
+  /** Ausgewiesene Umsatzsteuer auf `gesamt`. */
+  ust: number;
+  /** `gesamt + ust` — der Betrag, der tatsächlich bezahlt wird. */
+  gesamtBrutto: number;
 }
 
 function aufCent(betrag: number): number {
@@ -135,13 +142,17 @@ export function versandkosten(
   const basispreis = eigenePreise[stufe.id] ?? stufe.basispreis;
   const mautZuschlag = MAUT_ZUSCHLAG;
   const energieZuschlag = aufCent(basispreis * ENERGIE_ANTEIL);
+  const gesamt = aufCent(basispreis + mautZuschlag + energieZuschlag);
+  const ust = aufCent(gesamt * UST_SATZ);
 
   return {
     stufe,
     basispreis,
     mautZuschlag,
     energieZuschlag,
-    gesamt: aufCent(basispreis + mautZuschlag + energieZuschlag),
+    gesamt,
+    ust,
+    gesamtBrutto: aufCent(gesamt + ust),
   };
 }
 
